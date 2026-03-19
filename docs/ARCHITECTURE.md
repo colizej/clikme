@@ -523,7 +523,8 @@ Total: 342 URLs | OK: 339 | FAIL: 1 | WARN: 2
 - **Structura** (`framework-y.com/structura`) — тёмные фоны-секции, крупная типографика, геометричность
 - **GO Travel** (`go/html/landing/travel.html`) — tile-карточки, сетки контента, компонентная структура
 
-Реализация — **Bootstrap 5** (оба референса на BS4 — не используем напрямую, берём визуальный язык).
+Реализация — **Tailwind CSS v4 (CLI)** — utility-first, полный контроль над дизайном, без Bootstrap-look.
+Tailwind CLI собирает CSS при разработке, на сервере лежит один статический файл.
 
 ### Шрифты (Google Fonts)
 ```html
@@ -586,17 +587,54 @@ Inter + Playfair Display — проверенная пара для кирилл
 [Товары/услуги — карточки-tile]
 ```
 
-### Компоненты (Bootstrap 5 + custom CSS)
-Никаких дополнительных CSS-фреймворков — только Bootstrap 5 + переменные выше.
-Кастомные классы с префиксом `.ck-` чтобы не конфликтовать с Bootstrap:
-```css
-.ck-hero          /* Hero-секция с тёмным фоном */
-.ck-article-card  /* Карточка статьи */
-.ck-vendor-card   /* Карточка вендора */
-.ck-news-item     /* Строка новости */
-.ck-section-dark  /* Тёмная секция (Structura-стиль) */
-.ck-accent        /* Акцентный цвет */
+### Tailwind CSS — конфигурация
+
+Tailwind CLI — без Node.js/npm в продакшне. Только локально при разработке:
+```bash
+# Установка CLI (один раз)
+curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64
+chmod +x tailwindcss-macos-arm64 && mv tailwindcss-macos-arm64 tailwindcss
+
+# Сборка при разработке (watch)
+./tailwindcss -i static/css/input.css -o static/css/style.css --watch
+
+# Финальная сборка (minified)
+./tailwindcss -i static/css/input.css -o static/css/style.css --minify
 ```
+
+`static/css/input.css` — только директивы + кастомные компоненты:
+```css
+@import "tailwindcss";
+
+@theme {
+  /* Шрифты */
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+
+  /* Цветовая палитра */
+  --color-bg-dark:  #111214;
+  --color-bg-soft:  #f7f7f5;
+  --color-accent:   #e85d26;
+  --color-accent-hover: #c94d1a;
+  --color-muted:    #6b7280;
+}
+
+/* Кастомные компоненты с префиксом .ck- */
+@layer components {
+  .ck-hero        { @apply bg-(--color-bg-dark) text-white py-24 px-6; }
+  .ck-article-card{ @apply bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow; }
+  .ck-vendor-card { @apply bg-(--color-bg-soft) rounded-xl p-6; }
+  .ck-news-item   { @apply border-b border-gray-100 py-3 flex gap-4 items-start; }
+  .ck-section-dark{ @apply bg-(--color-bg-dark) text-white py-16; }
+  .ck-btn-accent  { @apply bg-(--color-accent) hover:bg-(--color-accent-hover) text-white px-6 py-3 rounded-lg font-semibold transition-colors; }
+}
+```
+
+**Файл `tailwindcss` в `.gitignore`** — каждый разработчик скачивает сам.
+**`static/css/style.css`** (собранный) — в git, чтобы сервер не требовал сборки.
+
+### Компоненты (Tailwind utility-classes)
+Каждый Django-компонент (`templates/components/`) использует Tailwind-классы напрямую.
 
 ---
 

@@ -2,6 +2,10 @@
 opencart/
 go/
 
+# === Tailwind CLI (бинарник, каждый скачивает сам) ===
+tailwindcss
+tailwindcss-*
+
 # === Django ===
 __pycache__/
 *.py[cod]

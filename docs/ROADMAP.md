@@ -165,7 +165,7 @@ SEO-позиции сохранены, URL идентичны.
 | БД | **SQLite** | Встроена в Python, достаточно для проекта |
 | Кэш | Django cache (файловый) | Встроен, Redis не нужен на старте |
 | Очереди | — | Django email backend, без Celery |
-| Frontend | Bootstrap 5 + минимум JS | Без HTMX на старте, добавить если нужно |
+| Frontend | **Tailwind CSS v4 CLI** + минимум JS | Utility-first, без Bootstrap-look, CLI без npm в prod |
 | Медиа | Локально на сервере | Без S3/R2 на старте |
 | Email | Django SMTP backend | Встроен, без сторонних сервисов |
 | Деплой | gunicorn + nginx + systemd | Стандарт для VPS |
