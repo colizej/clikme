@@ -66,28 +66,30 @@ blog/templatetags/
 SEO-позиции сохранены, URL идентичны.
 
 ### Django-приложения
-- [ ] `blog` — статьи, категории, теги
+- [ ] `blog` — статьи, категории, теги (~86 статей из OpenCart)
+- [ ] `vendors` — магазины, рестораны, сервисы (~42 вендора + ~280 продуктов)
 - [ ] `pages` — статичные страницы (о нас, контакты, виза)
 - [ ] `users` — кастомный AbstractUser (основа для всего остального)
 - [ ] `newsletter` — подписка на рассылку (с первого дня!)
 
 ### Технические задачи
-- [ ] Настройка проекта (settings, PostgreSQL, Redis)
-- [ ] Django models — Article, Category, Tag
-- [ ] Скрипт импорта из OpenCart SQL (`import_from_opencart`)
-- [ ] URL-паттерны: `/slug/` и `/cat/slug/` (оба типа из OpenCart)
+- [ ] Настройка проекта (settings, SQLite)
+- [ ] Django models — Article, Category, Tag, Vendor, Product
+- [ ] **Скрипт parity check** — до миграции сохранить все URL оригинала; после — сравнивать
+- [ ] Скрипт импорта из OpenCart SQL (`import_from_opencart` — статьи + вендоры + продукты)
+- [ ] URL-паттерны: `/slug/`, `/cat/slug/`, vendor slug, product slug (без конфликтов)
 - [ ] SEO: canonical, meta title/description, Open Graph, sitemap.xml
 - [ ] robots.txt
-- [ ] 301 редиректы для старых OpenCart URL (маркетплейс → /)
 - [ ] Перенос изображений (image/catalog/ → media/)
-- [ ] Базовые шаблоны (base, article, category, home)
+- [ ] Базовые шаблоны (base, article, vendor, product, home)
 - [ ] Форма подписки на email в конце каждой статьи
 - [ ] Настройка nginx + gunicorn на EU-сервере
 - [ ] SSL (Let's Encrypt)
 - [ ] Переключение DNS clikme.ru → EU-сервер
 
 ### Метрики успеха Фазы 1
-- Все 70 статей доступны по оригинальным URL
+- Все ~86 статей и ~42 страницы вендоров доступны по оригинальным URL
+- Parity check скрипт показывает 0 ошибок (404, title mismatch)
 - Позиции в Google не ниже -2 позиций от baseline
 - Email-форма работает, первые подписчики
 
@@ -140,8 +142,9 @@ SEO-позиции сохранены, URL идентичны.
 **Цель:** Полноценная travel-платформа.
 
 - [ ] Мультиязычность (en, vi) — `django-modeltranslation`
-- [ ] Маркетплейс (lite) — активация заложенной инфраструктуры
-  - Vendor-профили, товары/услуги, заказы
+- [ ] Маркетплейс full — развитие `vendors` приложения из Фазы 1
+  - Заказы, оплата, личный кабинет продавца
+  - Рейтинги и отзывы на продукты
   - Актуально если Telegram ограничат в РФ
 - [ ] Мобильная версия / PWA
 - [ ] Переезд на reg.ru VPS (опционально)
