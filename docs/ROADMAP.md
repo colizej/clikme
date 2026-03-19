@@ -85,8 +85,12 @@ SEO-позиции сохранены, URL идентичны.
 - [ ] Перенос изображений (image/catalog/ → media/)
 - [ ] Базовые шаблоны (base, article, vendor, product, home)
 - [ ] Форма подписки на email в конце каждой статьи
-- [ ] Настройка nginx + gunicorn на EU-сервере
-- [ ] SSL (Let's Encrypt)
+- [ ] Конверсия изображений в WebP при импорте (`to_webp()` в import_from_opencart)
+- [ ] 404 и 500 страницы с дизайном сайта
+- [ ] Поиск `GET /search/?q=` — статьи + вендоры (Django icontains, Фаза 1)
+- [ ] Политика конфиденциальности — перенести из OpenCart как страницу `pages`
+- [ ] `python manage.py check --deploy` — 0 предупреждений перед деплоем
+- [ ] Настройка Caddy + gunicorn на EU-сервере (Caddy — автоматический SSL)
 - [ ] Переключение DNS clikme.ru → EU-сервер
 
 ### Метрики успеха Фазы 1
@@ -168,5 +172,7 @@ SEO-позиции сохранены, URL идентичны.
 | Frontend | **Tailwind CSS v4 CLI** + минимум JS | Utility-first, без Bootstrap-look, CLI без npm в prod |
 | Медиа | Локально на сервере | Без S3/R2 на старте |
 | Email | Django SMTP backend | Встроен, без сторонних сервисов |
-| Деплой | gunicorn + nginx + systemd | Стандарт для VPS |
+| Деплой | gunicorn + Caddy + systemd | Caddy = авто SSL, проще nginx |
+| Платежи | Mollie API (западные) + RU провайдер позже | Фаза 2 |
+| Поиск | Django icontains → SQLite FTS5 | Фаза 1 → Фаза 2 |
 | CI/CD | GitHub Actions | Автодеплой (опционально) |

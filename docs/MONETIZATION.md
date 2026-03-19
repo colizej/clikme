@@ -131,6 +131,71 @@
 
 ---
 
+## Платёжная инфраструктура
+
+### Mollie — западные платежи (Фаза 2)
+
+Mollie — европейский платёжный провайдер. Visa/MC, iDEAL, PayPal, банковский перевод.
+Нет требований к минимальному обороту. Python SDK доступен.
+
+**Установка:** `mollie-api-python` (в requirements.txt)
+
+**Флоу оплаты:**
+```
+Пользователь выбирает тариф
+    ↓
+POST /payments/create/  ← создаём платёж в Mollie API
+    ↓
+redirect → Mollie checkout
+    ↓
+Пользователь платит
+    ↓
+Mollie → POST /payments/webhook/
+    ↓
+Проверяем статус через API → активируем услугу
+    ↓
+redirect → /payments/success/ или /payments/failed/
+```
+
+**Пример интеграции:**
+```python
+# apps/payments/views.py
+from mollie.api.client import Client
+from django.conf import settings
+
+mollie_client = Client()
+mollie_client.set_api_key(settings.MOLLIE_API_KEY)
+
+def create_payment(request, listing_id):
+    payment = mollie_client.payments.create({
+        'amount': {'currency': 'EUR', 'value': '2.00'},
+        'description': 'Поднятие объявления — КликМи',
+        'redirectUrl': request.build_absolute_uri('/payments/success/'),
+        'webhookUrl': settings.MOLLIE_WEBHOOK_URL,
+        'metadata': {'user_id': request.user.id, 'listing_id': listing_id},
+    })
+    return redirect(payment.checkout_url)
+
+def webhook(request):
+    """Молли POST-ит payment_id — обязательно перепроверяем статус через API"""
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+    payment = mollie_client.payments.get(request.POST.get('id'))
+    if payment.is_paid():
+        listing_id = payment['metadata']['listing_id']
+        Listing.objects.filter(id=listing_id).update(is_premium=True)
+    return HttpResponse(status=200)
+```
+
+**Тестирование:** ключ `test_xxx` в `MOLLIE_API_KEY` — реальных списаний нет.
+
+### Российские платежи (Фаза 2, позже)
+
+Провайдер будет определён позже (ЮКасса / Тинькофф / CloudPayments).
+Переменная: `RUSSIAN_PAYMENT_API_KEY` — добавить в `.env` когда появится.
+
+---
+
 ## Что сделать прямо сейчас (не ждать Django)
 
 1. **Зарегистрироваться в Booking.com Partner Programme** — бесплатно, займёт 10 мин
