@@ -519,12 +519,58 @@ Total: 342 URLs | OK: 339 | FAIL: 1 | WARN: 2
 ## Дизайн-система
 
 ### Концепция
-Минималистичный современный информационный сайт. Референсы:
+Мобайльный минималистичный информационный сайт. Референсы:
 - **Structura** (`framework-y.com/structura`) — тёмные фоны-секции, крупная типографика, геометричность
 - **GO Travel** (`go/html/landing/travel.html`) — tile-карточки, сетки контента, компонентная структура
 
 Реализация — **Tailwind CSS v4 (CLI)** — utility-first, полный контроль над дизайном, без Bootstrap-look.
 Tailwind CLI собирает CSS при разработке, на сервере лежит один статический файл.
+
+---
+
+### 📱 Mobile-First — Главный приоритет
+
+> **82% трафика с мобильных** (8 879 кликов vs 1 960 с ПК, Google Search Console март 2026)
+
+Принцип: **сначала делаем мобайльную версию** — Tailwind это поддерживает по умолчанию.
+Без префикса = мобайл → `sm:` = таблет → `lg:` = десктоп.
+
+**Правила Mobile-First для этого проекта:**
+
+| Элемент | Мобайл (<640px) | Десктоп (lg:) |
+|---------|--------------|-------------|
+| Навбар | Гамбургер-меню | Горизонтальные ссылки |
+| Карточки статей | 1 колонка | 3 колонки |
+| Статья | Шрифт 18px, паддинги 16px | Шрифт 17px, паддинги больше |
+| Боковая панель | Нет (прячется вниз) | Есть |
+| Таблицы в статье | `overflow-x-auto` + скролл | Обычно |
+| Hero-заголовок | 2.2rem | 3.5rem |
+| Кнопки/ссылки | min-height 44px (пальцем) | 36px |
+
+**Обязательные вещи:**
+```html
+<!-- Обязательно в base.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Изображения через srcset (мобайл не грузит desktop-размер) -->
+<img src="cover.jpg"
+     srcset="cover-400.jpg 400w, cover-800.jpg 800w, cover.jpg 1200w"
+     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+     loading="lazy" alt="...">
+
+<!-- Формы: input type="text" → font-size не меньше 16px (иначе iOS зумирует) -->
+<input class="text-base ..." type="text">
+```
+
+**Core Web Vitals — обязательные метрики (Google ранжирует по ним):**
+| Метрика | Цель | Что делаем |
+|---------|------|----------|
+| LCP (Largest Contentful Paint) | < 2.5s | `loading="eager"` для обложки, WebP |
+| CLS (Cumulative Layout Shift) | < 0.1 | `width`/`height` у всех `<img>` |
+| INP (Interaction to Next Paint) | < 200ms | минимум JS |
+| TTFB | < 800ms | whitenoise + django cache |
+
+---
 
 ### Шрифты (Google Fonts)
 ```html
