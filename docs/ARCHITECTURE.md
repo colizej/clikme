@@ -127,13 +127,20 @@ class Article(models.Model):
 
 ```python
 class NewsSource(models.Model):
-    """Источник новостей: RSS-лента или сайт для парсинга"""
+    """Источник новостей: RSS-лента или HTML-сайт """
     name = models.CharField(max_length=255)
     url = models.URLField(unique=True)
     RSS = 'rss'
     HTML = 'html'
     SOURCE_TYPES = [(RSS, 'RSS-лента'), (HTML, 'HTML-страница')]
     source_type = models.CharField(max_length=10, choices=SOURCE_TYPES, default=RSS)
+
+    # для HTML: CSS-селекторы полей (JSON: {"items": ".news-item", "title": "h2", ...})
+    html_selectors = models.JSONField(default=dict, blank=True)
+
+    source_language = models.CharField(max_length=10, default='ru')  # vi, en, ru и т..д.
+    needs_translation = models.BooleanField(default=False)  # True → AI переводит на RU
+
     is_active = models.BooleanField(default=True)
     last_fetched_at = models.DateTimeField(null=True, blank=True)
 
@@ -144,10 +151,20 @@ class NewsItem(models.Model):
     source_url = models.URLField(unique=True)           # дедупликация по этому полю
     slug = models.SlugField(unique=True, max_length=255, blank=True)
 
+    # Оригинальные данные (на языке источника)
+    title_original = models.CharField(max_length=500, blank=True)
+    summary_original = models.TextField(blank=True)
+
+    # Финальные данные (после AI-обработки или напрямую)
     title = models.CharField(max_length=500)
-    summary = models.TextField(blank=True)              # анонс/описание
-    image_url = models.URLField(blank=True)             # урл картинки с источника
-    image = models.ImageField(upload_to='news/', blank=True)  # скачанная локально
+    summary = models.TextField(blank=True)
+
+    image_url = models.URLField(blank=True)
+    image = models.ImageField(upload_to='news/', blank=True)
+
+    # AI-обработка
+    ai_processed = models.BooleanField(default=False)   # True = AI уже обработал
+    ai_model_used = models.CharField(max_length=50, blank=True)  # 'gpt-4o-mini' и т..д.
 
     DRAFT = 'draft'
     PUBLISHED = 'published'
@@ -155,7 +172,7 @@ class NewsItem(models.Model):
     STATUSES = [(DRAFT, 'Черновик'), (PUBLISHED, 'Опубликовано'), (REJECTED, 'Отклонено')]
     status = models.CharField(max_length=15, choices=STATUSES, default=DRAFT)
 
-    telegram_message_id = models.CharField(max_length=50, blank=True)  # ID сообщения после пуша
+    telegram_message_id = models.CharField(max_length=50, blank=True)
 
     fetched_at = models.DateTimeField(auto_now_add=True)
     published_at = models.DateTimeField(null=True, blank=True)
@@ -164,44 +181,121 @@ class NewsItem(models.Model):
         ordering = ['-fetched_at']
 ```
 
-**Рабочий процесс:**
+---
+
+### Архитектура fetch_news
+
 ```
-1. python manage.py fetch_news          ← сбор из всех источников → сохраняет в status=draft
-2. Открываешь /admin/news/newsitem/ ← видишь черновики
-3. В админе: кнопка "Опубликовать" → сайт + Telegram одновременно
-4. "Отклонить" → новость со status=rejected, сайт не попадает
+apps/news/management/commands/
+├── fetch_news.py          ← главная команда
+├── publish_news.py        ← публикация из admin-action
+apps/news/
+├── fetchers/
+│   ├── base.py            ← абстрактный класс BaseFetcher
+│   ├── rss.py             ← RSS-парсер (feedparser)
+│   └── html.py            ← HTML-парсер (BeautifulSoup4)
+├── ai.py                  ← AI-обработка: перевод + рерайт + категоризация
+├── telegram.py            ← публикация в Telegram (без доп. библиотек)
+├── admin.py               ← кнопки "Опубликовать" / "Отклонить"
 ```
 
-**Telegram-публикация:** через `urllib.request` (без доп. библиотек):
+**Полный рабочий процесс:**
+```
+┌─────────────────────────┐
+│ python manage.py fetch_news │
+└───────────┬─────────────┘
+           ↓
+ для каждого NewsSource
+           ↓
+  RSS? → feedparser → статьи
+  HTML? → httpx + BeautifulSoup4 → статьи
+           ↓
+  дедупликация по source_url
+  (уже есть → пропустить)
+           ↓
+  source.needs_translation?
+  ДА → ai.translate(title, summary, 'vi'|'en' → 'ru')
+  НЕТ → записать как есть
+           ↓
+  ai.enrich() ← рерайт заголовка + сжать summary
+           ␣
+  status=draft, ждёт модерации
+
+/admin/news/newsitem/ ← ты открываешь
+  [Опубликовать] → сайт + Telegram
+  [Отклонить]  → status=rejected
+```
+
+**AI-возможности (`apps/news/ai.py`):**
+```python
+# Используем OpenAI API через urllib.request (без пакета openai)
+import json, urllib.request
+
+def call_openai(messages, model='gpt-4o-mini'):
+    payload = json.dumps({
+        'model': model,
+        'messages': messages,
+        'max_tokens': 1000,
+    }).encode()
+    req = urllib.request.Request(
+        'https://api.openai.com/v1/chat/completions',
+        data=payload,
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {settings.OPENAI_API_KEY}',
+        },
+    )
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read())['choices'][0]['message']['content']
+
+
+def translate_and_enrich(title_original, summary_original, source_lang='vi'):
+    """Перевод + рерайт + сжатое summary одним запросом"""
+    prompt = f"""Новость на языке: {source_lang}
+Заголовок: {title_original}
+Анонс: {summary_original}
+
+Сделай:
+1. Переведи на русский, сохраняя смысл
+2. Сделай заголовок цеплящим, ўемким, как для SEO
+3. Напиши summary 2-3 предложения для русскоязычной аудитории (туристы + экспаты)
+
+Ответ в JSON: {{"title": "...", "summary": "..."}}"""
+
+    result = call_openai([{'role': 'user', 'content': prompt}])
+    return json.loads(result)  # {'title': '...', 'summary': '...'}
+```
+
+**Параметры команды:**
+```bash
+python manage.py fetch_news                   # все источники
+python manage.py fetch_news --source=12       # один источник
+python manage.py fetch_news --no-ai           # без AI (экономия токенов)
+```
+
+**Telegram-публикация** (через `urllib.request`, без доп. библиотек):
 ```python
 # apps/news/telegram.py
-import json
-import urllib.request
+import json, urllib.request
 
 def send_to_telegram(news_item, bot_token, channel_id):
-    """Отправка новости в Telegram-канал"""
-    text = f"""• *{news_item.title}*
-
-{news_item.summary[:300]}...
-
-Читать полностью: {news_item.get_absolute_url()}
-Источник: {news_item.source_url}"""
-
+    text = (
+        f"• *{news_item.title}*\n\n"
+        f"{news_item.summary[:300]}...\n\n"
+        f"➡️ {news_item.get_absolute_url()}"
+    )
     payload = json.dumps({
         'chat_id': channel_id,
         'text': text,
         'parse_mode': 'Markdown',
-        'disable_web_page_preview': False,
     }).encode()
-
     req = urllib.request.Request(
         f'https://api.telegram.org/bot{bot_token}/sendMessage',
         data=payload,
         headers={'Content-Type': 'application/json'},
     )
-    with urllib.request.urlopen(req) as response:
-        data = json.loads(response.read())
-        return data['result']['message_id']
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read())['result']['message_id']
 ```
 
 ---
@@ -416,10 +510,20 @@ Total: 342 URLs | OK: 339 | FAIL: 1 | WARN: 2
 ### Принцип: только то, для чего нет решения из коробки Django
 
 ```
-django>=5.0       # фреймворк
-Pillow            # обработка изображений (django ImageField требует)
-gunicorn          # WSGI-сервер для продакшна
-whitenoise        # отдача статики без nginx-настроек
+# Основа
+django>=5.0          # фреймворк
+Pillow               # ImageField (обязательно)
+gunicorn             # WSGI-сервер
+whitenoise           # статика без nginx-настроек
+
+# Новости (news app)
+feedparser           # парсинг RSS/Atom лент (pure Python, без зависимостей)
+beautifulsoup4       # парсинг HTML-страниц источников
+lxml                 # быстрый парсер для BeautifulSoup4
+httpx                # HTTP-клиент (нужен для HTML-сайтов с защитой от urllib)
+
+# AI через urllib.request — пакет не нужен
+# OPENAI_API_KEY — в .env
 ```
 
 ### БД — SQLite (встроена в Python)
@@ -431,8 +535,10 @@ whitenoise        # отдача статики без nginx-настроек
 |--------|--------|
 | PostgreSQL | SQLite достаточно, меньше инфраструктуры |
 | Redis | Нет очередей на старте, Django cache backend встроен |
-| Celery | Email через Django smtp backend, задачи — позже |
-| django-environ | os.environ достаточно для простых настроек |
+| Celery | Запуск вручную через management command |
+| `openai` пакет | urllib.request достаточно для ChatGPT API |
+| `requests` | httpx заменяет полностью, + async на будущее |
+| django-environ | os.environ достаточно |
 | django-modeltranslation | Добавим когда реально понадобится |
 | django-storages | Медиафайлы хранятся локально на сервере |
 | sentry-sdk | Django logging достаточно на старте |
