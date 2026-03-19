@@ -2,14 +2,17 @@
 
 ## Сервер
 
+> EU VPS уже существует и обслуживает несколько проектов. clikme.ru добавляется как ещё один сайт.
+
 | Параметр | Значение |
-|---------|---------|
-| Хостинг | EU VPS (Hetzner / DigitalOcean / Contabo) |
+|---------|----------|
+| Хостинг | EU VPS (существующий сервер) |
 | ОС | Ubuntu 22.04 LTS |
 | Python | 3.11+ |
 | Web-сервер | **Caddy** (авто SSL, без certbot) |
 | WSGI | **gunicorn** (3 workers) |
 | БД | SQLite (WAL mode) |
+| Email | **Mailjet** (сейчас) → другой провайдер позже |
 
 ---
 
@@ -125,6 +128,60 @@ sudo systemctl daemon-reload
 sudo systemctl enable clikme
 sudo systemctl start clikme
 sudo systemctl status clikme
+```
+
+---
+
+## CI/CD — GitHub Actions (автодеплой)
+
+При каждом `git push origin main` GitHub Actions автоматически деплоит на сервер по SSH.
+
+**`.github/workflows/deploy.yml`:**
+```yaml
+name: Deploy to EU server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            cd /var/www/clikme/django_project
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt -q
+            python manage.py migrate --run-syncdb
+            python manage.py collectstatic --no-input --clear
+            sudo systemctl restart clikme
+            echo "Deployed: $(git log --oneline -1)"
+```
+
+**GitHub Secrets** (добавить в Settings → Secrets → Actions):
+| Secret | Значение |
+|--------|----------|
+| `SERVER_HOST` | IP-адрес EU-сервера |
+| `SERVER_USER` | `deploy` или `www-data` |
+| `SERVER_SSH_KEY` | Приватный SSH-ключ (без пароля) |
+
+**Настройка SSH-ключа на сервере:**
+```bash
+# Генерация ключа (на Mac или локальной машине)
+ssh-keygen -t ed25519 -C "github-actions-clikme" -f ~/.ssh/clikme_deploy
+
+# Добавить публичный ключ на сервер
+ssh-copy-id -i ~/.ssh/clikme_deploy.pub user@eu-server
+
+# Приватный ключ (clikme_deploy) → вставить в GitHub Secret SERVER_SSH_KEY
 ```
 
 ---
@@ -267,10 +324,12 @@ LOGGING = {
 
 ## Checklist первого запуска EU-сервера
 
-- [ ] VPS создан, SSH-ключ добавлен
-- [ ] Ubuntu обновлена: `apt update && apt upgrade -y`
-- [ ] Caddy установлен
-- [ ] Python 3.11+ установлен
+> Сервер уже работает. Выполнить только шаги, которых ещё нет для clikme.ru.
+
+- [x] VPS создан, SSH-ключ добавлен (сервер уже работает)
+- [x] Ubuntu обновлена
+- [x] Caddy установлен
+- [x] Python 3.11+ установлен
 - [ ] Создан пользователь `www-data` для gunicorn
 - [ ] Репозиторий склонирован в `/var/www/clikme/`
 - [ ] venv создан, зависимости установлены

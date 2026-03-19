@@ -844,6 +844,91 @@ chmod +x tailwindcss-macos-arm64 && mv tailwindcss-macos-arm64 tailwindcss
 
 ---
 
+## apps/newsletter/models.py
+
+Подписка не требует регистрации. Пользователь вводит только email.
+
+```python
+class Subscriber(models.Model):
+    email = models.EmailField(unique=True)
+    is_active = models.BooleanField(default=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    # GDPR: явное согласие на рассылку
+    consent_given_at = models.DateTimeField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    def __str__(self):
+        return self.email
+```
+
+**Уникальный token для отписки** — генерируется через `secrets.token_urlsafe()` и хранится взвешенным в hashed-виде или отдельным полем.
+
+```
+GET /unsubscribe/<token>/  ← один клик → is_active=False
+```
+
+**Email-провайдер:** на старте **Mailjet** (бесплатно до 200 писем/день), смена провайдера — только через `.env`.
+
+```python
+# settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'in-v3.mailjet.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ['MAILJET_API_KEY']
+EMAIL_HOST_PASSWORD = os.environ['MAILJET_SECRET_KEY']
+DEFAULT_FROM_EMAIL = 'КликМи <noreply@clikme.ru>'
+```
+
+---
+
+## GDPR — Cookie Consent
+
+> EU-сервер + европейская аудитория = обязательный cookie banner.
+
+**Что требует GDPR для этого сайта:**
+- Cookie consent перед загрузкой Google Analytics / Yandex.Metrika
+- Ссылка на Политику конфиденциальности (clikme.ru/privacy/) — уже есть в OpenCart
+- Явное согласие при подписке `consent_given_at = now()`
+- Google Fonts — загружать через `<link>` или скачать локально (не отправлять IP в Google)
+
+**Реализация (minimal vanilla JS, без платных сервисов):**
+
+```html
+<!-- templates/components/cookie_banner.html -->
+{% if not request.COOKIES.ck_consent %}
+<div id="cookie-banner"
+     class="fixed bottom-0 left-0 right-0 bg-(--color-bg-dark) text-white p-4 z-50
+            flex flex-col sm:flex-row items-center gap-4">
+  <p class="text-sm flex-1">
+    Мы используем cookie для аналитики.
+    <a href="/privacy/" class="underline">Политика конфиденциальности</a>
+  </p>
+  <button id="cookie-accept" class="ck-btn-accent whitespace-nowrap">Принять</button>
+  <button id="cookie-decline" class="text-gray-400 text-sm underline">Отказаться</button>
+</div>
+<script>
+  document.getElementById('cookie-accept').onclick = function() {
+    document.cookie = 'ck_consent=1;max-age=31536000;path=/;SameSite=Lax';
+    document.getElementById('cookie-banner').remove();
+    // Google Analytics / Metrika — инициализировать здесь
+  };
+  document.getElementById('cookie-decline').onclick = function() {
+    document.getElementById('cookie-banner').remove();
+  };
+</script>
+{% endif %}
+```
+
+Подключить в `base.html` перед `</body>`:
+```html
+{% include "components/cookie_banner.html" %}
+```
+
+Google Analytics и Yandex.Metrika — обернуть в `{% if request.COOKIES.ck_consent %}...{% endif %}`.
+
+---
+
 ## SEO-чеклист на каждой странице
 
 ```html
