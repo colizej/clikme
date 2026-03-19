@@ -1,0 +1,56 @@
+# === OpenCart (архив, не пушить) ===
+opencart/
+
+# === Django ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Окружение
+.env
+.env.local
+.env.production
+venv/
+env/
+.venv/
+
+# Медиафайлы (загружаемый контент)
+django_project/media/
+
+# Статика (генерируется через collectstatic)
+django_project/staticfiles/
+
+# БД
+*.sqlite3
+db.sqlite3
+
+# Логи
+*.log
+logs/
+
+# === macOS ===
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# === IDE ===
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# === Тесты и покрытие ===
+.coverage
+htmlcov/
+.pytest_cache/
+
+# === Сборка ===
+dist/
+build/
+*.egg-info/
+
+# === Бэкапы БД ===
+*.sql.gz
+*.dump
