@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Новости Вьетнама" %} — ClikMe{% endblock %}
+{% block meta_description %}{% trans "Актуальные новости о Вьетнаме и Нячанге." %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-10">
+
+  <h1 class="font-serif text-3xl md:text-4xl font-bold mb-8">{% trans "Новости" %}</h1>
+
+  {% if object_list %}
+  <div class="divide-y divide-(--color-border)">
+    {% for item in object_list %}
+    <article class="ck-news-item">
+      {% if item.image %}
+      <a href="/news/{{ item.slug }}/" class="shrink-0">
+        <img src="{{ item.image.url }}" alt="{{ item.title }}"
+             loading="lazy" class="w-20 h-20 object-cover rounded-lg">
+      </a>
+      {% elif item.image_url %}
+      <a href="/news/{{ item.slug }}/" class="shrink-0">
+        <img src="{{ item.image_url }}" alt="{{ item.title }}"
+             loading="lazy" class="w-20 h-20 object-cover rounded-lg">
+      </a>
+      {% endif %}
+      <div class="flex-1 min-w-0">
+        <a href="/news/{{ item.slug }}/"
+           class="font-semibold text-sm leading-snug hover:text-(--color-accent) transition-colors line-clamp-2">
+          {{ item.title }}
+        </a>
+        {% if item.summary %}
+        <p class="text-xs text-(--color-muted) mt-1 line-clamp-2">{{ item.summary }}</p>
+        {% endif %}
+        <p class="text-xs text-(--color-muted) mt-1">{{ item.published_at|date:"j E, H:i" }}</p>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  {# Pagination #}
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-10 flex justify-center gap-1">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}"
+       class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">&laquo;</a>
+    {% endif %}
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+      <span class="px-3 py-2 rounded-lg text-sm bg-(--color-accent) text-white font-semibold">{{ num }}</span>
+      {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+      <a href="?page={{ num }}"
+         class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}"
+       class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">&raquo;</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-20 text-(--color-muted)">
+    <p class="text-5xl mb-4">📰</p>
+    <p class="text-xl font-semibold">{% trans "Новостей пока нет" %}</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

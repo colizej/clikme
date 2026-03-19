@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Страница не найдена" %} — ClikMe{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto px-4 py-24 text-center">
+  <p class="text-8xl font-bold text-(--color-accent) mb-4">404</p>
+  <h1 class="font-serif text-2xl font-bold mb-4">{% trans "Страница не найдена" %}</h1>
+  <p class="text-(--color-muted) mb-8">{% trans "Возможно, страница была удалена или вы перешли по неверной ссылке." %}</p>
+  <a href="/" class="ck-btn-accent">{% trans "На главную" %}</a>
+</div>
+{% endblock %}

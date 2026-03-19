@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Поиск" %}{% if request.GET.q %}: «{{ request.GET.q }}»{% endif %} — ClikMe{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-10">
+
+  <h1 class="font-serif text-3xl font-bold mb-2">{% trans "Результаты поиска" %}</h1>
+  {% if request.GET.q %}
+  <p class="text-(--color-muted) text-sm mb-8">«{{ request.GET.q }}»</p>
+  {% endif %}
+
+  {# Articles #}
+  {% if object_list %}
+  <section class="mb-10">
+    <h2 class="font-semibold text-sm uppercase tracking-wide text-(--color-muted) mb-4">{% trans "Статьи" %}</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for article in object_list %}
+      <a href="/{{ article.slug }}/" class="ck-article-card group p-4 flex gap-4 items-start">
+        {% if article.image %}
+        <img src="{{ article.image.url }}" alt="{{ article.title }}"
+             class="w-16 h-16 object-cover rounded-lg shrink-0" loading="lazy">
+        {% endif %}
+        <div>
+          <h3 class="text-sm font-semibold group-hover:text-(--color-accent) transition-colors line-clamp-2">
+            {{ article.title }}
+          </h3>
+          <p class="text-xs text-(--color-muted) mt-1">{{ article.published_at|date:"j E Y" }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {# Vendors #}
+  {% if vendors %}
+  <section>
+    <h2 class="font-semibold text-sm uppercase tracking-wide text-(--color-muted) mb-4">{% trans "Компании" %}</h2>
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% for vendor in vendors %}
+      <a href="/{{ vendor.slug }}/" class="ck-vendor-card group flex items-center gap-4">
+        {% if vendor.image %}
+        <img src="{{ vendor.image.url }}" alt="{{ vendor.display_name }}"
+             class="w-12 h-12 object-cover rounded-lg shrink-0" loading="lazy">
+        {% endif %}
+        <div>
+          <h3 class="font-semibold group-hover:text-(--color-accent) transition-colors">{{ vendor.display_name }}</h3>
+          {% if vendor.city %}<p class="text-xs text-(--color-muted)">{{ vendor.city }}</p>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if not object_list and not vendors %}
+  <div class="text-center py-20 text-(--color-muted)">
+    <p class="text-5xl mb-4">🔍</p>
+    <p class="text-xl font-semibold">{% trans "Ничего не найдено" %}</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

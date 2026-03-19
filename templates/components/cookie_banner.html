@@ -1,0 +1,26 @@
+{% load i18n %}
+<div id="cookie-banner"
+     class="fixed bottom-0 left-0 right-0 z-50 bg-(--color-bg-dark) text-white px-4 py-4 md:px-8 md:py-5 shadow-2xl"
+     style="display:none">
+  <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
+    <p class="text-sm text-gray-300 flex-1">
+      {% trans "Мы используем куки для улучшения работы сайта." %}
+      <a href="/privacy/" class="underline hover:text-white ml-1">{% trans "Подробнее" %}</a>
+    </p>
+    <button id="cookie-accept"
+            class="ck-btn-accent shrink-0 text-sm py-2 px-5">
+      {% trans "Принять" %}
+    </button>
+  </div>
+</div>
+<script>
+  (function () {
+    var banner = document.getElementById('cookie-banner');
+    var btn = document.getElementById('cookie-accept');
+    if (!localStorage.getItem('cookie_ok')) banner.style.display = '';
+    btn.addEventListener('click', function () {
+      localStorage.setItem('cookie_ok', '1');
+      banner.style.display = 'none';
+    });
+  })();
+</script>

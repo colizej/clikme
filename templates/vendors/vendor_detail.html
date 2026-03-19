@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ vendor.display_name }} — ClikMe{% endblock %}
+{% block meta_description %}{{ vendor.meta_description|default:vendor.description|truncatewords:25 }}{% endblock %}
+{% block meta_extra %}
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-10">
+
+  {# Breadcrumb #}
+  <nav class="text-xs text-(--color-muted) mb-6 flex items-center gap-1">
+    <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+    <span>/</span>
+    <span>{{ vendor.display_name }}</span>
+  </nav>
+
+  <div class="flex flex-col md:flex-row gap-8 mb-10">
+    {% if vendor.image %}
+    <div class="shrink-0">
+      <img src="{{ vendor.image.url }}" alt="{{ vendor.display_name }}"
+           class="w-32 h-32 rounded-2xl object-cover shadow-md">
+    </div>
+    {% endif %}
+    <div class="flex-1">
+      <h1 class="font-serif text-3xl md:text-4xl font-bold mb-3">{{ vendor.display_name }}</h1>
+      {% if vendor.city %}
+      <p class="text-sm text-(--color-muted) mb-2">📍 {{ vendor.city }}</p>
+      {% endif %}
+      {% if vendor.telephone %}
+      <a href="tel:{{ vendor.telephone }}"
+         class="inline-flex items-center gap-2 text-(--color-accent) font-semibold hover:underline mb-4">
+        📞 {{ vendor.telephone }}
+      </a>
+      {% endif %}
+      {% if vendor.description %}
+      <div class="prose max-w-none text-sm">{{ vendor.description|safe }}</div>
+      {% endif %}
+      <div class="flex flex-wrap gap-3 mt-6">
+        {% if vendor.map_url %}
+        <a href="{{ vendor.map_url }}" target="_blank" rel="noopener"
+           class="ck-btn-accent text-sm py-2">🗺 {% trans "На карте" %}</a>
+        {% endif %}
+        {% if vendor.facebook_url %}
+        <a href="{{ vendor.facebook_url }}" target="_blank" rel="noopener"
+           class="border border-(--color-border) text-(--color-text) text-sm py-2 px-5 rounded-lg hover:bg-(--color-bg-soft) transition-colors">
+          Facebook
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Products #}
+  {% if vendor.products.all %}
+  <section>
+    <h2 class="font-serif text-2xl font-bold mb-6">{% trans "Услуги и товары" %}</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for product in vendor.products.all %}
+      {% if product.is_active %}
+      <a href="/{{ product.slug }}/" class="ck-article-card group flex flex-col overflow-hidden">
+        {% if product.image %}
+        <div class="aspect-video overflow-hidden bg-gray-100">
+          <img src="{{ product.image.url }}" alt="{{ product.name }}"
+               loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+        </div>
+        {% endif %}
+        <div class="p-4">
+          <h3 class="font-semibold text-sm group-hover:text-(--color-accent) transition-colors mb-1">{{ product.name }}</h3>
+          {% if product.price %}
+          <p class="text-(--color-accent) font-bold text-sm">{{ product.price }}</p>
+          {% endif %}
+        </div>
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

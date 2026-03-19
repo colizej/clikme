@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ article.meta_title|default:article.title }} — ClikMe{% endblock %}
+{% block meta_description %}{{ article.meta_description|default:article.short_description }}{% endblock %}
+{% block meta_extra %}
+  {% if article.noindex %}<meta name="robots" content="noindex,follow">{% endif %}
+  <meta property="og:title" content="{{ article.meta_title|default:article.title }}">
+  <meta property="og:description" content="{{ article.meta_description|default:article.short_description }}">
+  {% if article.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.image.url }}">{% endif %}
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+{% endblock %}
+
+{% block content %}
+<article class="max-w-3xl mx-auto px-4 py-10">
+
+  {# Breadcrumb #}
+  <nav class="text-xs text-(--color-muted) mb-6 flex items-center gap-1">
+    <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+    {% if article.category %}
+    <span>/</span>
+    <a href="/?category={{ article.category.slug }}"
+       class="hover:text-(--color-accent) transition-colors">{{ article.category.name }}</a>
+    {% endif %}
+    <span>/</span>
+    <span class="truncate">{{ article.title }}</span>
+  </nav>
+
+  {# Header #}
+  <header class="mb-8">
+    {% if article.category %}
+    <a href="/?category={{ article.category.slug }}"
+       class="inline-block text-xs font-semibold uppercase tracking-wide text-(--color-accent) mb-3 hover:underline">
+      {{ article.category.name }}
+    </a>
+    {% endif %}
+    <h1 class="font-serif text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4">
+      {{ article.title }}
+    </h1>
+    {% if article.subtitle %}
+    <p class="text-xl text-(--color-muted) mb-4">{{ article.subtitle }}</p>
+    {% endif %}
+    <div class="flex flex-wrap items-center gap-3 text-sm text-(--color-muted)">
+      <time datetime="{{ article.published_at|date:'Y-m-d' }}">{{ article.published_at|date:"j E Y" }}</time>
+      {% if article.author %}
+      <span>·</span>
+      <span>{{ article.author.get_full_name|default:article.author.username }}</span>
+      {% endif %}
+    </div>
+  </header>
+
+  {# Hero image #}
+  {% if article.image %}
+  <figure class="mb-8 rounded-2xl overflow-hidden">
+    <img src="{{ article.image.url }}" alt="{{ article.title }}"
+         class="w-full h-auto object-cover aspect-video" loading="eager">
+  </figure>
+  {% endif %}
+
+  {# Body #}
+  <div class="prose prose-lg max-w-none
+              prose-headings:font-serif prose-headings:font-bold
+              prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline">
+    {{ article.content|safe }}
+  </div>
+
+  {# Tags #}
+  {% if article.tags.all %}
+  <div class="mt-8 pt-6 border-t border-(--color-border) flex flex-wrap gap-2">
+    {% for tag in article.tags.all %}
+    <a href="/?q={{ tag.name }}"
+       class="text-xs bg-(--color-bg-soft) hover:bg-gray-200 text-(--color-text) px-3 py-1 rounded-full transition-colors">
+      #{{ tag.name }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</article>
+{% endblock %}

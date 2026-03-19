@@ -1,0 +1,135 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ClikMe — Вьетнам, Нячанг{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Всё о жизни и отдыхе во Вьетнаме: статьи, компании, новости.{% endblock %}">
+  {% block meta_extra %}{% endblock %}
+
+  {# Google Fonts — Inter + Playfair Display #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="font-sans text-(--color-text) bg-(--color-bg) antialiased">
+
+  {# ── NAV ── #}
+  <header class="sticky top-0 z-40 bg-(--color-bg-dark) text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+
+      {# Logo #}
+      <a href="/" class="font-serif text-2xl font-bold tracking-tight hover:text-(--color-accent) transition-colors">
+        ClikMe
+      </a>
+
+      {# Desktop nav #}
+      <nav class="hidden lg:flex items-center gap-6 text-sm font-medium">
+        <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+        <a href="/news/" class="hover:text-(--color-accent) transition-colors">{% trans "Новости" %}</a>
+        <a href="/contacts/" class="hover:text-(--color-accent) transition-colors">{% trans "Контакты" %}</a>
+      </nav>
+
+      {# Search + hamburger #}
+      <div class="flex items-center gap-3">
+        <a href="/?q=" aria-label="{% trans 'Поиск' %}"
+           class="text-gray-300 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+          </svg>
+        </a>
+        {# Hamburger (mobile) #}
+        <button id="nav-toggle" class="lg:hidden text-gray-300 hover:text-white focus:outline-none"
+                aria-label="{% trans 'Меню' %}">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {# Mobile dropdown #}
+    <nav id="nav-mobile"
+         class="lg:hidden hidden bg-(--color-bg-dark) border-t border-gray-700 px-4 py-3 flex flex-col gap-3 text-sm font-medium">
+      <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+      <a href="/news/" class="hover:text-(--color-accent) transition-colors">{% trans "Новости" %}</a>
+      <a href="/contacts/" class="hover:text-(--color-accent) transition-colors">{% trans "Контакты" %}</a>
+    </nav>
+  </header>
+
+  {# ── MESSAGES ── #}
+  {% if messages %}
+  <div class="max-w-7xl mx-auto px-4 mt-4 space-y-2">
+    {% for message in messages %}
+    <div class="rounded-lg px-4 py-3 text-sm
+      {% if message.tags == 'error' %}bg-red-50 text-red-700
+      {% elif message.tags == 'success' %}bg-green-50 text-green-700
+      {% else %}bg-blue-50 text-blue-700{% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── CONTENT ── #}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {# ── FOOTER ── #}
+  <footer class="ck-section-dark mt-16">
+    <div class="max-w-7xl mx-auto px-4 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm text-gray-400">
+      <div>
+        <p class="font-serif text-white text-xl font-bold mb-3">ClikMe</p>
+        <p>{% trans "Всё о жизни и отдыхе во Вьетнаме" %}</p>
+      </div>
+      <div>
+        <p class="text-white font-semibold mb-3">{% trans "Разделы" %}</p>
+        <ul class="space-y-2">
+          <li><a href="/" class="hover:text-white transition-colors">{% trans "Статьи" %}</a></li>
+          <li><a href="/news/" class="hover:text-white transition-colors">{% trans "Новости" %}</a></li>
+          <li><a href="/contacts/" class="hover:text-white transition-colors">{% trans "Контакты" %}</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-white font-semibold mb-3">{% trans "Информация" %}</p>
+        <ul class="space-y-2">
+          <li><a href="/privacy/" class="hover:text-white transition-colors">{% trans "Политика конфиденциальности" %}</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-white font-semibold mb-3">{% trans "Рассылка" %}</p>
+        <form action="/subscribe/" method="post" class="flex flex-col gap-2">
+          {% csrf_token %}
+          <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+          <input type="email" name="email" required
+                 placeholder="your@email.com"
+                 class="rounded-lg px-3 py-2 bg-gray-800 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:border-(--color-accent) text-sm">
+          <button type="submit" class="ck-btn-accent text-sm py-2">{% trans "Подписаться" %}</button>
+        </form>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 mt-4 pt-4 text-center text-gray-600 text-xs pb-4">
+      &copy; {% now "Y" %} ClikMe
+    </div>
+  </footer>
+
+  {# ── GDPR COOKIE BANNER ── #}
+  {% include "components/cookie_banner.html" %}
+
+  {# Hamburger toggle #}
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', function () {
+      var nav = document.getElementById('nav-mobile');
+      nav.classList.toggle('hidden');
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

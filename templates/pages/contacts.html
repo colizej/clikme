@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Контакты" %} — ClikMe{% endblock %}
+{% block meta_description %}{% trans "Свяжитесь с нами по любым вопросам о сайте ClikMe." %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+  <h1 class="font-serif text-3xl font-bold mb-8">{% trans "Контакты" %}</h1>
+
+  {% if success %}
+  <div class="bg-green-50 text-green-700 rounded-xl px-4 py-3 mb-6 text-sm">
+    {% trans "Спасибо! Ваше сообщение получено." %}
+  </div>
+  {% endif %}
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {# Honeypot #}
+    <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+
+    <div>
+      <label for="name" class="block text-sm font-medium mb-1">{% trans "Имя" %}</label>
+      <input type="text" id="name" name="name" required maxlength="100"
+             class="w-full rounded-lg border border-(--color-border) px-3 py-2 text-sm focus:outline-none focus:border-(--color-accent)">
+    </div>
+    <div>
+      <label for="email" class="block text-sm font-medium mb-1">Email</label>
+      <input type="email" id="email" name="email" required
+             class="w-full rounded-lg border border-(--color-border) px-3 py-2 text-sm focus:outline-none focus:border-(--color-accent)">
+    </div>
+    <div>
+      <label for="message" class="block text-sm font-medium mb-1">{% trans "Сообщение" %}</label>
+      <textarea id="message" name="message" required rows="5" maxlength="2000"
+                class="w-full rounded-lg border border-(--color-border) px-3 py-2 text-sm focus:outline-none focus:border-(--color-accent) resize-y"></textarea>
+    </div>
+    <button type="submit" class="ck-btn-accent">{% trans "Отправить" %}</button>
+  </form>
+</div>
+{% endblock %}

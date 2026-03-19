@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if page_obj.number > 1 %}Страница {{ page_obj.number }} — {% endif %}ClikMe — Вьетнам, Нячанг{% endblock %}
+
+{% block content %}
+
+  {# ── HERO (first page only) ── #}
+  {% if not request.GET.q and not request.GET.category and page_obj.number == 1 %}
+  <section class="ck-hero">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+        {% trans "Жизнь во Вьетнаме" %}
+      </h1>
+      <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-8">
+        {% trans "Статьи, компании и новости о Вьетнаме — всё, что нужно для жизни и отдыха в Нячанге." %}
+      </p>
+      <form action="/" method="get" class="flex max-w-md mx-auto gap-2">
+        <input type="search" name="q" placeholder="{% trans 'Найти...' %}"
+               class="flex-1 rounded-lg px-4 py-3 bg-gray-800 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-(--color-accent) text-sm">
+        <button type="submit" class="ck-btn-accent">{% trans "Найти" %}</button>
+      </form>
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="max-w-7xl mx-auto px-4 py-10">
+
+    {# ── SEARCH / FILTER HEADER ── #}
+    {% if request.GET.q %}
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">{% trans "Поиск:" %} «{{ request.GET.q }}»</h2>
+      <p class="text-(--color-muted) mt-1 text-sm">
+        {% blocktrans count count=page_obj.paginator.count %}{{ count }} результат{% plural %}{{ count }} результатов{% endblocktrans %}
+      </p>
+    </div>
+    {% elif request.GET.category %}
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold">{{ request.GET.category }}</h2>
+    </div>
+    {% endif %}
+
+    {# ── ARTICLE GRID ── #}
+    {% if object_list %}
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {% for article in object_list %}
+      <a href="/{{ article.slug }}/" class="ck-article-card group flex flex-col overflow-hidden">
+        {% if article.image %}
+        <div class="aspect-video overflow-hidden bg-gray-100">
+          <img src="{{ article.image.url }}" alt="{{ article.title }}"
+               loading="lazy" decoding="async"
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+        </div>
+        {% else %}
+        <div class="aspect-video bg-(--color-bg-soft) flex items-center justify-center">
+          <span class="text-4xl">🌴</span>
+        </div>
+        {% endif %}
+        <div class="p-4 flex flex-col flex-1">
+          {% if article.category %}
+          <span class="text-xs font-semibold uppercase tracking-wide text-(--color-accent) mb-2">
+            {{ article.category.name }}
+          </span>
+          {% endif %}
+          <h2 class="font-bold text-sm leading-snug line-clamp-3 mb-auto group-hover:text-(--color-accent) transition-colors">
+            {{ article.title }}
+          </h2>
+          <p class="text-xs text-(--color-muted) mt-3">
+            {{ article.published_at|date:"j E Y" }}
+          </p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {# ── PAGINATION ── #}
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-12 flex justify-center items-center gap-1" aria-label="{% trans 'Страницы' %}">
+      {% if page_obj.has_previous %}
+      <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}"
+         class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">&laquo;</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <span class="px-3 py-2 rounded-lg text-sm bg-(--color-accent) text-white font-semibold">{{ num }}</span>
+        {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}"
+           class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+      <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}"
+         class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">&raquo;</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-20 text-(--color-muted)">
+      <p class="text-5xl mb-4">🔍</p>
+      <p class="text-xl font-semibold mb-2">{% trans "Ничего не найдено" %}</p>
+      <p class="text-sm">{% trans "Попробуйте изменить запрос" %}</p>
+    </div>
+    {% endif %}
+
+  </div>
+{% endblock %}

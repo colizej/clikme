@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ news_item.title }} — ClikMe{% endblock %}
+{% block meta_description %}{{ news_item.summary|truncatewords:30 }}{% endblock %}
+{% block meta_extra %}
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+{% endblock %}
+
+{% block content %}
+<article class="max-w-3xl mx-auto px-4 py-10">
+
+  <nav class="text-xs text-(--color-muted) mb-6 flex items-center gap-1">
+    <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+    <span>/</span>
+    <a href="/news/" class="hover:text-(--color-accent) transition-colors">{% trans "Новости" %}</a>
+    <span>/</span>
+    <span class="truncate">{{ news_item.title }}</span>
+  </nav>
+
+  <header class="mb-8">
+    <h1 class="font-serif text-3xl md:text-4xl font-bold leading-tight mb-4">{{ news_item.title }}</h1>
+    <p class="text-sm text-(--color-muted)">
+      {{ news_item.published_at|date:"j E Y, H:i" }}
+      {% if news_item.source %}
+      · <a href="{{ news_item.source_url }}" target="_blank" rel="noopener nofollow"
+           class="hover:text-(--color-accent) transition-colors">{{ news_item.source.name }}</a>
+      {% endif %}
+    </p>
+  </header>
+
+  {% if news_item.image %}
+  <figure class="mb-8 rounded-2xl overflow-hidden">
+    <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}"
+         class="w-full h-auto object-cover" loading="eager">
+  </figure>
+  {% elif news_item.image_url %}
+  <figure class="mb-8 rounded-2xl overflow-hidden">
+    <img src="{{ news_item.image_url }}" alt="{{ news_item.title }}"
+         class="w-full h-auto object-cover" loading="eager">
+  </figure>
+  {% endif %}
+
+  {% if news_item.summary %}
+  <div class="prose prose-lg max-w-none
+              prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline">
+    <p class="lead">{{ news_item.summary }}</p>
+  </div>
+  {% endif %}
+
+  {% if news_item.source_url %}
+  <div class="mt-8 pt-6 border-t border-(--color-border)">
+    <a href="{{ news_item.source_url }}" target="_blank" rel="noopener nofollow"
+       class="ck-btn-accent inline-flex items-center gap-2 text-sm py-2">
+      {% trans "Читать оригинал" %} →
+    </a>
+  </div>
+  {% endif %}
+
+</article>
+{% endblock %}

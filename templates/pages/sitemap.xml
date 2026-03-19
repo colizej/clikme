@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{% for article in articles %}<url>
+  <loc>{{ base_url }}/{{ article.slug }}/</loc>
+  <lastmod>{{ article.published_at|date:"Y-m-d" }}</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+{% endfor %}
+{% for vendor in vendors %}<url>
+  <loc>{{ base_url }}/{{ vendor.slug }}/</loc>
+  <changefreq>monthly</changefreq>
+  <priority>0.6</priority>
+</url>
+{% endfor %}
+{% for item in news_items %}<url>
+  <loc>{{ base_url }}/news/{{ item.slug }}/</loc>
+  <lastmod>{{ item.published_at|date:"Y-m-d" }}</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>0.5</priority>
+</url>
+{% endfor %}
+<url>
+  <loc>{{ base_url }}/</loc>
+  <changefreq>daily</changefreq>
+  <priority>1.0</priority>
+</url>
+<url>
+  <loc>{{ base_url }}/news/</loc>
+  <changefreq>daily</changefreq>
+  <priority>0.7</priority>
+</url>
+</urlset>

@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --color-bg-dark: #111214;
+  --color-bg-soft: #f7f7f5;
+  --color-bg: #ffffff;
+  --color-text: #1a1a1a;
+  --color-accent: #e85d26;
+  --color-accent-hover: #c94d1a;
+  --color-muted: #6b7280;
+  --color-border: #e5e5e5;
+}
+
+@layer components {
+  .ck-hero         { @apply bg-(--color-bg-dark) text-white py-24 px-6; }
+  .ck-article-card { @apply bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow; }
+  .ck-vendor-card  { @apply bg-(--color-bg-soft) rounded-xl p-6; }
+  .ck-news-item    { @apply border-b border-gray-100 py-3 flex gap-4 items-start; }
+  .ck-section-dark { @apply bg-(--color-bg-dark) text-white py-16; }
+  .ck-btn-accent   { @apply bg-(--color-accent) hover:bg-(--color-accent-hover) text-white px-6 py-3 min-h-[44px] rounded-lg font-semibold transition-colors; }
+}
