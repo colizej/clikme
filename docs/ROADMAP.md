@@ -36,6 +36,7 @@ templates/
     ├── subscribe_form.html     ← форма подписки на email
     ├── affiliate_block.html    ← партнёрский виджет (Trip.com и др.)
     ├── share_buttons.html      ← кнопки "поделиться"
+    ├── news_card.html          ← карточка новости
     └── listing_card.html       ← карточка объявления (Фаза 2)
 ```
 
@@ -68,13 +69,14 @@ SEO-позиции сохранены, URL идентичны.
 ### Django-приложения
 - [ ] `blog` — статьи, категории, теги (~86 статей из OpenCart)
 - [ ] `vendors` — магазины, рестораны, сервисы (~42 вендора + ~280 продуктов)
+- [ ] `news` — лента новостей (парсинг источников + публикация на сайт + дубль в Telegram)
 - [ ] `pages` — статичные страницы (о нас, контакты, виза)
 - [ ] `users` — кастомный AbstractUser (основа для всего остального)
 - [ ] `newsletter` — подписка на рассылку (с первого дня!)
 
 ### Технические задачи
 - [ ] Настройка проекта (settings, SQLite)
-- [ ] Django models — Article, Category, Tag, Vendor, Product
+- [ ] Django models — Article, Category, Tag, Vendor, Product, NewsSource, NewsItem
 - [ ] **Скрипт parity check** — до миграции сохранить все URL оригинала; после — сравнивать
 - [ ] Скрипт импорта из OpenCart SQL (`import_from_opencart` — статьи + вендоры + продукты)
 - [ ] URL-паттерны: `/slug/`, `/cat/slug/`, vendor slug, product slug (без конфликтов)
@@ -92,6 +94,7 @@ SEO-позиции сохранены, URL идентичны.
 - Parity check скрипт показывает 0 ошибок (404, title mismatch)
 - Позиции в Google не ниже -2 позиций от baseline
 - Email-форма работает, первые подписчики
+- Раздел новостей работает: fetch → модерация → публикация → Telegram
 
 ---
 

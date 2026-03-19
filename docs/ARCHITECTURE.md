@@ -13,6 +13,7 @@ django_project/
 ├── apps/
 │   ├── blog/                   ← Фаза 1: Инфостатьи (~86 статей)
 │   ├── vendors/                ← Фаза 1: Бизнес-каталог (~42 вендора, ~280 продуктов)
+│   ├── news/                   ← Фаза 1: Новостная лента + Telegram
 │   ├── pages/                  ← Фаза 1: Статичные страницы
 │   ├── users/                  ← Фаза 1: Пользователи (AbstractUser)
 │   ├── newsletter/             ← Фаза 1: Email-подписка
@@ -31,6 +32,9 @@ django_project/
 │   │   ├── vendor_detail.html
 │   │   ├── product_detail.html
 │   │   └── vendor_list.html
+│   ├── news/
+│   │   ├── news_list.html
+│   │   └── news_detail.html
 │   ├── components/             ← Переиспользуемые компоненты ({% include %})
 │   │   ├── article_card.html   ← карточка статьи
 │   │   ├── seo_meta.html       ← <title>, <meta>, canonical, OG-теги
@@ -119,10 +123,90 @@ class Article(models.Model):
         return f'/{self.slug}/'
 ```
 
-### apps/vendors/models.py
+### apps/news/models.py
 
 ```python
-class Vendor(models.Model):
+class NewsSource(models.Model):
+    """Источник новостей: RSS-лента или сайт для парсинга"""
+    name = models.CharField(max_length=255)
+    url = models.URLField(unique=True)
+    RSS = 'rss'
+    HTML = 'html'
+    SOURCE_TYPES = [(RSS, 'RSS-лента'), (HTML, 'HTML-страница')]
+    source_type = models.CharField(max_length=10, choices=SOURCE_TYPES, default=RSS)
+    is_active = models.BooleanField(default=True)
+    last_fetched_at = models.DateTimeField(null=True, blank=True)
+
+
+class NewsItem(models.Model):
+    source = models.ForeignKey(NewsSource, on_delete=models.SET_NULL,
+                               null=True, related_name='items')
+    source_url = models.URLField(unique=True)           # дедупликация по этому полю
+    slug = models.SlugField(unique=True, max_length=255, blank=True)
+
+    title = models.CharField(max_length=500)
+    summary = models.TextField(blank=True)              # анонс/описание
+    image_url = models.URLField(blank=True)             # урл картинки с источника
+    image = models.ImageField(upload_to='news/', blank=True)  # скачанная локально
+
+    DRAFT = 'draft'
+    PUBLISHED = 'published'
+    REJECTED = 'rejected'
+    STATUSES = [(DRAFT, 'Черновик'), (PUBLISHED, 'Опубликовано'), (REJECTED, 'Отклонено')]
+    status = models.CharField(max_length=15, choices=STATUSES, default=DRAFT)
+
+    telegram_message_id = models.CharField(max_length=50, blank=True)  # ID сообщения после пуша
+
+    fetched_at = models.DateTimeField(auto_now_add=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-fetched_at']
+```
+
+**Рабочий процесс:**
+```
+1. python manage.py fetch_news          ← сбор из всех источников → сохраняет в status=draft
+2. Открываешь /admin/news/newsitem/ ← видишь черновики
+3. В админе: кнопка "Опубликовать" → сайт + Telegram одновременно
+4. "Отклонить" → новость со status=rejected, сайт не попадает
+```
+
+**Telegram-публикация:** через `urllib.request` (без доп. библиотек):
+```python
+# apps/news/telegram.py
+import json
+import urllib.request
+
+def send_to_telegram(news_item, bot_token, channel_id):
+    """Отправка новости в Telegram-канал"""
+    text = f"""• *{news_item.title}*
+
+{news_item.summary[:300]}...
+
+Читать полностью: {news_item.get_absolute_url()}
+Источник: {news_item.source_url}"""
+
+    payload = json.dumps({
+        'chat_id': channel_id,
+        'text': text,
+        'parse_mode': 'Markdown',
+        'disable_web_page_preview': False,
+    }).encode()
+
+    req = urllib.request.Request(
+        f'https://api.telegram.org/bot{bot_token}/sendMessage',
+        data=payload,
+        headers={'Content-Type': 'application/json'},
+    )
+    with urllib.request.urlopen(req) as response:
+        data = json.loads(response.read())
+        return data['result']['message_id']
+```
+
+---
+
+### apps/vendors/models.py
     oc_id = models.IntegerField(null=True, blank=True)   # vendor_id из OpenCart
     slug = models.SlugField(unique=True, max_length=255) # из oc9a_seo_url
 
