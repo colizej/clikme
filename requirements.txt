@@ -1,0 +1,8 @@
+django>=6.0
+Pillow
+gunicorn
+whitenoise
+feedparser
+beautifulsoup4
+lxml
+httpx

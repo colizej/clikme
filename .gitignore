@@ -21,10 +21,13 @@ env/
 .venv/
 
 # Медиафайлы (загружаемый контент)
-django_project/media/
+media/
 
 # Статика (генерируется через collectstatic)
-django_project/staticfiles/
+staticfiles/
+
+# Django кэш
+.cache/
 
 # БД
 *.sqlite3

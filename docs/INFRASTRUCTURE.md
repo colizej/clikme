@@ -19,24 +19,25 @@
 ## Структура директорий на сервере
 
 ```
-/var/www/clikme/
-├── django_project/
-│   ├── venv/
-│   ├── manage.py
-│   ├── config/
-│   ├── apps/
-│   ├── templates/
-│   ├── static/
-│   │   └── css/style.css       ← собранный Tailwind (в git)
-│   ├── staticfiles/            ← collectstatic output (не в git)
-│   ├── media/                  ← загруженные файлы (не в git)
-│   ├── db.sqlite3             ← база данных (не в git)
-│   ├── db.sqlite3.bak         ← ручной бэкап
-│   ├── requirements.txt
-│   ├── tailwindcss            ← CLI-бинарь (не в git)
-│   └── .env                   ← секреты (не в git)
-└── Caddyfile
+/home/clikme/clikme/          ← git-корень = Django-корень
+├── venv/                     ← виртуальное окружение (не в git)
+├── manage.py
+├── config/                   ← settings, urls, wsgi
+├── apps/                     ← blog, vendors, news, users...
+├── templates/
+├── static/
+│   └── css/style.css           ← собранный Tailwind (в git)
+├── staticfiles/              ← collectstatic output (не в git)
+├── media/                    ← загруженные файлы (не в git)
+├── docs/                     ← документация
+├── db.sqlite3                ← база данных (не в git)
+├── requirements.txt
+├── tailwindcss               ← CLI-бинарь (не в git)
+├── .env                      ← секреты (не в git)
+└── .gitignore
 ```
+
+> Caddyfile лежит в `/etc/caddy/Caddyfile` (системный, не в репо)
 
 ---
 
@@ -65,13 +66,13 @@ clikme.ru, www.clikme.ru {
 
     # Статика (длительный кэш)
     handle /static/* {
-        root * /var/www/clikme/django_project
+        root * /home/clikme/clikme
         file_server
         header Cache-Control "public, max-age=31536000, immutable"
     }
 
     handle /media/* {
-        root * /var/www/clikme/django_project
+        root * /home/clikme/clikme
         file_server
         header Cache-Control "public, max-age=604800"
     }
@@ -105,15 +106,15 @@ After=network.target
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/clikme/django_project
-ExecStart=/var/www/clikme/django_project/venv/bin/gunicorn \
+WorkingDirectory=/home/clikme/clikme
+ExecStart=/home/clikme/clikme/venv/bin/gunicorn \
     --workers 3 \
     --bind 127.0.0.1:8000 \
     --access-logfile /var/log/clikme/access.log \
     --error-logfile /var/log/clikme/error.log \
     --timeout 30 \
     config.wsgi:application
-EnvironmentFile=/var/www/clikme/django_project/.env
+EnvironmentFile=/home/clikme/clikme/.env
 Restart=on-failure
 RestartSec=5
 
@@ -156,7 +157,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
-            cd /var/www/clikme/django_project
+            cd /home/clikme/clikme
             git pull origin main
             source venv/bin/activate
             pip install -r requirements.txt -q
@@ -189,7 +190,7 @@ ssh-copy-id -i ~/.ssh/clikme_deploy.pub user@eu-server
 ## Деплой (ручной)
 
 ```bash
-cd /var/www/clikme/django_project
+cd /home/clikme/clikme
 git pull origin main
 source venv/bin/activate
 pip install -r requirements.txt --quiet
@@ -226,12 +227,12 @@ Description=clikme.ru — Staging
 
 [Service]
 User=www-data
-WorkingDirectory=/var/www/clikme/django_project
-ExecStart=/var/www/clikme/django_project/venv/bin/gunicorn \
+WorkingDirectory=/home/clikme/clikme
+ExecStart=/home/clikme/clikme/venv/bin/gunicorn \
     --workers 2 \
     --bind 127.0.0.1:8001 \
     config.wsgi:application
-EnvironmentFile=/var/www/clikme/django_project/.env.staging
+EnvironmentFile=/home/clikme/clikme/.env.staging
 Restart=on-failure
 ```
 
@@ -243,11 +244,11 @@ Restart=on-failure
 
 ```bash
 # Перед каждым деплоем (обязательно)
-cd /var/www/clikme/django_project
+cd /home/clikme/clikme
 cp db.sqlite3 "db.sqlite3.$(date +%Y%m%d)"
 
 # Скачать бэкап на свой Mac
-rsync -avz user@eu-server:/var/www/clikme/django_project/db.sqlite3 \
+rsync -avz user@eu-server:/home/clikme/clikme/db.sqlite3 \
     ~/backups/clikme/db.sqlite3.$(date +%Y%m%d)
 
 # Удалить старые бэкапы (оставить последние 7)
@@ -331,7 +332,7 @@ LOGGING = {
 - [x] Caddy установлен
 - [x] Python 3.11+ установлен
 - [ ] Создан пользователь `www-data` для gunicorn
-- [ ] Репозиторий склонирован в `/var/www/clikme/`
+- [ ] Репозиторий склонирован в `/home/clikme/clikme/`
 - [ ] venv создан, зависимости установлены
 - [ ] `.env` создан с реальными значениями
 - [ ] `python manage.py migrate` выполнен
