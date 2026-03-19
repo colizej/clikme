@@ -1,4 +1,5 @@
 django>=6.0
+python-dotenv
 Pillow
 gunicorn
 whitenoise
