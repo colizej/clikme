@@ -14,7 +14,12 @@ class HomeView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return Article.objects.filter(is_published=True).select_related('category')
+        return Article.objects.filter(is_published=True).select_related('category', 'author')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['top_vendors'] = Vendor.objects.filter(is_active=True, approved=True)[:6]
+        return ctx
 
 
 class ArticleDetailView(DetailView):

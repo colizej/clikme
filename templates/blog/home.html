@@ -1,73 +1,181 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% if page_obj.number > 1 %}Страница {{ page_obj.number }} — {% endif %}ClikMe — Вьетнам, Нячанг{% endblock %}
+{% block title %}{% if page_obj.number > 1 %}Стр. {{ page_obj.number }} — {% endif %}ClikMe — Вьетнам, Нячанг{% endblock %}
 
 {% block content %}
 
-  {# ── HERO (first page only) ── #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# HERO — только на первой странице без фильтров                      #}
+  {# ════════════════════════════════════════════════════════════════════ #}
   {% if not request.GET.q and not request.GET.category and page_obj.number == 1 %}
   <section class="ck-hero">
-    <div class="max-w-4xl mx-auto text-center">
-      <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-        {% trans "Жизнь во Вьетнаме" %}
+
+    {# Декоративные блобы #}
+    <div class="ck-blob w-96 h-96 bg-orange-200 -top-24 -right-20"></div>
+    <div class="ck-blob w-72 h-72 bg-amber-100 -bottom-16 -left-16"></div>
+    <div class="ck-blob w-48 h-48 bg-orange-100 top-1/2 right-1/3"></div>
+
+    <div class="relative max-w-4xl mx-auto text-center">
+
+      {# Badge #}
+      <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm text-sm font-semibold text-(--color-accent) mb-8 border border-(--color-accent-medium)">
+        🌴 <span>Нячанг · Вьетнам</span>
+      </div>
+
+      {# Headline #}
+      <h1 class="font-serif text-5xl sm:text-6xl md:text-7xl font-black text-(--color-text) mb-5 leading-[1.05] tracking-tight">
+        Жизнь<br>
+        <span class="text-(--color-accent)">под солнцем</span><br>
+        Вьетнама
       </h1>
-      <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-        {% trans "Статьи, компании и новости о Вьетнаме — всё, что нужно для жизни и отдыха в Нячанге." %}
+      <p class="text-base md:text-lg text-(--color-text-muted) max-w-lg mx-auto mb-10 leading-relaxed">
+        {% trans "Статьи, компании и новости о жизни и путешествиях в Нячанге" %}
       </p>
-      <form action="/" method="get" class="flex max-w-md mx-auto gap-2">
-        <input type="search" name="q" placeholder="{% trans 'Найти...' %}"
-               class="flex-1 rounded-lg px-4 py-3 bg-gray-800 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-(--color-accent) text-sm">
-        <button type="submit" class="ck-btn-accent">{% trans "Найти" %}</button>
+
+      {# Search pill #}
+      <form action="/" method="get"
+            class="flex max-w-lg mx-auto bg-white rounded-full shadow-lg border border-(--color-border) overflow-hidden pl-5 pr-1 py-1">
+        <svg class="w-4 h-4 text-stone-400 shrink-0 my-auto mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+        <input type="search" name="q"
+               placeholder="{% trans 'Найти статью, место, компанию...' %}"
+               class="flex-1 bg-transparent outline-none text-sm py-2.5 min-w-0">
+        <button type="submit" class="ck-btn-accent rounded-full py-2.5 px-5 text-sm shrink-0">
+          {% trans "Найти" %}
+        </button>
       </form>
+
+      {# Stats / social proof #}
+      <div class="flex items-center justify-center gap-8 mt-10 text-sm text-(--color-text-muted)">
+        <div class="text-center">
+          <p class="font-bold text-xl text-(--color-text)">86+</p>
+          <p>{% trans "статей" %}</p>
+        </div>
+        <div class="w-px h-8 bg-(--color-border)"></div>
+        <div class="text-center">
+          <p class="font-bold text-xl text-(--color-text)">42+</p>
+          <p>{% trans "компаний" %}</p>
+        </div>
+        <div class="w-px h-8 bg-(--color-border)"></div>
+        <div class="text-center">
+          <p class="font-bold text-xl text-(--color-text)">🔴</p>
+          <p>{% trans "новости" %}</p>
+        </div>
+      </div>
     </div>
   </section>
   {% endif %}
 
-  <div class="max-w-7xl mx-auto px-4 py-10">
-
-    {# ── SEARCH / FILTER HEADER ── #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# SEARCH / FILTER HEADER                                             #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if request.GET.q or request.GET.category %}
+  <div class="max-w-7xl mx-auto px-4 pt-10 pb-2">
     {% if request.GET.q %}
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold">{% trans "Поиск:" %} «{{ request.GET.q }}»</h2>
-      <p class="text-(--color-muted) mt-1 text-sm">
-        {% blocktrans count count=page_obj.paginator.count %}{{ count }} результат{% plural %}{{ count }} результатов{% endblocktrans %}
-      </p>
+    <div class="flex flex-wrap items-center gap-3">
+      <h2 class="font-serif text-2xl md:text-3xl font-bold">
+        {% trans "Поиск:" %} <span class="text-(--color-accent)">«{{ request.GET.q }}»</span>
+      </h2>
+      <a href="/" class="ck-pill hover:bg-(--color-accent-medium) transition-colors">✕ {% trans "Сбросить" %}</a>
     </div>
-    {% elif request.GET.category %}
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold">{{ request.GET.category }}</h2>
+    <p class="text-(--color-text-muted) mt-1 text-sm">
+      {% blocktrans count count=page_obj.paginator.count %}{{ count }} результат{% plural %}{{ count }} результатов{% endblocktrans %}
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# FEATURED ARTICLE — первая запись на главной странице (выделенная)  #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if not request.GET.q and not request.GET.category and page_obj.number == 1 and object_list %}
+  {% with featured=object_list.0 %}
+  <section class="max-w-7xl mx-auto px-4 pt-12 pb-4">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="h-px flex-1 bg-(--color-border)"></div>
+      <span class="ck-pill">✨ {% trans "Избранное" %}</span>
+      <div class="h-px flex-1 bg-(--color-border)"></div>
+    </div>
+    <a href="/{{ featured.slug }}/"
+       class="group grid md:grid-cols-2 gap-0 bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300">
+      {# Image #}
+      <div class="relative aspect-[4/3] md:aspect-auto overflow-hidden bg-(--color-bg-warm)">
+        {% if featured.image %}
+        <img src="{{ featured.image.url }}" alt="{{ featured.title }}"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+             loading="eager">
+        {% else %}
+        <div class="w-full h-full flex items-center justify-center text-7xl">🌴</div>
+        {% endif %}
+        {% if featured.category %}
+        <span class="absolute top-4 left-4 ck-pill-white">{{ featured.category.name }}</span>
+        {% endif %}
+      </div>
+      {# Content #}
+      <div class="p-8 md:p-10 flex flex-col justify-center">
+        <p class="text-xs text-(--color-text-muted) mb-3 flex items-center gap-2">
+          <span>{{ featured.published_at|date:"j E Y" }}</span>
+          {% if featured.author %}<span>·</span><span>{{ featured.author.get_full_name|default:featured.author.username }}</span>{% endif %}
+        </p>
+        <h2 class="font-serif text-2xl md:text-3xl font-bold leading-snug mb-4 group-hover:text-(--color-accent) transition-colors">
+          {{ featured.title }}
+        </h2>
+        {% if featured.short_description %}
+        <p class="text-(--color-text-muted) text-sm leading-relaxed mb-6 line-clamp-3">
+          {{ featured.short_description }}
+        </p>
+        {% endif %}
+        <span class="ck-btn-outline self-start">{% trans "Читать" %} →</span>
+      </div>
+    </a>
+  </section>
+  {% endwith %}
+  {% endif %}
+
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# ARTICLE GRID                                                        #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  <section class="max-w-7xl mx-auto px-4 py-10">
+
+    {% if not request.GET.q and not request.GET.category and page_obj.number == 1 %}
+    <div class="flex items-center gap-3 mb-8">
+      <h2 class="font-serif text-2xl font-bold">{% trans "Все статьи" %}</h2>
+      <div class="h-px flex-1 bg-(--color-border)"></div>
     </div>
     {% endif %}
 
-    {# ── ARTICLE GRID ── #}
     {% if object_list %}
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3
+                {% if not request.GET.q and not request.GET.category and page_obj.number == 1 %}
+                [&>*:first-child]:hidden
+                {% endif %}">
       {% for article in object_list %}
-      <a href="/{{ article.slug }}/" class="ck-article-card group flex flex-col overflow-hidden">
-        {% if article.image %}
-        <div class="aspect-video overflow-hidden bg-gray-100">
+      <a href="/{{ article.slug }}/" class="ck-article-card group flex flex-col">
+        {# Image #}
+        <div class="relative aspect-[16/10] overflow-hidden bg-(--color-bg-warm)">
+          {% if article.image %}
           <img src="{{ article.image.url }}" alt="{{ article.title }}"
                loading="lazy" decoding="async"
-               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-        </div>
-        {% else %}
-        <div class="aspect-video bg-(--color-bg-soft) flex items-center justify-center">
-          <span class="text-4xl">🌴</span>
-        </div>
-        {% endif %}
-        <div class="p-4 flex flex-col flex-1">
-          {% if article.category %}
-          <span class="text-xs font-semibold uppercase tracking-wide text-(--color-accent) mb-2">
-            {{ article.category.name }}
-          </span>
+               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-orange-50 to-amber-100">🌴</div>
           {% endif %}
+          {# Category overlay #}
+          {% if article.category %}
+          <span class="absolute top-3 left-3 ck-pill-white">{{ article.category.name }}</span>
+          {% endif %}
+        </div>
+        {# Text #}
+        <div class="p-5 flex flex-col flex-1">
           <h2 class="font-bold text-sm leading-snug line-clamp-3 mb-auto group-hover:text-(--color-accent) transition-colors">
             {{ article.title }}
           </h2>
-          <p class="text-xs text-(--color-muted) mt-3">
-            {{ article.published_at|date:"j E Y" }}
-          </p>
+          <div class="flex items-center justify-between mt-4 pt-4 border-t border-(--color-border)">
+            <p class="text-xs text-(--color-text-muted)">{{ article.published_at|date:"j E Y" }}</p>
+            <span class="text-xs text-(--color-accent) font-semibold group-hover:underline">{% trans "Читать" %} →</span>
+          </div>
         </div>
       </a>
       {% endfor %}
@@ -75,33 +183,72 @@
 
     {# ── PAGINATION ── #}
     {% if page_obj.has_other_pages %}
-    <nav class="mt-12 flex justify-center items-center gap-1" aria-label="{% trans 'Страницы' %}">
+    <nav class="mt-14 flex justify-center items-center gap-2" aria-label="{% trans 'Страницы' %}">
       {% if page_obj.has_previous %}
       <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}"
-         class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">&laquo;</a>
+         class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">‹</a>
       {% endif %}
       {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
-        <span class="px-3 py-2 rounded-lg text-sm bg-(--color-accent) text-white font-semibold">{{ num }}</span>
+        <span class="w-10 h-10 flex items-center justify-center rounded-full bg-(--color-accent) text-white font-bold text-sm">{{ num }}</span>
         {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
         <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}"
-           class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">{{ num }}</a>
+           class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">{{ num }}</a>
         {% endif %}
       {% endfor %}
       {% if page_obj.has_next %}
       <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}"
-         class="px-3 py-2 rounded-lg text-sm hover:bg-(--color-bg-soft) transition-colors">&raquo;</a>
+         class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">›</a>
       {% endif %}
     </nav>
     {% endif %}
 
     {% else %}
-    <div class="text-center py-20 text-(--color-muted)">
-      <p class="text-5xl mb-4">🔍</p>
+    <div class="text-center py-24 text-(--color-text-muted)">
+      <div class="text-7xl mb-6">🔍</div>
       <p class="text-xl font-semibold mb-2">{% trans "Ничего не найдено" %}</p>
-      <p class="text-sm">{% trans "Попробуйте изменить запрос" %}</p>
+      <p class="text-sm mb-6">{% trans "Попробуйте изменить запрос" %}</p>
+      <a href="/" class="ck-btn-outline">{% trans "На главную" %}</a>
     </div>
     {% endif %}
+  </section>
 
-  </div>
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# DISCOVER SECTION — только на главной                               #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if not request.GET.q and not request.GET.category and page_obj.number == 1 %}
+  <section class="ck-section-warm">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-center gap-3 mb-10">
+        <div class="h-px flex-1 bg-orange-200"></div>
+        <span class="ck-pill">🗺 {% trans "Компании и сервисы" %}</span>
+        <div class="h-px flex-1 bg-orange-200"></div>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {# Placeholder cards — будут заполнены реальными данными после импорта #}
+        {% for item in top_vendors %}
+        <a href="/{{ item.slug }}/" class="ck-vendor-card group flex items-center gap-4 p-5">
+          {% if item.image %}
+          <img src="{{ item.image.url }}" alt="{{ item.display_name }}"
+               class="w-14 h-14 rounded-xl object-cover shrink-0" loading="lazy">
+          {% else %}
+          <div class="w-14 h-14 rounded-xl bg-white flex items-center justify-center text-2xl shrink-0 shadow-sm">🏪</div>
+          {% endif %}
+          <div class="min-w-0">
+            <h3 class="font-semibold text-sm group-hover:text-(--color-accent) transition-colors truncate">
+              {{ item.display_name }}
+            </h3>
+            {% if item.city %}<p class="text-xs text-(--color-text-muted) mt-0.5">📍 {{ item.city }}</p>{% endif %}
+          </div>
+        </a>
+        {% empty %}
+        <div class="col-span-full text-center py-8 text-(--color-text-muted) text-sm">
+          {% trans "Скоро здесь появятся компании" %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
 {% endblock %}

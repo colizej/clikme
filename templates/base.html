@@ -11,7 +11,7 @@
   {# Google Fonts — Inter + Playfair Display #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;900&display=swap"
         rel="stylesheet">
 
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -19,114 +19,220 @@
 </head>
 <body class="font-sans text-(--color-text) bg-(--color-bg) antialiased">
 
-  {# ── NAV ── #}
-  <header class="sticky top-0 z-40 bg-(--color-bg-dark) text-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+  {# ── NAV ───────────────────────────────────────────────────────────── #}
+  <header class="ck-nav">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center gap-6">
 
       {# Logo #}
-      <a href="/" class="font-serif text-2xl font-bold tracking-tight hover:text-(--color-accent) transition-colors">
-        ClikMe
+      <a href="/" class="shrink-0 flex items-center">
+        <img src="{% static 'img/logo.png' %}" alt="ClikMe" class="h-9 w-auto">
       </a>
 
-      {# Desktop nav #}
-      <nav class="hidden lg:flex items-center gap-6 text-sm font-medium">
-        <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
-        <a href="/news/" class="hover:text-(--color-accent) transition-colors">{% trans "Новости" %}</a>
-        <a href="/contacts/" class="hover:text-(--color-accent) transition-colors">{% trans "Контакты" %}</a>
+      {# Desktop nav — center #}
+      <nav class="hidden lg:flex items-center gap-1 flex-1">
+        <a href="/"
+           class="px-4 py-2 rounded-full text-sm font-medium text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
+          {% trans "Статьи" %}
+        </a>
+        <a href="/news/"
+           class="px-4 py-2 rounded-full text-sm font-medium text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
+          {% trans "Новости" %}
+        </a>
+        <a href="/contacts/"
+           class="px-4 py-2 rounded-full text-sm font-medium text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
+          {% trans "Контакты" %}
+        </a>
       </nav>
 
-      {# Search + hamburger #}
-      <div class="flex items-center gap-3">
-        <a href="/?q=" aria-label="{% trans 'Поиск' %}"
-           class="text-gray-300 hover:text-white transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      {# Right side: search + subscribe #}
+      <div class="ml-auto flex items-center gap-2">
+        {# Search toggle #}
+        <button id="search-toggle"
+                class="hidden lg:flex items-center gap-2 text-(--color-text-muted) hover:text-(--color-accent) bg-(--color-bg-warm) hover:bg-(--color-accent-light) px-4 py-2 rounded-full transition-colors text-sm font-medium"
+                aria-label="{% trans 'Поиск' %}">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
           </svg>
+          <span>{% trans "Поиск" %}</span>
+        </button>
+
+        {# Subscribe CTA — desktop #}
+        <a href="#subscribe" class="hidden lg:inline-flex ck-btn-accent py-2 px-5 text-sm">
+          ✉️ {% trans "Подписаться" %}
         </a>
-        {# Hamburger (mobile) #}
-        <button id="nav-toggle" class="lg:hidden text-gray-300 hover:text-white focus:outline-none"
+
+        {# Hamburger — mobile #}
+        <button id="nav-toggle"
+                class="lg:hidden flex items-center justify-center w-10 h-10 rounded-full bg-(--color-bg-warm) text-(--color-text) hover:bg-(--color-accent-light) transition-colors"
                 aria-label="{% trans 'Меню' %}">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg id="icon-menu" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg id="icon-close" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
     </div>
 
-    {# Mobile dropdown #}
-    <nav id="nav-mobile"
-         class="lg:hidden hidden bg-(--color-bg-dark) border-t border-gray-700 px-4 py-3 flex flex-col gap-3 text-sm font-medium">
-      <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
-      <a href="/news/" class="hover:text-(--color-accent) transition-colors">{% trans "Новости" %}</a>
-      <a href="/contacts/" class="hover:text-(--color-accent) transition-colors">{% trans "Контакты" %}</a>
-    </nav>
+    {# Search bar (collapsible, desktop) #}
+    <div id="search-bar"
+         class="hidden border-t border-(--color-border) bg-white px-4 py-3">
+      <form action="/" method="get"
+            class="max-w-2xl mx-auto flex items-center gap-3 bg-(--color-bg-warm) border border-(--color-border) rounded-full px-4 py-1">
+        <svg class="w-4 h-4 text-(--color-text-muted) shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+        <input id="search-input" type="search" name="q" autofocus
+               placeholder="{% trans 'Найти статью, место, компанию...' %}"
+               class="flex-1 bg-transparent outline-none py-2 text-sm placeholder-stone-400">
+        <button type="submit" class="ck-btn-accent py-1.5 px-4 text-xs">{% trans "Найти" %}</button>
+      </form>
+    </div>
+
+    {# Mobile full-screen menu #}
+    <div id="nav-mobile"
+         class="lg:hidden hidden fixed inset-0 top-16 bg-white z-30 flex flex-col px-6 pt-8 pb-6 gap-2 overflow-y-auto">
+      <a href="/" onclick="closeMobileNav()"
+         class="flex items-center gap-3 text-lg font-semibold py-4 border-b border-(--color-border) hover:text-(--color-accent) transition-colors">
+        📰 {% trans "Статьи" %}
+      </a>
+      <a href="/news/" onclick="closeMobileNav()"
+         class="flex items-center gap-3 text-lg font-semibold py-4 border-b border-(--color-border) hover:text-(--color-accent) transition-colors">
+        🌏 {% trans "Новости" %}
+      </a>
+      <a href="/contacts/" onclick="closeMobileNav()"
+         class="flex items-center gap-3 text-lg font-semibold py-4 border-b border-(--color-border) hover:text-(--color-accent) transition-colors">
+        ✉️ {% trans "Контакты" %}
+      </a>
+      {# Mobile search #}
+      <form action="/" method="get" class="mt-6 flex gap-2">
+        <input type="search" name="q" placeholder="{% trans 'Поиск...' %}"
+               class="flex-1 border border-(--color-border) rounded-full px-4 py-3 text-sm outline-none focus:border-(--color-accent)">
+        <button type="submit" class="ck-btn-accent">→</button>
+      </form>
+    </div>
   </header>
 
-  {# ── MESSAGES ── #}
+  {# ── MESSAGES ────────────────────────────────────────────────────────── #}
   {% if messages %}
   <div class="max-w-7xl mx-auto px-4 mt-4 space-y-2">
     {% for message in messages %}
-    <div class="rounded-lg px-4 py-3 text-sm
-      {% if message.tags == 'error' %}bg-red-50 text-red-700
-      {% elif message.tags == 'success' %}bg-green-50 text-green-700
-      {% else %}bg-blue-50 text-blue-700{% endif %}">
+    <div class="rounded-full px-5 py-3 text-sm font-medium
+      {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+      {% elif message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
+      {% else %}bg-(--color-accent-light) text-(--color-accent) border border-(--color-accent-medium){% endif %}">
       {{ message }}
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
-  {# ── CONTENT ── #}
+  {# ── CONTENT ─────────────────────────────────────────────────────────── #}
   <main>
     {% block content %}{% endblock %}
   </main>
 
-  {# ── FOOTER ── #}
-  <footer class="ck-section-dark mt-16">
-    <div class="max-w-7xl mx-auto px-4 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm text-gray-400">
+  {# ── NEWSLETTER ANCHOR ────────────────────────────────────────────────── #}
+  <section id="subscribe" class="ck-section-warm">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+      <div class="inline-block ck-pill mb-4">✈️ Рассылка</div>
+      <h2 class="font-serif text-3xl md:text-4xl font-bold mb-3">
+        Будь в курсе жизни Вьетнама
+      </h2>
+      <p class="text-(--color-text-muted) mb-8">
+        {% trans "Лучшие статьи и новости — раз в неделю, без спама." %}
+      </p>
+      <form action="/subscribe/" method="post"
+            class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        {% csrf_token %}
+        <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+        <input type="email" name="email" required
+               placeholder="your@email.com"
+               class="flex-1 border border-(--color-border) rounded-full px-5 py-3 text-sm bg-white outline-none focus:border-(--color-accent)">
+        <button type="submit" class="ck-btn-accent">{% trans "Подписаться" %}</button>
+      </form>
+      <p class="text-xs text-(--color-text-muted) mt-4">
+        {% trans "Нажимая «Подписаться», вы соглашаетесь с" %}
+        <a href="/privacy/" class="underline hover:text-(--color-accent)">{% trans "политикой конфиденциальности" %}</a>
+      </p>
+    </div>
+  </section>
+
+  {# ── FOOTER ──────────────────────────────────────────────────────────── #}
+  <footer class="bg-(--color-dark) text-stone-400">
+    <div class="max-w-7xl mx-auto px-4 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+
       <div>
-        <p class="font-serif text-white text-xl font-bold mb-3">ClikMe</p>
-        <p>{% trans "Всё о жизни и отдыхе во Вьетнаме" %}</p>
+        <img src="{% static 'img/logo.png' %}" alt="ClikMe" class="h-8 w-auto mb-4 opacity-90">
+        <p class="leading-relaxed">{% trans "Всё о жизни, отдыхе и путешествиях во Вьетнаме" %}</p>
       </div>
+
       <div>
-        <p class="text-white font-semibold mb-3">{% trans "Разделы" %}</p>
-        <ul class="space-y-2">
+        <p class="text-white font-semibold mb-4 text-xs uppercase tracking-widest">{% trans "Разделы" %}</p>
+        <ul class="space-y-2.5">
           <li><a href="/" class="hover:text-white transition-colors">{% trans "Статьи" %}</a></li>
           <li><a href="/news/" class="hover:text-white transition-colors">{% trans "Новости" %}</a></li>
           <li><a href="/contacts/" class="hover:text-white transition-colors">{% trans "Контакты" %}</a></li>
         </ul>
       </div>
+
       <div>
-        <p class="text-white font-semibold mb-3">{% trans "Информация" %}</p>
-        <ul class="space-y-2">
-          <li><a href="/privacy/" class="hover:text-white transition-colors">{% trans "Политика конфиденциальности" %}</a></li>
+        <p class="text-white font-semibold mb-4 text-xs uppercase tracking-widest">{% trans "Информация" %}</p>
+        <ul class="space-y-2.5">
+          <li><a href="/privacy/" class="hover:text-white transition-colors">{% trans "Конфиденциальность" %}</a></li>
         </ul>
       </div>
+
       <div>
-        <p class="text-white font-semibold mb-3">{% trans "Рассылка" %}</p>
-        <form action="/subscribe/" method="post" class="flex flex-col gap-2">
-          {% csrf_token %}
-          <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
-          <input type="email" name="email" required
-                 placeholder="your@email.com"
-                 class="rounded-lg px-3 py-2 bg-gray-800 border border-gray-600 text-white placeholder-gray-500 focus:outline-none focus:border-(--color-accent) text-sm">
-          <button type="submit" class="ck-btn-accent text-sm py-2">{% trans "Подписаться" %}</button>
-        </form>
+        <p class="text-white font-semibold mb-4 text-xs uppercase tracking-widest">🌏 Нячанг</p>
+        <p class="leading-relaxed text-xs">
+          Нячанг (Нha Trang), Вьетнам<br>
+          <span class="text-(--color-accent)">UTC+7</span>
+        </p>
       </div>
     </div>
-    <div class="border-t border-gray-700 mt-4 pt-4 text-center text-gray-600 text-xs pb-4">
+
+    <div class="border-t border-white/10 py-4 text-center text-xs text-stone-600">
       &copy; {% now "Y" %} ClikMe
     </div>
   </footer>
 
-  {# ── GDPR COOKIE BANNER ── #}
+  {# ── GDPR COOKIE BANNER ───────────────────────────────────────────────── #}
   {% include "components/cookie_banner.html" %}
 
-  {# Hamburger toggle #}
   <script>
-    document.getElementById('nav-toggle').addEventListener('click', function () {
-      var nav = document.getElementById('nav-mobile');
-      nav.classList.toggle('hidden');
+    /* Nav toggle */
+    var navToggle = document.getElementById('nav-toggle');
+    var navMobile = document.getElementById('nav-mobile');
+    var iconMenu  = document.getElementById('icon-menu');
+    var iconClose = document.getElementById('icon-close');
+
+    function closeMobileNav() {
+      navMobile.classList.add('hidden');
+      iconMenu.classList.remove('hidden');
+      iconClose.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    navToggle.addEventListener('click', function () {
+      var open = !navMobile.classList.contains('hidden');
+      if (open) { closeMobileNav(); }
+      else {
+        navMobile.classList.remove('hidden');
+        iconMenu.classList.add('hidden');
+        iconClose.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    });
+
+    /* Search toggle */
+    var searchToggle = document.getElementById('search-toggle');
+    var searchBar    = document.getElementById('search-bar');
+    var searchInput  = document.getElementById('search-input');
+    searchToggle.addEventListener('click', function () {
+      var visible = !searchBar.classList.contains('hidden');
+      searchBar.classList.toggle('hidden');
+      if (!visible) { setTimeout(function(){ searchInput.focus(); }, 50); }
     });
   </script>
 

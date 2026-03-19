@@ -3,21 +3,99 @@
 @theme {
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
-  --color-bg-dark: #111214;
-  --color-bg-soft: #f7f7f5;
-  --color-bg: #ffffff;
-  --color-text: #1a1a1a;
-  --color-accent: #e85d26;
-  --color-accent-hover: #c94d1a;
-  --color-muted: #6b7280;
-  --color-border: #e5e5e5;
+
+  /* ── Светлая тёплая палитра (travel) ─────────────────────────────── */
+  --color-bg:          #ffffff;
+  --color-bg-warm:     #FFF8F4;   /* очень лёгкий оранжевый тинт */
+  --color-bg-section:  #FFF3EA;   /* секции с цветным фоном */
+  --color-text:        #1C1917;   /* тёплый почти-чёрный */
+  --color-text-muted:  #78716C;   /* тёплый серый */
+  --color-border:      #E7E5E4;
+
+  /* ── Акцент (оранжевый) ───────────────────────────────────────────── */
+  --color-accent:        #E85D26;
+  --color-accent-hover:  #D14E1C;
+  --color-accent-light:  #FFF0E6;  /* очень светлый оранжевый */
+  --color-accent-medium: #FFDCC6;
+
+  /* ── Тёмный (только футер) ───────────────────────────────────────── */
+  --color-dark:       #1C1917;
+  --color-dark-soft:  #292524;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { -webkit-font-smoothing: antialiased; }
 }
 
 @layer components {
-  .ck-hero         { @apply bg-(--color-bg-dark) text-white py-24 px-6; }
-  .ck-article-card { @apply bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow; }
-  .ck-vendor-card  { @apply bg-(--color-bg-soft) rounded-xl p-6; }
-  .ck-news-item    { @apply border-b border-gray-100 py-3 flex gap-4 items-start; }
-  .ck-section-dark { @apply bg-(--color-bg-dark) text-white py-16; }
-  .ck-btn-accent   { @apply bg-(--color-accent) hover:bg-(--color-accent-hover) text-white px-6 py-3 min-h-[44px] rounded-lg font-semibold transition-colors; }
+
+  /* === Навигация ====================================================== */
+  .ck-nav {
+    @apply sticky top-0 z-40 bg-white/95 backdrop-blur-md
+           border-b border-(--color-border) shadow-sm;
+  }
+
+  /* === Герой ========================================================== */
+  .ck-hero {
+    @apply relative overflow-hidden bg-(--color-bg-warm) py-20 md:py-28 px-6;
+  }
+
+  /* === Карточки ======================================================= */
+  .ck-card,
+  .ck-article-card {
+    @apply bg-white rounded-2xl overflow-hidden shadow-sm
+           hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+  }
+
+  .ck-vendor-card {
+    @apply bg-(--color-bg-warm) rounded-2xl overflow-hidden
+           hover:shadow-md hover:-translate-y-0.5 transition-all duration-300;
+  }
+
+  /* === Секции ========================================================= */
+  .ck-section      { @apply py-14 md:py-20; }
+  .ck-section-warm { @apply py-14 md:py-20 bg-(--color-bg-section); }
+  .ck-section-dark { @apply py-14 md:py-20 bg-(--color-dark) text-white; }
+
+  /* === Кнопки ========================================================= */
+  .ck-btn-accent {
+    @apply inline-flex items-center justify-center gap-2
+           bg-(--color-accent) hover:bg-(--color-accent-hover)
+           text-white px-6 py-3 min-h-[44px] rounded-full
+           font-semibold text-sm transition-all duration-200 hover:shadow-md;
+  }
+  .ck-btn-outline {
+    @apply inline-flex items-center justify-center gap-2
+           border-2 border-(--color-accent) text-(--color-accent)
+           hover:bg-(--color-accent) hover:text-white
+           px-6 py-3 min-h-[44px] rounded-full
+           font-semibold text-sm transition-all duration-200;
+  }
+  .ck-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           bg-white/15 hover:bg-white/25 text-white
+           px-5 py-2.5 min-h-[44px] rounded-full
+           font-medium text-sm transition-colors;
+  }
+
+  /* === Бейджи ========================================================= */
+  .ck-pill {
+    @apply inline-block bg-(--color-accent-light) text-(--color-accent)
+           text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full;
+  }
+  .ck-pill-white {
+    @apply inline-block bg-white/90 backdrop-blur-sm text-(--color-accent)
+           text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm;
+  }
+
+  /* === Новости ======================================================== */
+  .ck-news-item {
+    @apply border-b border-(--color-border) py-4 flex gap-4 items-start;
+  }
+
+  /* === Декоративный разделитель ======================================= */
+  .ck-blob {
+    @apply absolute rounded-full blur-3xl opacity-60 pointer-events-none;
+  }
 }

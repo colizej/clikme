@@ -10,12 +10,12 @@ urlpatterns = [
     # Auth
     path('accounts/', include('django.contrib.auth.urls')),
 
-    # Apps
-    path('', include('apps.blog.urls')),
-    path('', include('apps.vendors.urls')),
+    # Apps — специфические пути ПЕРЕД slug-диспатчером blog
     path('news/', include('apps.news.urls')),
     path('', include('apps.pages.urls')),
     path('', include('apps.newsletter.urls')),
+    path('', include('apps.vendors.urls')),
+    path('', include('apps.blog.urls')),  # slug_dispatch — последним
 
     # Robots
     path('robots.txt', include('apps.pages.robots')),

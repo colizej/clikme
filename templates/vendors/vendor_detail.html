@@ -10,14 +10,14 @@
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 py-10">
 
-  {# Breadcrumb #}
-  <nav class="text-xs text-(--color-muted) mb-6 flex items-center gap-1">
+  <nav class="text-xs text-(--color-text-muted) mb-6 flex items-center gap-1.5">
     <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
-    <span>/</span>
+    <span class="text-(--color-border)">›</span>
     <span>{{ vendor.display_name }}</span>
   </nav>
 
-  <div class="flex flex-col md:flex-row gap-8 mb-10">
+  {# Header card #}
+  <div class="bg-(--color-bg-warm) rounded-3xl p-6 md:p-10 flex flex-col md:flex-row gap-8 mb-10">
     {% if vendor.image %}
     <div class="shrink-0">
       <img src="{{ vendor.image.url }}" alt="{{ vendor.display_name }}"
@@ -25,9 +25,9 @@
     </div>
     {% endif %}
     <div class="flex-1">
-      <h1 class="font-serif text-3xl md:text-4xl font-bold mb-3">{{ vendor.display_name }}</h1>
+      <h1 class="font-serif text-3xl md:text-4xl font-bold mb-2">{{ vendor.display_name }}</h1>
       {% if vendor.city %}
-      <p class="text-sm text-(--color-muted) mb-2">📍 {{ vendor.city }}</p>
+      <p class="text-sm text-(--color-text-muted) mb-3">📍 {{ vendor.city }}</p>
       {% endif %}
       {% if vendor.telephone %}
       <a href="tel:{{ vendor.telephone }}"
@@ -36,7 +36,7 @@
       </a>
       {% endif %}
       {% if vendor.description %}
-      <div class="prose max-w-none text-sm">{{ vendor.description|safe }}</div>
+      <div class="prose max-w-none text-sm mt-3">{{ vendor.description|safe }}</div>
       {% endif %}
       <div class="flex flex-wrap gap-3 mt-6">
         {% if vendor.map_url %}
@@ -45,9 +45,7 @@
         {% endif %}
         {% if vendor.facebook_url %}
         <a href="{{ vendor.facebook_url }}" target="_blank" rel="noopener"
-           class="border border-(--color-border) text-(--color-text) text-sm py-2 px-5 rounded-lg hover:bg-(--color-bg-soft) transition-colors">
-          Facebook
-        </a>
+           class="ck-btn-outline text-sm py-2">Facebook</a>
         {% endif %}
       </div>
     </div>
@@ -62,10 +60,12 @@
       {% if product.is_active %}
       <a href="/{{ product.slug }}/" class="ck-article-card group flex flex-col overflow-hidden">
         {% if product.image %}
-        <div class="aspect-video overflow-hidden bg-gray-100">
+        <div class="aspect-video overflow-hidden bg-(--color-bg-warm)">
           <img src="{{ product.image.url }}" alt="{{ product.name }}"
                loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
         </div>
+        {% else %}
+        <div class="aspect-video bg-gradient-to-br from-orange-50 to-amber-100 flex items-center justify-center text-4xl">🛍</div>
         {% endif %}
         <div class="p-4">
           <h3 class="font-semibold text-sm group-hover:text-(--color-accent) transition-colors mb-1">{{ product.name }}</h3>
@@ -82,3 +82,4 @@
 
 </div>
 {% endblock %}
+{% block meta_extra %}

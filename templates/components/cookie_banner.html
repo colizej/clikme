@@ -1,26 +1,28 @@
 {% load i18n %}
 <div id="cookie-banner"
-     class="fixed bottom-0 left-0 right-0 z-50 bg-(--color-bg-dark) text-white px-4 py-4 md:px-8 md:py-5 shadow-2xl"
+     class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm z-50 bg-white border border-(--color-border) shadow-2xl rounded-2xl px-5 py-4"
      style="display:none">
-  <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
-    <p class="text-sm text-gray-300 flex-1">
-      {% trans "Мы используем куки для улучшения работы сайта." %}
-      <a href="/privacy/" class="underline hover:text-white ml-1">{% trans "Подробнее" %}</a>
-    </p>
-    <button id="cookie-accept"
-            class="ck-btn-accent shrink-0 text-sm py-2 px-5">
+  <p class="text-sm text-(--color-text) mb-3 leading-relaxed">
+    🍪 {% trans "Мы используем куки для улучшения работы сайта." %}
+    <a href="/privacy/" class="text-(--color-accent) hover:underline ml-1">{% trans "Подробнее" %}</a>
+  </p>
+  <div class="flex gap-2">
+    <button id="cookie-accept" class="ck-btn-accent flex-1 py-2 text-xs">
       {% trans "Принять" %}
+    </button>
+    <button id="cookie-decline" class="flex-1 py-2 text-xs rounded-full border border-(--color-border) text-(--color-text-muted) hover:bg-(--color-bg-warm) transition-colors">
+      {% trans "Отклонить" %}
     </button>
   </div>
 </div>
 <script>
   (function () {
-    var banner = document.getElementById('cookie-banner');
-    var btn = document.getElementById('cookie-accept');
+    var banner  = document.getElementById('cookie-banner');
+    var accept  = document.getElementById('cookie-accept');
+    var decline = document.getElementById('cookie-decline');
     if (!localStorage.getItem('cookie_ok')) banner.style.display = '';
-    btn.addEventListener('click', function () {
-      localStorage.setItem('cookie_ok', '1');
-      banner.style.display = 'none';
-    });
+    function hide() { localStorage.setItem('cookie_ok', '1'); banner.style.display = 'none'; }
+    accept.addEventListener('click', hide);
+    decline.addEventListener('click', hide);
   })();
 </script>

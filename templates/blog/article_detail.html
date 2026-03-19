@@ -12,69 +12,79 @@
 {% endblock %}
 
 {% block content %}
-<article class="max-w-3xl mx-auto px-4 py-10">
 
-  {# Breadcrumb #}
-  <nav class="text-xs text-(--color-muted) mb-6 flex items-center gap-1">
-    <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
-    {% if article.category %}
-    <span>/</span>
-    <a href="/?category={{ article.category.slug }}"
-       class="hover:text-(--color-accent) transition-colors">{{ article.category.name }}</a>
-    {% endif %}
-    <span>/</span>
-    <span class="truncate">{{ article.title }}</span>
-  </nav>
+  {# ── Hero image (если есть) ── #}
+  {% if article.image %}
+  <div class="w-full max-h-[55vh] overflow-hidden bg-(--color-bg-warm)">
+    <img src="{{ article.image.url }}" alt="{{ article.title }}"
+         class="w-full h-full object-cover" loading="eager"
+         style="max-height:55vh">
+  </div>
+  {% endif %}
 
-  {# Header #}
-  <header class="mb-8">
+  <article class="max-w-3xl mx-auto px-4 py-10">
+
+    {# Breadcrumb #}
+    <nav class="text-xs text-(--color-text-muted) mb-6 flex flex-wrap items-center gap-1.5">
+      <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+      {% if article.category %}
+      <span class="text-(--color-border)">›</span>
+      <a href="/?category={{ article.category.slug }}"
+         class="hover:text-(--color-accent) transition-colors">{{ article.category.name }}</a>
+      {% endif %}
+      <span class="text-(--color-border)">›</span>
+      <span class="truncate max-w-[200px]">{{ article.title }}</span>
+    </nav>
+
+    {# Category pill #}
     {% if article.category %}
-    <a href="/?category={{ article.category.slug }}"
-       class="inline-block text-xs font-semibold uppercase tracking-wide text-(--color-accent) mb-3 hover:underline">
+    <a href="/?category={{ article.category.slug }}" class="ck-pill hover:bg-(--color-accent-medium) transition-colors mb-5 inline-block">
       {{ article.category.name }}
     </a>
     {% endif %}
-    <h1 class="font-serif text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4">
+
+    {# Title #}
+    <h1 class="font-serif text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-4 text-(--color-text)">
       {{ article.title }}
     </h1>
+
     {% if article.subtitle %}
-    <p class="text-xl text-(--color-muted) mb-4">{{ article.subtitle }}</p>
+    <p class="text-lg md:text-xl text-(--color-text-muted) mb-5 leading-relaxed">{{ article.subtitle }}</p>
     {% endif %}
-    <div class="flex flex-wrap items-center gap-3 text-sm text-(--color-muted)">
-      <time datetime="{{ article.published_at|date:'Y-m-d' }}">{{ article.published_at|date:"j E Y" }}</time>
+
+    {# Meta row #}
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-(--color-text-muted) pb-6 mb-8 border-b border-(--color-border)">
+      <time datetime="{{ article.published_at|date:'Y-m-d' }}">📅 {{ article.published_at|date:"j E Y" }}</time>
       {% if article.author %}
-      <span>·</span>
-      <span>{{ article.author.get_full_name|default:article.author.username }}</span>
+      <span>✍️ {{ article.author.get_full_name|default:article.author.username }}</span>
       {% endif %}
     </div>
-  </header>
 
-  {# Hero image #}
-  {% if article.image %}
-  <figure class="mb-8 rounded-2xl overflow-hidden">
-    <img src="{{ article.image.url }}" alt="{{ article.title }}"
-         class="w-full h-auto object-cover aspect-video" loading="eager">
-  </figure>
-  {% endif %}
+    {# Body #}
+    <div class="prose prose-lg max-w-none
+                prose-headings:font-serif prose-headings:font-bold prose-headings:text-(--color-text)
+                prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline
+                prose-img:rounded-2xl prose-blockquote:border-l-4 prose-blockquote:border-(--color-accent)">
+      {{ article.content|safe }}
+    </div>
 
-  {# Body #}
-  <div class="prose prose-lg max-w-none
-              prose-headings:font-serif prose-headings:font-bold
-              prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline">
-    {{ article.content|safe }}
-  </div>
+    {# Tags #}
+    {% if article.tags.all %}
+    <div class="mt-10 pt-6 border-t border-(--color-border) flex flex-wrap gap-2">
+      {% for tag in article.tags.all %}
+      <a href="/?q={{ tag.name }}" class="ck-pill hover:bg-(--color-accent-medium) transition-colors">
+        #{{ tag.name }}
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
 
-  {# Tags #}
-  {% if article.tags.all %}
-  <div class="mt-8 pt-6 border-t border-(--color-border) flex flex-wrap gap-2">
-    {% for tag in article.tags.all %}
-    <a href="/?q={{ tag.name }}"
-       class="text-xs bg-(--color-bg-soft) hover:bg-gray-200 text-(--color-text) px-3 py-1 rounded-full transition-colors">
-      #{{ tag.name }}
-    </a>
-    {% endfor %}
-  </div>
-  {% endif %}
+    {# Share hint #}
+    <div class="mt-10 pt-6 border-t border-(--color-border) flex flex-wrap items-center gap-4">
+      <a href="/" class="ck-btn-outline text-sm py-2">
+        ← {% trans "Все статьи" %}
+      </a>
+    </div>
 
-</article>
+  </article>
 {% endblock %}
