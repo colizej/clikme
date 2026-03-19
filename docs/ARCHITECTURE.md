@@ -227,22 +227,48 @@ apps/news/
 ```
 
 **AI-возможности (`apps/news/ai.py`):**
-```python
-# Используем OpenAI API через urllib.request (без пакета openai)
-import json, urllib.request
 
-def call_openai(messages, model='gpt-4o-mini'):
+> У тебя есть подписка GitHub Copilot — это даёт доступ к **GitHub Models API**.
+> Те же модели (GPT-4o-mini, GPT-4o), тот же формат запросов —
+> меняется только `base_url` и ключ.
+
+```python
+# apps/news/ai.py
+# API-совместим с OpenAI — меняется только endpoint + ключ
+import json, urllib.request
+from django.conf import settings
+
+# .env:
+# AI_PROVIDER=github          # или 'openai'
+# GITHUB_TOKEN=ghp_xxx        # Personal Access Token (права: models:read)
+# OPENAI_API_KEY=sk-xxx       # если AI_PROVIDER=openai
+
+AI_ENDPOINTS = {
+    'github': 'https://models.inference.ai.azure.com/chat/completions',
+    'openai': 'https://api.openai.com/v1/chat/completions',
+}
+
+def _get_token():
+    if settings.AI_PROVIDER == 'github':
+        return settings.GITHUB_TOKEN
+    return settings.OPENAI_API_KEY
+
+
+def call_ai(messages, model='gpt-4o-mini'):
+    """Универсальный вызов: GitHub Models или OpenAI в зависимости от AI_PROVIDER"""
+    url = AI_ENDPOINTS[settings.AI_PROVIDER]
     payload = json.dumps({
         'model': model,
         'messages': messages,
         'max_tokens': 1000,
+        'response_format': {'type': 'json_object'},
     }).encode()
     req = urllib.request.Request(
-        'https://api.openai.com/v1/chat/completions',
+        url,
         data=payload,
         headers={
             'Content-Type': 'application/json',
-            'Authorization': f'Bearer {settings.OPENAI_API_KEY}',
+            'Authorization': f'Bearer {_get_token()}',
         },
     )
     with urllib.request.urlopen(req) as r:
@@ -250,21 +276,34 @@ def call_openai(messages, model='gpt-4o-mini'):
 
 
 def translate_and_enrich(title_original, summary_original, source_lang='vi'):
-    """Перевод + рерайт + сжатое summary одним запросом"""
+    """Перевод + рерайт + summary одним запросом (экономия токенов)"""
     prompt = f"""Новость на языке: {source_lang}
 Заголовок: {title_original}
 Анонс: {summary_original}
 
-Сделай:
+Сделай в одном ответе:
 1. Переведи на русский, сохраняя смысл
-2. Сделай заголовок цеплящим, ўемким, как для SEO
-3. Напиши summary 2-3 предложения для русскоязычной аудитории (туристы + экспаты)
+2. Сделай заголовок цеплящим и ёмким
+3. summary 2–3 предложения для русскоязычных (туристы + экспаты)
 
 Ответ в JSON: {{"title": "...", "summary": "..."}}"""
 
-    result = call_openai([{'role': 'user', 'content': prompt}])
-    return json.loads(result)  # {'title': '...', 'summary': '...'}
+    result = call_ai([{'role': 'user', 'content': prompt}])
+    return json.loads(result)
 ```
+
+**Лимиты GitHub Models** (бесплатно для Copilot-подписчиков):
+| Модель | Запросов/день | Запросов/месяц |
+|--------|--------------|---------------|
+| gpt-4o-mini | 500 | 2000 |
+| gpt-4o | 50 | 150 |
+
+Для ручного `fetch_news` раз в день — море по колено.
+
+**Как получить `GITHUB_TOKEN`:**
+1. github.com → Settings → Developer settings → Personal access tokens
+2. Сделать токен (Fine-grained) с правом `models:read`
+3. Добавить в `.env`: `GITHUB_TOKEN=ghp_xxx`
 
 **Параметры команды:**
 ```bash
@@ -522,8 +561,10 @@ beautifulsoup4       # парсинг HTML-страниц источников
 lxml                 # быстрый парсер для BeautifulSoup4
 httpx                # HTTP-клиент (нужен для HTML-сайтов с защитой от urllib)
 
-# AI через urllib.request — пакет не нужен
-# OPENAI_API_KEY — в .env
+# AI: используем GitHub Models API (входит в GitHub Copilot подписку)
+# Формат запросов = OpenAI API — никаких доп. пакетов не нужен
+# AI_PROVIDER=github и GITHUB_TOKEN — в .env
+# Альтернатива: AI_PROVIDER=openai и OPENAI_API_KEY — тот же код
 ```
 
 ### БД — SQLite (встроена в Python)
