@@ -46,6 +46,12 @@ class HomeView(ListView):
         )
         tag_slug = self.request.GET.get('tag', '').strip()
         ctx['active_tag'] = Tag.objects.filter(slug=tag_slug).first() if tag_slug else None
+        ctx['top_articles'] = (
+            Article.objects
+            .filter(is_published=True)
+            .select_related('category')
+            .order_by('-views_count')[:2]
+        )
         return ctx
 
 

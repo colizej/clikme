@@ -111,10 +111,10 @@
 
   {# ── Hero image ── #}
   {% if article.image %}
-  <div class="w-full max-h-[55vh] overflow-hidden bg-(--color-bg-warm)">
+  <div class="w-full overflow-hidden bg-(--color-bg-warm)" style="max-height:58vh;margin-top:2px">
     <img src="{{ article.image.url }}" alt="{{ article.image_alt|default:article.title }}"
          class="w-full h-full object-cover" loading="eager"
-         style="max-height:55vh">
+         style="max-height:58vh;display:block">
   </div>
   {% endif %}
 
