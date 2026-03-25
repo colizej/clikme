@@ -148,15 +148,50 @@ class Article(models.Model):
 
         source = re.sub(r'\[image(\d+)\]', _replace, source, flags=re.IGNORECASE)
 
-        # ── 2. Парсить FAQ-блоки ( #### Q : ... @@ ) ──────────────────────
+        # ── 2. Пометить [toc] плейсхолдером (реальный TOC строим после рендера) ──
+        TOC_PLACEHOLDER = '<div id="ck-toc-placeholder"></div>'
+        has_toc = bool(re.search(r'\[toc\]', source, re.IGNORECASE))
+        if has_toc:
+            source = re.sub(r'\[toc\]', TOC_PLACEHOLDER, source, flags=re.IGNORECASE)
+
+        # ── 3. Парсить FAQ-блоки ( #### Q : ... @@ ) ──────────────────────
         source, parsed_faqs = self._parse_faq_blocks(source)
         self._parsed_faqs = parsed_faqs
 
-        self.content = markdown.markdown(
+        html = markdown.markdown(
             source,
             extensions=['extra', 'toc', 'nl2br', 'sane_lists'],
             output_format='html',
         )
+
+        # ── 4. Построить TOC по реальным id из отрендеренных H2 ────────────
+        if has_toc:
+            h2_matches = re.findall(
+                r'<h2[^>]*\sid="([^"]+)"[^>]*>(.*?)</h2>',
+                html, re.IGNORECASE | re.DOTALL,
+            )
+            if h2_matches:
+                items_html = ''
+                for i, (slug, title_html) in enumerate(h2_matches, 1):
+                    title_text = re.sub(r'<[^>]+>', '', title_html).strip()
+                    items_html += (
+                        f'<li>'
+                        f'<a href="#{slug}" class="ck-toc-link">'
+                        f'<span class="ck-toc-num">{i}</span>'
+                        f'<span>{title_text}</span>'
+                        f'</a></li>\n'
+                    )
+                toc_html = (
+                    f'<nav class="ck-toc" aria-label="Содержание">'
+                    f'<p class="ck-toc-title">📋 Содержание</p>'
+                    f'<ol>{items_html}</ol>'
+                    f'</nav>'
+                )
+            else:
+                toc_html = ''
+            html = html.replace(TOC_PLACEHOLDER, toc_html)
+
+        self.content = html
 
     def _parse_faq_blocks(self, source):
         """Парсит блоки FAQ из content_md и возвращает (modified_source, [(q, a), ...]).

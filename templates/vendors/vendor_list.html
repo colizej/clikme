@@ -6,32 +6,29 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-10">
-  <h1 class="font-serif text-3xl md:text-4xl font-bold mb-8">{% trans "Компании и сервисы" %}</h1>
+  <h1 class="font-serif text-3xl md:text-4xl font-bold mb-2">{% trans "Компании и сервисы" %}</h1>
+  <p class="text-(--color-text-muted) mb-10">{% trans "Проверенные компании, магазины и сервисы" %}</p>
 
   {% if object_list %}
-  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
     {% for vendor in object_list %}
-    <a href="/{{ vendor.slug }}/" class="ck-vendor-card group flex gap-4 items-start">
-      {% if vendor.image %}
-      <img src="{{ vendor.image.url }}" alt="{{ vendor.display_name }}"
-           class="w-14 h-14 object-cover rounded-xl shrink-0" loading="lazy">
-      {% endif %}
-      <div class="flex-1 min-w-0">
-        <h2 class="font-semibold group-hover:text-(--color-accent) transition-colors line-clamp-1">
-          {{ vendor.display_name }}
-        </h2>
-        {% if vendor.city %}
-        <p class="text-xs text-(--color-muted) mt-1">📍 {{ vendor.city }}</p>
-        {% endif %}
-        {% if vendor.meta_description %}
-        <p class="text-xs text-(--color-muted) mt-1 line-clamp-2">{{ vendor.meta_description }}</p>
+    <a href="/{{ vendor.slug }}/" class="ck-vendor-square group">
+      <div class="ck-vendor-square-logo">
+        {% if vendor.image %}
+        <img src="{{ vendor.image.url }}" alt="{{ vendor.display_name }}"
+             class="w-full h-full object-cover" loading="lazy">
+        {% else %}
+        <span class="text-2xl font-bold text-(--color-accent)">
+          {{ vendor.display_name|slice:":1" }}
+        </span>
         {% endif %}
       </div>
+      <p class="ck-vendor-square-name">{{ vendor.display_name }}</p>
     </a>
     {% endfor %}
   </div>
   {% else %}
-  <p class="text-(--color-muted)">{% trans "Пока ничего нет." %}</p>
+  <p class="text-(--color-text-muted)">{% trans "Пока ничего нет." %}</p>
   {% endif %}
 </div>
 {% endblock %}

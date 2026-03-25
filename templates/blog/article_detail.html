@@ -111,9 +111,26 @@
 
   {# ── Hero image ── #}
   {% if article.image %}
-  <div class="w-full md:max-w-5xl md:mx-auto aspect-video overflow-hidden md:rounded-b-3xl">
+  <div class="w-full md:max-w-7xl md:mx-auto aspect-video overflow-hidden md:rounded-b-3xl md:relative">
     <img src="{{ article.image.url }}" alt="{{ article.image_alt|default:article.title }}"
          class="w-full h-full object-cover object-center" loading="eager">
+    {# Desktop overlay: title + subtitle over image #}
+    <div class="hidden md:flex absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent md:rounded-b-3xl flex-col justify-end px-10 pb-20">
+      {% if article.category %}
+      <a href="/?category={{ article.category.slug }}"
+         class="inline-block self-start mb-4 px-3 py-1 rounded-full text-xs font-semibold bg-white/25 text-white backdrop-blur-sm border border-white/40 hover:bg-white/40 transition-colors">
+        {{ article.category.name }}
+      </a>
+      {% endif %}
+      <h1 class="font-serif text-3xl lg:text-5xl font-black leading-tight text-white mb-3"
+          style="text-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.8);">
+        {{ article.title }}
+      </h1>
+      {% if article.subtitle %}
+      <p class="text-base lg:text-lg text-white/90 leading-relaxed max-w-2xl"
+         style="text-shadow: 0 1px 6px rgba(0,0,0,0.7);">{{ article.subtitle }}</p>
+      {% endif %}
+    </div>
   </div>
   {% endif %}
 
@@ -131,20 +148,20 @@
       <span class="truncate max-w-[200px]">{{ article.title }}</span>
     </nav>
 
-    {# Category pill #}
+    {# Category pill — mobile only (desktop shows on hero) #}
     {% if article.category %}
-    <a href="/?category={{ article.category.slug }}" class="ck-pill hover:bg-(--color-accent-medium) transition-colors mb-5 inline-block">
+    <a href="/?category={{ article.category.slug }}" class="ck-pill hover:bg-(--color-accent-medium) transition-colors mb-5 inline-block md:hidden">
       {{ article.category.name }}
     </a>
     {% endif %}
 
-    {# Title #}
-    <h1 class="font-serif text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-4 text-(--color-text)">
+    {# Title — mobile only (desktop shows on hero) #}
+    <h1 class="md:hidden font-serif text-3xl font-black leading-tight mb-4 text-(--color-text)">
       {{ article.title }}
     </h1>
 
     {% if article.subtitle %}
-    <p class="text-lg md:text-xl text-(--color-text-muted) mb-5 leading-relaxed">{{ article.subtitle }}</p>
+    <p class="md:hidden text-lg text-(--color-text-muted) mb-5 leading-relaxed">{{ article.subtitle }}</p>
     {% endif %}
 
     {# Meta row #}

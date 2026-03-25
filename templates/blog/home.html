@@ -284,22 +284,18 @@
         <span class="ck-pill">🗺 {% trans "Компании и сервисы" %}</span>
         <div class="h-px flex-1 bg-orange-200"></div>
       </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {# Placeholder cards — будут заполнены реальными данными после импорта #}
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
         {% for item in top_vendors %}
-        <a href="/{{ item.slug }}/" class="ck-vendor-card group flex items-center gap-4 p-5">
-          {% if item.image %}
-          <img src="{{ item.image.url }}" alt="{{ item.display_name }}"
-               class="w-14 h-14 rounded-xl object-cover shrink-0" loading="lazy">
-          {% else %}
-          <div class="w-14 h-14 rounded-xl bg-white flex items-center justify-center text-2xl shrink-0 shadow-sm">🏪</div>
-          {% endif %}
-          <div class="min-w-0">
-            <h3 class="font-semibold text-sm group-hover:text-(--color-accent) transition-colors truncate">
-              {{ item.display_name }}
-            </h3>
-            {% if item.city %}<p class="text-xs text-(--color-text-muted) mt-0.5">📍 {{ item.city }}</p>{% endif %}
+        <a href="/{{ item.slug }}/" class="ck-vendor-square group">
+          <div class="ck-vendor-square-logo">
+            {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.display_name }}"
+                 class="w-full h-full object-cover" loading="lazy">
+            {% else %}
+            <span class="text-2xl font-bold text-(--color-accent)">{{ item.display_name|slice:":1" }}</span>
+            {% endif %}
           </div>
+          <p class="ck-vendor-square-name">{{ item.display_name }}</p>
         </a>
         {% empty %}
         <div class="col-span-full text-center py-8 text-(--color-text-muted) text-sm">

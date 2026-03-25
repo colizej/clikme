@@ -5,11 +5,10 @@ from .models import Vendor, Product
 class VendorListView(ListView):
     model = Vendor
     template_name = 'vendors/vendor_list.html'
-    context_object_name = 'vendors'
-    paginate_by = 24
+    context_object_name = 'object_list'
 
     def get_queryset(self):
-        return Vendor.objects.filter(is_active=True)
+        return Vendor.objects.filter(is_active=True).order_by('display_name')
 
 
 class VendorDetailView(DetailView):
