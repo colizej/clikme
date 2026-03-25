@@ -3,12 +3,15 @@ document.addEventListener('DOMContentLoaded', function () {
   var el = document.querySelector('.easymde-field');
   if (!el || typeof EasyMDE === 'undefined') return;
 
+  // Remove the old shared autosave key (one-time migration)
+  localStorage.removeItem('smde_article-content-md');
+
   new EasyMDE({
     element: el,
     spellChecker: false,
     autosave: {
       enabled: true,
-      uniqueId: 'article-content-md',
+      uniqueId: 'easymde-' + window.location.pathname,
       delay: 3000,
     },
     toolbar: [
