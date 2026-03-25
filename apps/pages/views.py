@@ -50,4 +50,5 @@ class SitemapView(TemplateView):
         ctx['articles'] = Article.objects.filter(is_published=True).only('slug', 'published_at')
         ctx['vendors'] = Vendor.objects.filter(is_active=True, approved=True).only('slug')
         ctx['news_items'] = NewsItem.objects.filter(status='published').only('slug', 'published_at')[:200]
+        ctx['pages'] = Page.objects.filter(is_published=True).only('slug', 'updated_at')
         return ctx

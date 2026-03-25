@@ -1,6 +1,31 @@
 # Roadmap — clikme.ru
 
-> Последнее обновление: март 2026
+> Последнее обновление: 25 марта 2026
+
+---
+
+## ✅ Спринт март 2026 — ЗАВЕРШЁН
+
+### 1. Страница `/delivery/` — убрать без вреда для SEO ✅
+- [x] Удалить Page объект `/delivery/` из БД
+- [x] Создать 301-редирект `/delivery/` → `/` через `django.contrib.redirects`
+
+### 2. Битые редиректы вендоров (29 шт.) → `/vendors/` ✅
+- [x] 72 редиректа — все валидны, ни один не ведёт в 404
+- [x] 65 → `/vendors/`, 3 → `/`, 4 → конкретные страницы
+
+### 3. Теги и категории статей ✅
+- [x] 9 тегов созданы из OpenCart SQL: обзор, где покушать, что смотреть, гид, пляжи, аренда, медицина, шопинг, буфеты
+- [x] 1 категория «Блог» создана (как на оригинальном сайте — плоская структура)
+- [x] management command `import_tags` — назначил теги 58/72 статьям, категорию всем 72
+- [ ] Шаблоны: показать теги на карточках и странице статьи `article_detail.html`
+- [ ] Добавить фильтрацию по тегу на странице блога
+
+### 4. Новости — ждём структуру от пользователя
+- [ ] Пользователь предоставит структуру (источники, формат, категории)
+- [ ] Настроить `NewsSource` записи в admin
+- [ ] Протестировать `fetch_news` management command
+- [ ] Добавить `fetch_news` в cron / GitHub Actions scheduled workflow
 
 ---
 
@@ -13,7 +38,6 @@
 - [x] Создание документации и roadmap
 - [x] EU-сервер существует, несколько проектов работают
 - [ ] Зафиксировать текущие позиции в Google Search Console (baseline CSV)
-- [ ] Настроить поддомен `new.clikme.ru` → EU-сервер (создать DNS-запись)
 - [ ] Настроить GitHub Actions автодеплой (`.github/workflows/deploy.yml`)
 
 ---
@@ -29,16 +53,13 @@
 ```
 templates/
 └── components/
-    ├── article_card.html       ← карточка статьи (лента, поиск, похожие)
-    ├── category_badge.html     ← бейдж категории
-    ├── pagination.html         ← пагинация (везде одинаковая)
-    ├── seo_meta.html           ← <title>, <meta>, canonical, OG-теги
-    ├── breadcrumbs.html        ← хлебные крошки
-    ├── subscribe_form.html     ← форма подписки на email
-    ├── affiliate_block.html    ← партнёрский виджет (Trip.com и др.)
-    ├── share_buttons.html      ← кнопки "поделиться"
-    ├── news_card.html          ← карточка новости
-    └── listing_card.html       ← карточка объявления (Фаза 2)
+    ├── cookie_banner.html      ← ✅ GDPR cookie consent
+    ├── subscribe_form.html     ← ⬜ форма подписки (view готов, шаблон нужен)
+    ├── article_card.html       ← ⬜ карточка статьи (лента, поиск, похожие)
+    ├── seo_meta.html           ← ⬜ <title>, <meta>, canonical, OG-теги
+    ├── breadcrumbs.html        ← ⬜ хлебные крошки
+    ├── affiliate_block.html    ← ⬜ партнёрский виджет (Trip.com и др.)
+    └── share_buttons.html      ← ⬜ кнопки «поделиться»
 ```
 
 **Правило:** если один и тот же HTML появляется в двух местах — это компонент.
@@ -62,49 +83,66 @@ blog/templatetags/
 
 ---
 
-## Фаза 1 — Django MVP: Зеркало сайта (апрель 2026)
+## Фаза 1 — Django MVP: Зеркало сайта ✅ (март 2026)
 
 **Цель:** Запустить полное зеркало clikme.ru на Django с новым дизайном.
-Весь контент перенесён, все SEO-позиции сохранены, URL идентичны.
-Регистрация пользователей — НЕ в этой фазе. Подписка на email — через форму без аккаунта.
+Весь контент перенесён, SEO-позиции сохранены через 301-редиректы.
 
 ### Django-приложения
-- [ ] `blog` — статьи, категории, теги (~86 статей из OpenCart)
-- [ ] `vendors` — магазины, рестораны, сервисы (~42 вендора + ~280 продуктов)
-- [ ] `news` — лента новостей (парсинг источников + публикация на сайт + дубль в Telegram)
-- [ ] `pages` — статичные страницы (о нас, контакты, виза)
-- [ ] `users` — кастомный AbstractUser (основа для всего остального)
-- [ ] `newsletter` — подписка на рассылку (email-форма без регистрации, с первого дня!)
-  - Поле: только email, подписчик → `Subscriber` модель
-  - Rate limiting + honeypot защита от ботов
+- [x] `blog` — **72 статьи** из OpenCart (все published, все с фото и Markdown)
+- [x] `vendors` — **39 вендоров + 224 продукта** из OpenCart
+- [x] `news` — модели NewsSource/NewsItem готовы; источники не настроены
+- [x] `pages` — **4 статичные страницы** (политика, условия, доставка, правила)
+- [x] `users` — кастомный AbstractUser (tourist/expat/business + points + telegram_id)
+- [x] `newsletter` — `Subscriber` модель, `SubscribeView` с rate limiting + honeypot
 
 ### Технические задачи
-- [ ] Настройка проекта (settings, SQLite)
-- [ ] Django models — Article, Category, Tag, Vendor, Product, NewsSource, NewsItem
-- [ ] **Скрипт parity check** — до миграции сохранить все URL оригинала; после — сравнивать
-- [ ] Скрипт импорта из OpenCart SQL (`import_from_opencart` — статьи + вендоры + продукты)
-- [ ] URL-паттерны: `/slug/`, `/cat/slug/`, vendor slug, product slug (без конфликтов)
-- [ ] SEO: canonical, meta title/description, Open Graph, sitemap.xml
-- [ ] robots.txt
-- [ ] Перенос изображений (image/catalog/ → media/)
-- [ ] Базовые шаблоны (base, article, vendor, product, home)
-- [ ] Форма подписки на email в конце каждой статьи
-- [ ] Конверсия изображений в WebP при импорте (`to_webp()` в import_from_opencart)
-- [ ] 404 и 500 страницы с дизайном сайта
-- [ ] Поиск `GET /search/?q=` — статьи + вендоры (Django icontains, без регистрации)
-- [ ] GDPR cookie consent banner (EU-сервер = обязателен)
-- [ ] Политика конфиденциальности — перенести из OpenCart как страницу `pages`
-- [ ] `python manage.py check --deploy` — 0 предупреждений перед деплоем
-- [ ] Настройка Caddy (добавить clikme.ru в существующий Caddyfile на сервере)
-- [ ] Настройка GitHub Actions автодеплоя
+- [x] Настройка проекта (Django 6.0.3, Python 3.14, SQLite, Tailwind CSS v4 CLI)
+- [x] Models: Article, Category, Tag, Vendor, Product, NewsSource, NewsItem, **ArticleFAQ**
+- [x] `scripts/audit_slugs.py` — паритет URL OpenCart vs Django
+- [x] `import_blog` — импорт статей из SQL; `import_vendors` — вендоры + продукты
+- [x] `slug_dispatch` в `apps/blog/views.py` — Article → Vendor → Product → Page
+- [x] SEO: canonical, meta title/description, Open Graph в шаблонах
+- [x] **Article JSON-LD** (ImageObject, keywords, articleSection, inLanguage, dateModified)
+- [x] **BreadcrumbList JSON-LD** (3 уровня: home → category → article)
+- [x] **FAQPage JSON-LD** — условный блок если есть `ArticleFAQ` записи
+- [x] **Twitter Card** meta-теги в `article_detail.html`
+- [x] `sitemap.xml` — 117 URLs
+- [x] `robots.txt`
+- [x] Медиа-файлы перенесены: 518 изображений → `media/`
+- [x] Шаблоны: base, home, article_detail, vendor_detail, product_detail, vendor_list, news_list, news_detail, search, contacts, page_detail, 404, 500
+- [x] Поиск `GET /search/?q=`
+- [x] GDPR cookie consent banner (`templates/components/cookie_banner.html`)
+- [x] 404 и 500 страницы
+- [x] Навигация — desktop + **мобильный drawer** (выезжает справа, SVG-иконки, backdrop, Esc)
+- [x] `django.contrib.redirects` — **71 редирект** (⚠️ 31 ведут в 404 — см. TODO #2)
+- [x] `django.contrib.sites` — domain обновлён: `clikme.ru` ✅
+- [x] **Markdown-редактор** в Django admin (EasyMDE, CDN)
+- [x] `Article.content_md` — Markdown-источник; `Article.content` — рендерится автоматически
+- [x] `Article.image_alt` — SEO alt-текст для изображений
+- [x] `convert_html_to_md` — все 72 статьи конвертированы HTML → Markdown
+- [x] Суперпользователь `admin` создан
+- [x] `make collect` (133 файла), `make deploy-check`, `make deploy`, `make status`
+- [x] `.github/workflows/deploy.yml` — GitHub Actions автодеплой
+- [x] `docs/Caddyfile.snippet` — конфиг для Caddy
+
+### 🔴 Остаток (см. TODO выше)
+- [ ] `/delivery/` — 301 → `/` (Task #1)
+- [ ] Битые редиректы вендоров — 31 шт. → `/vendors/` (Task #2)
+- [ ] Теги и категории статей (Task #3)
+- [ ] Новости — источники + fetch (Task #4)
+
+### После публикации
+- [ ] Зафиксировать позиции в Google Search Console (baseline)
+- [ ] Настроить Caddy на сервере (`docs/Caddyfile.snippet`)
 - [ ] **Переключение DNS clikme.ru → EU-сервер** (финальный шаг)
+- [ ] Настроить Mailjet SMTP ключи в `.env`
 
 ### Метрики успеха Фазы 1
-- Все ~86 статей и ~42 страницы вендоров доступны по оригинальным URL
-- Parity check скрипт показывает 0 ошибок (404, title mismatch)
-- Позиции в Google не ниже -2 позиций от baseline
-- Email-форма работает, первые подписчики
-- Раздел новостей работает: fetch → модерация → публикация → Telegram
+- [x] 72 статьи + 39 вендоров + 224 продукта + 4 страницы доступны по правильным URL
+- [x] 71 редирект покрывает старые OpenCart URLs (⚠️ 31 нужно исправить)
+- [ ] Позиции в Google не ниже -2 позиций от baseline (проверить +4 недели после деплоя)
+- [ ] Newsletter форма работает, первые подписчики
 
 ---
 
@@ -171,7 +209,7 @@ blog/templatetags/
 
 | Слой | Технология | Причина |
 |------|-----------|--------|
-| Backend | Django 5.x | Опыт разработчика |
+| Backend | **Django 6.0.3** (Python 3.14) | Опыт разработчика |
 | БД | **SQLite** | Встроена в Python, достаточно для проекта |
 | Кэш | Django cache (файловый) | Встроен, Redis не нужен на старте |
 | Очереди | — | Django email backend, без Celery |

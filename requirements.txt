@@ -7,3 +7,5 @@ feedparser
 beautifulsoup4
 lxml
 httpx
+markdown
+html2text

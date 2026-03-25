@@ -71,7 +71,7 @@
   {# ════════════════════════════════════════════════════════════════════ #}
   {# SEARCH / FILTER HEADER                                             #}
   {# ════════════════════════════════════════════════════════════════════ #}
-  {% if request.GET.q or request.GET.category %}
+  {% if request.GET.q or request.GET.category or request.GET.tag %}
   <div class="max-w-7xl mx-auto px-4 pt-10 pb-2">
     {% if request.GET.q %}
     <div class="flex flex-wrap items-center gap-3">
@@ -80,10 +80,18 @@
       </h2>
       <a href="/" class="ck-pill hover:bg-(--color-accent-medium) transition-colors">✕ {% trans "Сбросить" %}</a>
     </div>
+    {% endif %}
+    {% if active_tag %}
+    <div class="flex flex-wrap items-center gap-3">
+      <h2 class="font-serif text-2xl md:text-3xl font-bold">
+        {% trans "Тег:" %} <span class="text-(--color-accent)">{{ active_tag.name }}</span>
+      </h2>
+      <a href="/" class="ck-pill hover:bg-(--color-accent-medium) transition-colors">✕ {% trans "Сбросить" %}</a>
+    </div>
+    {% endif %}
     <p class="text-(--color-text-muted) mt-1 text-sm">
       {% blocktrans count count=page_obj.paginator.count %}{{ count }} результат{% plural %}{{ count }} результатов{% endblocktrans %}
     </p>
-    {% endif %}
   </div>
   {% endif %}
 
@@ -139,10 +147,26 @@
   {# ════════════════════════════════════════════════════════════════════ #}
   <section class="max-w-7xl mx-auto px-4 py-10">
 
-    {% if not request.GET.q and not request.GET.category and page_obj.number == 1 %}
-    <div class="flex items-center gap-3 mb-8">
+    {% if not request.GET.q and not request.GET.category and not request.GET.tag and page_obj.number == 1 %}
+    <div class="flex items-center gap-3 mb-6">
       <h2 class="font-serif text-2xl font-bold">{% trans "Все статьи" %}</h2>
       <div class="h-px flex-1 bg-(--color-border)"></div>
+    </div>
+    {% endif %}
+
+    {# ── Tag filter bar ── #}
+    {% if all_tags and not request.GET.q %}
+    <div class="overflow-x-auto mb-10" style="scrollbar-width:none;-ms-overflow-style:none;">
+      <style>.tag-bar::-webkit-scrollbar{display:none}</style>
+      <div class="tag-bar flex gap-2 min-w-max px-1 pb-1">
+        <a href="/" class="ck-pill transition-colors whitespace-nowrap {% if not active_tag %}bg-(--color-accent) text-white{% else %}hover:bg-(--color-accent-medium){% endif %}">{% trans "Все" %}</a>
+        {% for tag in all_tags %}
+        <a href="/?tag={{ tag.slug }}"
+           class="ck-pill transition-colors whitespace-nowrap {% if active_tag.slug == tag.slug %}bg-(--color-accent) text-white{% else %}hover:bg-(--color-accent-medium){% endif %}">
+          {{ tag.name }}
+        </a>
+        {% endfor %}
+      </div>
     </div>
     {% endif %}
 
@@ -169,9 +193,21 @@
         </div>
         {# Text #}
         <div class="p-5 flex flex-col flex-1">
-          <h2 class="font-bold text-sm leading-snug line-clamp-3 mb-auto group-hover:text-(--color-accent) transition-colors">
+          <h2 class="font-bold text-sm leading-snug line-clamp-3 mb-3 group-hover:text-(--color-accent) transition-colors">
             {{ article.title }}
           </h2>
+          {% if article.short_description %}
+          <p class="text-xs text-(--color-text-muted) leading-relaxed line-clamp-2 mb-auto">{{ article.short_description|truncatewords:18 }}</p>
+          {% endif %}
+          {% with card_tags=article.tags.all %}
+          {% if card_tags %}
+          <div class="flex flex-wrap gap-1 mt-3">
+            {% for tag in card_tags|slice:":3" %}
+            <span class="text-[10px] px-2 py-1 rounded-full bg-(--color-accent-light) text-(--color-accent) font-medium leading-none">{{ tag.name }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endwith %}
           <div class="flex items-center justify-between mt-4 pt-4 border-t border-(--color-border)">
             <p class="text-xs text-(--color-text-muted)">{{ article.published_at|date:"j E Y" }}</p>
             <span class="text-xs text-(--color-accent) font-semibold group-hover:underline">{% trans "Читать" %} →</span>
@@ -185,19 +221,19 @@
     {% if page_obj.has_other_pages %}
     <nav class="mt-14 flex justify-center items-center gap-2" aria-label="{% trans 'Страницы' %}">
       {% if page_obj.has_previous %}
-      <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}"
+      <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.tag %}tag={{ request.GET.tag }}&{% endif %}page={{ page_obj.previous_page_number }}"
          class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">‹</a>
       {% endif %}
       {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
         <span class="w-10 h-10 flex items-center justify-center rounded-full bg-(--color-accent) text-white font-bold text-sm">{{ num }}</span>
         {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
-        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}"
+        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.tag %}tag={{ request.GET.tag }}&{% endif %}page={{ num }}"
            class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">{{ num }}</a>
         {% endif %}
       {% endfor %}
       {% if page_obj.has_next %}
-      <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}"
+      <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.tag %}tag={{ request.GET.tag }}&{% endif %}page={{ page_obj.next_page_number }}"
          class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">›</a>
       {% endif %}
     </nav>
@@ -246,6 +282,11 @@
           {% trans "Скоро здесь появятся компании" %}
         </div>
         {% endfor %}
+      </div>
+      <div class="mt-8 text-center">
+        <a href="/vendors/" class="ck-btn-accent inline-flex items-center gap-2">
+          {% trans "Все компании" %} →
+        </a>
       </div>
     </div>
   </section>

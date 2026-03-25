@@ -98,4 +98,230 @@
   .ck-blob {
     @apply absolute rounded-full blur-3xl opacity-60 pointer-events-none;
   }
+
+  /* === Типографика статьи (замена @tailwindcss/typography) =========== */
+  .ck-prose {
+    @apply text-base leading-7 text-(--color-text) max-w-none;
+  }
+  .ck-prose > * + * { @apply mt-5; }
+
+  /* ── Заголовки ── */
+  .ck-prose h1 {
+    @apply font-serif text-3xl md:text-4xl font-black leading-tight
+           text-(--color-text) mt-12 mb-5 pb-3
+           border-b-2 border-(--color-border);
+  }
+  .ck-prose h2 {
+    @apply font-serif text-2xl md:text-3xl font-bold leading-tight
+           text-(--color-text) mt-10 mb-4;
+  }
+  /* H2 — оранжевая черта слева */
+  .ck-prose h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1em;
+    background: var(--color-accent);
+    border-radius: 2px;
+    margin-right: 10px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .ck-prose h3 {
+    @apply font-serif text-xl md:text-2xl font-bold leading-snug
+           text-(--color-text) mt-8 mb-3;
+  }
+  .ck-prose h4 {
+    @apply text-lg font-semibold text-(--color-text) mt-6 mb-2;
+  }
+  .ck-prose h5, .ck-prose h6 {
+    @apply text-base font-semibold text-(--color-text-muted) uppercase
+           tracking-wide mt-5 mb-1;
+  }
+
+  /* ── Текст ── */
+  .ck-prose p {
+    @apply leading-7;
+  }
+  .ck-prose a {
+    @apply text-(--color-accent) underline underline-offset-2
+           hover:text-(--color-accent-hover) transition-colors;
+  }
+  .ck-prose strong { @apply font-bold; }
+  .ck-prose em     { @apply italic; }
+  .ck-prose del    { @apply line-through text-(--color-text-muted) opacity-70; }
+  .ck-prose sup    { @apply text-xs align-super; }
+  .ck-prose sub    { @apply text-xs align-sub; }
+  .ck-prose abbr   { @apply underline decoration-dotted cursor-help; }
+
+  /* mark — выделение как маркером */
+  .ck-prose mark {
+    background: #fef08a;
+    color: var(--color-text);
+    padding: 0 3px;
+    border-radius: 3px;
+  }
+
+  /* kbd — клавиатурная клавиша */
+  .ck-prose kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.8em;
+    line-height: 1.5;
+    color: var(--color-text);
+    background: #f5f5f5;
+    border: 1px solid #c7c7c7;
+    border-bottom-width: 3px;
+    border-radius: 5px;
+  }
+
+  /* ── Списки ── */
+  .ck-prose ul {
+    @apply list-disc pl-6 my-5 space-y-1.5;
+  }
+  .ck-prose ol {
+    @apply list-decimal pl-6 my-5 space-y-1.5;
+  }
+  .ck-prose li {
+    @apply leading-7;
+  }
+  .ck-prose li > ul,
+  .ck-prose li > ol {
+    @apply my-1 mt-1.5;
+  }
+
+  /* Task list (- [ ] / - [x] из marked) */
+  .ck-prose ul:has(> li > input[type=checkbox]) {
+    @apply list-none pl-0;
+  }
+  .ck-prose li:has(> input[type=checkbox]) {
+    @apply flex items-start gap-2 pl-0;
+  }
+  .ck-prose li > input[type=checkbox] {
+    @apply mt-1.5 shrink-0 accent-(--color-accent);
+    width: 15px; height: 15px;
+  }
+
+  /* ── Цитата ── */
+  .ck-prose blockquote {
+    @apply border-l-4 border-(--color-accent) pl-5 pr-4 py-3 my-7
+           bg-(--color-bg-warm) rounded-r-xl;
+    position: relative;
+  }
+  .ck-prose blockquote::before {
+    content: '\201C';
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--color-accent);
+    opacity: 0.25;
+    font-family: Georgia, serif;
+    pointer-events: none;
+  }
+  .ck-prose blockquote p {
+    @apply text-(--color-text-muted) italic leading-7;
+    margin: 0;
+  }
+  .ck-prose blockquote cite {
+    @apply block text-xs text-(--color-text-muted) mt-2 not-italic;
+  }
+  .ck-prose blockquote cite::before { content: '— '; }
+
+  /* ── Код ── */
+  .ck-prose code {
+    @apply font-mono text-sm bg-(--color-bg-warm) text-(--color-accent)
+           px-1.5 py-0.5 rounded;
+  }
+  .ck-prose pre {
+    @apply font-mono text-sm bg-(--color-dark) text-white
+           p-5 rounded-xl overflow-x-auto my-6 leading-6;
+    tab-size: 2;
+  }
+  .ck-prose pre::-webkit-scrollbar { height: 5px; }
+  .ck-prose pre::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+  .ck-prose pre code {
+    @apply bg-transparent text-inherit p-0;
+  }
+
+  /* ── Изображения ── */
+  .ck-prose img {
+    @apply rounded-2xl my-6 w-full h-auto object-cover shadow-sm;
+  }
+  .ck-prose figure {
+    @apply my-7;
+  }
+  .ck-prose figure img {
+    @apply my-0;
+  }
+  .ck-prose figcaption {
+    @apply text-center text-sm text-(--color-text-muted) mt-2.5 italic;
+  }
+
+  /* ── Разделитель ── */
+  .ck-prose hr {
+    @apply my-10;
+    border: none;
+    border-top: 2px solid var(--color-border);
+    position: relative;
+  }
+  .ck-prose hr::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 0 10px;
+    color: var(--color-accent);
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  /* ── Таблица ── */
+  .ck-prose table {
+    @apply w-full my-6 text-sm border-collapse rounded-xl overflow-hidden;
+    border: 1px solid var(--color-border);
+  }
+  .ck-prose thead {
+    @apply bg-(--color-bg-section);
+  }
+  .ck-prose th {
+    @apply text-left font-bold px-4 py-2.5
+           border-b border-(--color-border) text-xs uppercase tracking-wide;
+  }
+  .ck-prose td {
+    @apply px-4 py-2.5 border-b border-(--color-border) align-top leading-6;
+  }
+  .ck-prose tr:last-child td { @apply border-b-0; }
+  .ck-prose tr:nth-child(even) td { @apply bg-(--color-bg-warm); }
+  .ck-prose tbody tr:hover td  { @apply bg-(--color-accent-light); transition: background .15s; }
+
+  /* ── Details / Summary (аккордеон) ── */
+  .ck-prose details {
+    @apply border border-(--color-border) rounded-xl overflow-hidden my-5;
+  }
+  .ck-prose summary {
+    @apply px-5 py-3.5 font-semibold cursor-pointer select-none
+           bg-(--color-bg-warm) hover:bg-(--color-accent-light) transition-colors;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ck-prose summary::-webkit-details-marker { display: none; }
+  .ck-prose summary::after {
+    content: '+';
+    font-size: 1.2rem;
+    color: var(--color-accent);
+    font-weight: 300;
+    transition: transform .2s;
+  }
+  .ck-prose details[open] summary::after { content: '−'; }
+  .ck-prose details > *:not(summary) {
+    @apply px-5 py-4 text-(--color-text-muted);
+  }
 }

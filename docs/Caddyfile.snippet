@@ -1,0 +1,32 @@
+# Caddyfile для clikme.ru
+# Расположение на сервере: /etc/caddy/Caddyfile
+#
+# Добавить этот блок в существующий Caddyfile на EU VPS.
+# После изменений: sudo systemctl reload caddy
+
+clikme.ru, www.clikme.ru {
+    # www → non-www
+    @www host www.clikme.ru
+    redir @www https://clikme.ru{uri} permanent
+
+    # Сжатие
+    encode gzip zstd
+
+    # Статика (длительный кэш, Whitenoise генерирует hashed имена)
+    handle /static/* {
+        root * /home/clikme/clikme
+        file_server
+        header Cache-Control "public, max-age=31536000, immutable"
+    }
+
+    handle /media/* {
+        root * /home/clikme/clikme
+        file_server
+        header Cache-Control "public, max-age=604800"
+    }
+
+    # Django приложение (gunicorn на порту 8000)
+    handle {
+        reverse_proxy localhost:8000
+    }
+}

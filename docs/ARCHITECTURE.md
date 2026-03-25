@@ -1,26 +1,33 @@
 # Архитектура Django-проекта — clikme.ru
 
+**Стек:** Django 6.0.3, Python 3.14, SQLite, Tailwind CSS v4 (standalone CLI)
+
+> **Статус:** Фаза 1 завершена — 72 статьи, 39 вендоров, 224 продукта, 4 страницы,
+> 71 SEO-редирект. Платформа готова к публикации (см. блокеры в ROADMAP.md).
+
 ## Структура проекта
 
 ```
-django_project/
+clikme/
 │
 ├── config/                     ← Настройки проекта
-│   ├── settings.py             ← Все настройки в одном файле
+│   ├── settings.py             ← Все настройки, SITE_ID=1
 │   ├── urls.py
 │   └── wsgi.py
 │
 ├── apps/
-│   ├── blog/                   ← Фаза 1: Инфостатьи (~86 статей)
-│   ├── vendors/                ← Фаза 1: Бизнес-каталог (~42 вендора, ~280 продуктов)
-│   ├── news/                   ← Фаза 1: Новостная лента + Telegram
-│   ├── pages/                  ← Фаза 1: Статичные страницы
-│   ├── users/                  ← Фаза 1: Пользователи (AbstractUser)
-│   ├── newsletter/             ← Фаза 1: Email-подписка
-│   ├── directory/              ← Фаза 2: Каталог мест
-│   ├── listings/               ← Фаза 2: Доска объявлений
-│   ├── reviews/                ← Фаза 2: Отзывы
-│   └── gamification/           ← Фаза 3: Баллы и бейджи
+│   ├── blog/                   ← 72 статьи (импортированы из OpenCart)
+│   │   └── management/commands/
+│   │       ├── import_blog.py
+│   │       └── setup_redirects.py
+│   ├── vendors/                ← 39 вендоров + 224 продукта
+│   │   └── management/commands/
+│   │       ├── import_vendors.py
+│   │       └── transliterate_slugs.py
+│   ├── news/                   ← NewsSource/NewsItem (источники не настроены)
+│   ├── pages/                  ← 4 статические страницы + setup_redirects command
+│   ├── users/                  ← AbstractUser (user_type, points, telegram_id)
+│   └── newsletter/             ← Subscriber модель + SubscribeView
 │
 ├── templates/
 │   ├── base.html
@@ -35,25 +42,26 @@ django_project/
 │   ├── news/
 │   │   ├── news_list.html
 │   │   └── news_detail.html
+│   ├── pages/
+│   │   └── page_detail.html
 │   ├── components/             ← Переиспользуемые компоненты ({% include %})
-│   │   ├── article_card.html   ← карточка статьи
-│   │   ├── seo_meta.html       ← <title>, <meta>, canonical, OG-теги
-│   │   ├── breadcrumbs.html    ← хлебные крошки
-│   │   ├── pagination.html     ← пагинация
-│   │   ├── subscribe_form.html ← форма email-подписки
-│   │   ├── affiliate_block.html← партнёрский виджет
-│   │   └── share_buttons.html  ← кнопки поделиться
-│   └── ...
+│   │   └── cookie_banner.html  ← ✅ GDPR cookie consent (EU-сервер)
+│   ├── 404.html
+│   └── 500.html
 │
 ├── static/
 │   ├── css/
 │   ├── js/
 │   └── img/
 │
-├── media/                      ← Загруженные файлы (не в git)
-│   └── catalog/                ← Скопировано из OpenCart image/catalog/
+├── media/                      ← 518 изображений из OpenCart (не в git)
+│   └── catalog/
 │
-├── requirements.txt            ← Один файл зависимостей
+├── scripts/
+│   ├── audit_slugs.py          ← паритет-чек URL OpenCart vs Django
+│   └── fix_redirects.py        ← утилита починки редиректов
+│
+├── requirements.txt
 ├── manage.py
 └── .env.example
 ```
@@ -480,10 +488,29 @@ class Listing(models.Model):
 
 ## URL-архитектура
 
+### Система редиректов (`django.contrib.redirects`)
+
+`RedirectFallbackMiddleware` (последний в `MIDDLEWARE`) перехватывает 404
+и ищет совпадение в таблице `django_redirect`. Пути хранятся **percent-encoded**
+(не Unicode), т.к. `request.get_full_path()` возвращает percent-encoded URL.
+
+```
+django_redirect (71 записей):
+  /%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0/  →  /vendors/      (кирилл. вендор)
+  /%D0%BE%D0%B1%D0%BC%D0%B5%D0%BD-...../  →  /obmen-valyuty-2025/  (кирилл. статья)
+  /obmen-valyuty-2025/                     →  200 OK (статья с Latin slug)
+  /index.php?route=checkout/cart           →  /
+  ... 35 OpenCart-категорий               →  /vendors/
+```
+
+**management commands:**
+- `setup_redirects` — парсит `oc9a_seo_url` из SQL, создаёт редиректы для категорий и функциональных страниц
+- `transliterate_slugs` — находит кириллические slug в Django DB, переводит в Latin, создаёт редирект со старого URL
+
 ### Проблема конфликтов URL
 Все сущности (статьи, вендоры, продукты) используют плоские slug-URL без префикса:
 `/elki-restaurant/` — вендор, `/manti/` — продукт, `/vizaran-vetnam/` — статья.
-Решение: единый `slug_dispatch` view — ищем в порядке **Article → Vendor → Product**.
+Решение: единый `slug_dispatch` view — ищем в порядке **Article → Vendor → Product → Page**.
 Поскольку slug берётся точно из `oc9a_seo_url`, конфликтов нет (OpenCart сам обеспечивал уникальность).
 
 ```python
@@ -496,19 +523,20 @@ urlpatterns = [
     path('<slug:slug>/', slug_dispatch),   # Article | Vendor | Product
 
     # Системные
-    path('subscribe/', SubscribeView.as_view()),
+    path('search/', SearchView.as_view(), name='search'),
+    path('subscribe/', SubscribeView.as_view(), name='subscribe'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}),
     path('robots.txt', RobotsView.as_view()),
 
     # Фаза 2
-    path('places/', include('directory.urls')),
-    path('listings/', include('listings.urls')),
+    # path('places/', include('directory.urls')),
+    # path('listings/', include('listings.urls')),
 ]
 
 
 # apps/blog/views.py
 def slug_dispatch(request, slug):
-    """Диспатчер: Article | Vendor | Product по slug"""
+    """Диспатчер: Article | Vendor | Product | Page по slug"""
     article = Article.objects.filter(slug=slug, is_published=True).first()
     if article:
         return ArticleDetailView.as_view()(request, slug=slug)
@@ -520,6 +548,10 @@ def slug_dispatch(request, slug):
     product = Product.objects.filter(slug=slug, is_active=True).first()
     if product:
         return ProductDetailView.as_view()(request, slug=slug)
+
+    page = Page.objects.filter(slug=slug).first()
+    if page:
+        return PageDetailView.as_view()(request, slug=slug)
 
     raise Http404
 ```
