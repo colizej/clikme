@@ -120,7 +120,7 @@
   .ck-prose {
     @apply text-base leading-7 text-(--color-text) max-w-none;
   }
-  .ck-prose > * + * { @apply mt-5; }
+  .ck-prose > * + * { @apply mt-6; }
 
   /* ── Заголовки ── */
   .ck-prose h1 {
@@ -130,7 +130,7 @@
   }
   .ck-prose h2 {
     @apply font-serif text-2xl md:text-3xl font-bold leading-tight
-           text-(--color-text) mt-10 mb-4;
+           text-(--color-text) mt-14 mb-4;
     scroll-margin-top: 80px;
   }
   /* H2 — оранжевая черта слева */
@@ -160,8 +160,11 @@
 
   /* ── Текст ── */
   .ck-prose p {
-    @apply leading-7;
+    @apply leading-7 mb-5;
   }
+  .ck-prose p:last-child { margin-bottom: 0; }
+  /* Скрыть пустые абзацы <p><br></p> от пустых строк в MD */
+  .ck-prose p:has(> br:only-child) { display: none; }
   .ck-prose a {
     @apply text-(--color-accent) underline underline-offset-2
            hover:text-(--color-accent-hover) transition-colors;
@@ -231,19 +234,20 @@
 
   /* ── Цитата ── */
   .ck-prose blockquote {
-    @apply border-l-4 border-(--color-accent) pl-5 pr-4 py-3 my-7
-           bg-(--color-bg-warm) rounded-r-xl;
+    @apply pl-6 pr-5 pt-9 pb-4 my-8 rounded-2xl;
+    background: var(--color-accent-light);
+    border: 1.5px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
     position: relative;
   }
   .ck-prose blockquote::before {
     content: '\201C';
     position: absolute;
-    top: -8px;
-    left: 12px;
-    font-size: 3rem;
+    top: 2px;
+    left: 18px;
+    font-size: 4.5rem;
     line-height: 1;
     color: var(--color-accent);
-    opacity: 0.25;
+    opacity: 0.18;
     font-family: Georgia, serif;
     pointer-events: none;
   }
@@ -307,8 +311,13 @@
   }
 
   /* ── Таблица ── */
+  .ck-table-wrap {
+    @apply w-full my-6 overflow-x-auto rounded-xl;
+    -webkit-overflow-scrolling: touch;
+  }
   .ck-prose table {
-    @apply w-full my-6 text-sm border-collapse rounded-xl overflow-hidden;
+    @apply w-full text-sm border-collapse rounded-xl overflow-hidden;
+    min-width: 480px;
     border: 1px solid var(--color-border);
   }
   .ck-prose thead {

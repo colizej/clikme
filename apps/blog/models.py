@@ -183,7 +183,9 @@ class Article(models.Model):
                     )
                 toc_html = (
                     f'<nav class="ck-toc" aria-label="Содержание">'
-                    f'<p class="ck-toc-title">📋 Содержание</p>'
+                    f'<p class="ck-toc-title">'
+                    f'<svg class="w-4 h-4 inline-block mr-1.5 align-middle" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10"/></svg>'
+                    f'Содержание</p>'
                     f'<ol>{items_html}</ol>'
                     f'</nav>'
                 )
@@ -191,6 +193,13 @@ class Article(models.Model):
                 toc_html = ''
             html = html.replace(TOC_PLACEHOLDER, toc_html)
 
+        # ── 5. Постобработка HTML ──────────────────────────────────────────
+        # Разбить <p>текст<br>текст</p> на отдельные <p> (nl2br слипает абзацы)
+        html = re.sub(r'<br\s*/?>\s*\n?', '</p>\n<p>', html)
+        # Убрать пустые параграфы <p></p> и <p> </p>
+        html = re.sub(r'<p>\s*</p>', '', html)        # Обернуть таблицы для горизонтальной прокрутки на мобильных
+        html = re.sub(r'<table', '<div class="ck-table-wrap"><table', html)
+        html = re.sub(r'</table>', '</table></div>', html)
         self.content = html
 
     def _parse_faq_blocks(self, source):

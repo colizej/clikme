@@ -69,7 +69,7 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     form = ArticleForm
-    inlines = [ArticleImageInline, FAQInline]
+    inlines = [ArticleImageInline]
 
     list_display = ('title', 'category', 'is_published', 'is_featured', 'published_at', 'views_count')
     list_filter = ('is_published', 'is_featured', 'noindex', 'category')
