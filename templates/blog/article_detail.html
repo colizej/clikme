@@ -167,12 +167,12 @@
       {% if article.image %}{{ article.content|strip_first_image }}{% else %}{{ article.content|safe }}{% endif %}
     </div>
 
-    {# ── FAQ блок (если есть) ── #}
-    {% with faqs=article.faqs.all %}{% if faqs %}
+    {# ── FAQ блок (только ручные, не auto) ── #}
+    {% if manual_faqs %}
     <section class="mt-12 pt-8 border-t border-(--color-border)">
       <h2 class="font-serif text-2xl font-bold mb-6">Часто задаваемые вопросы</h2>
       <div class="space-y-4">
-        {% for faq in faqs %}
+        {% for faq in manual_faqs %}
         <details class="group border border-(--color-border) rounded-xl overflow-hidden">
           <summary class="flex items-center justify-between px-5 py-4 cursor-pointer font-medium text-(--color-text) hover:bg-(--color-bg-warm) transition-colors list-none">
             <span>{{ faq.question }}</span>
@@ -187,7 +187,7 @@
         {% endfor %}
       </div>
     </section>
-    {% endif %}{% endwith %}
+    {% endif %}
 
     {# Tags #}
     {% if article.tags.all %}

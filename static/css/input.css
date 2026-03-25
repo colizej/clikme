@@ -332,3 +332,42 @@
     @apply px-5 py-4 text-(--color-text-muted);
   }
 }
+
+/* ============================================================
+   .ck-faq  — инлайн FAQ-аккордеон (генерируется автоматически из #### Q : ... @@)
+   ============================================================ */
+.ck-faq {
+  @apply my-10 rounded-2xl overflow-hidden border border-(--color-border);
+  box-shadow: 0 2px 16px 0 rgba(232,93,38,.07);
+}
+.ck-faq-header {
+  @apply flex items-center gap-2.5 px-5 py-4
+         bg-gradient-to-r from-(--color-accent) to-orange-400
+         text-white font-bold text-sm tracking-wide;
+}
+.ck-faq-item {
+  @apply border-t border-(--color-border) bg-white;
+}
+.ck-faq-item:first-of-type { border-top: none; }
+.ck-faq-q {
+  @apply flex items-center gap-3 px-5 py-4 cursor-pointer
+         font-medium text-(--color-text) select-none
+         hover:bg-(--color-bg-warm) transition-colors;
+  list-style: none;
+}
+.ck-faq-q::-webkit-details-marker { display: none; }
+.ck-faq-icon {
+  @apply w-5 h-5 shrink-0 text-(--color-text-muted) transition-transform duration-200;
+}
+details.ck-faq-item[open] .ck-faq-icon {
+  transform: rotate(180deg);
+}
+details.ck-faq-item[open] .ck-faq-q {
+  @apply text-(--color-accent) bg-(--color-accent-light);
+}
+.ck-faq-a {
+  @apply px-5 py-4 text-(--color-text-muted) leading-relaxed
+         border-t border-(--color-border) bg-(--color-bg-warm);
+}
+.ck-faq-a p { margin: 0 0 .5em; }
+.ck-faq-a p:last-child { margin: 0; }

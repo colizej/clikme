@@ -46,9 +46,8 @@ class ArticleImageInline(admin.TabularInline):
                 'border-radius:4px;color:#e85d26">[image{}]</code>',
                 obj.image.url, obj.number,
             )
-        return format_html(
-            '<span style="color:#aaa;font-size:11px">Нет изображения</span>'
-        )
+        from django.utils.safestring import mark_safe
+        return mark_safe('<span style="color:#aaa;font-size:11px">Нет изображения</span>')
     image_preview.short_description = 'Превью / шорткод'
 
 

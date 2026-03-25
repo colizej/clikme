@@ -89,6 +89,7 @@ class ArticleDetailView(DetailView):
             )
         else:
             ctx['related_articles'] = []
+        ctx['manual_faqs'] = article.faqs.filter(is_auto=False)
         return ctx
 
 

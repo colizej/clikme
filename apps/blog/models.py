@@ -99,16 +99,24 @@ class Article(models.Model):
     def save(self, *args, **kwargs):
         self.render_content()
         super().save(*args, **kwargs)
+        # Синхронизируем auto-FAQ из content_md
+        if self.pk and hasattr(self, '_parsed_faqs'):
+            self.faqs.filter(is_auto=True).delete()
+            for i, (q, a) in enumerate(self._parsed_faqs):
+                ArticleFAQ.objects.create(
+                    article=self, question=q, answer=a,
+                    order=i, is_auto=True,
+                )
 
     def render_content(self):
-        """Рендерит content_md → content, заменяя [imageN] на HTML."""
+        """Рендерит content_md → content, заменяя [imageN] на HTML и парся FAQ-блоки."""
         import re
         import markdown
         from django.utils.html import escape
 
         source = self.content_md or ''
 
-        # Собираем словарь {number: ArticleImage} если pk уже есть
+        # ── 1. Заменить [imageN] ───────────────────────────────────────────
         image_map = {}
         if self.pk:
             try:
@@ -127,25 +135,118 @@ class Article(models.Model):
             url  = img_obj.image.url
             alt  = escape(img_obj.alt or self.title or '')
             title_attr = f' title="{escape(img_obj.title)}"' if img_obj.title else ''
-            width_attr = ''
             classes = 'rounded-2xl w-full shadow-sm'
             html = (
                 f'<figure>\n'
                 f'<img src="{url}" alt="{alt}"{title_attr}'
-                f' loading="lazy" decoding="async" class="{classes}"{width_attr}>\n'
+                f' loading="lazy" decoding="async" class="{classes}">\n'
             )
             if img_obj.caption:
                 html += f'<figcaption>{escape(img_obj.caption)}</figcaption>\n'
             html += '</figure>'
             return html
 
-        # Заменить [imageN] до рендера Markdown (markdown сохранит сырой HTML)
         source = re.sub(r'\[image(\d+)\]', _replace, source, flags=re.IGNORECASE)
+
+        # ── 2. Парсить FAQ-блоки ( #### Q : ... @@ ) ──────────────────────
+        source, parsed_faqs = self._parse_faq_blocks(source)
+        self._parsed_faqs = parsed_faqs
 
         self.content = markdown.markdown(
             source,
             extensions=['extra', 'toc', 'nl2br', 'sane_lists'],
             output_format='html',
+        )
+
+    def _parse_faq_blocks(self, source):
+        """Парсит блоки FAQ из content_md и возвращает (modified_source, [(q, a), ...]).
+
+        Синтаксис:
+            #### Q : Вопрос?
+            Ответ в markdown
+
+            #### Q : Ещё вопрос?
+            Ещё ответ
+            @@
+            Обычный текст продолжается...
+        """
+        import re
+        import markdown as md
+        from django.utils.html import escape
+
+        lines = source.split('\n')
+        result_lines = []
+        all_faqs = []
+
+        in_faq = False
+        current_question = None
+        current_answer_lines = []
+        current_block = []
+
+        for line in lines:
+            q_match = re.match(r'^#{4}\s+Q\s*:\s*(.+)', line)
+            if q_match:
+                if current_question is not None:
+                    current_block.append((current_question, '\n'.join(current_answer_lines).strip()))
+                current_question = q_match.group(1).strip()
+                current_answer_lines = []
+                in_faq = True
+            elif in_faq and line.strip() == '@@':
+                if current_question is not None:
+                    current_block.append((current_question, '\n'.join(current_answer_lines).strip()))
+                result_lines.append(self._render_faq_html(current_block))
+                all_faqs.extend(current_block)
+                current_block = []
+                current_question = None
+                current_answer_lines = []
+                in_faq = False
+            elif in_faq:
+                current_answer_lines.append(line)
+            else:
+                result_lines.append(line)
+
+        # незакрытый блок
+        if in_faq:
+            if current_question is not None:
+                current_block.append((current_question, '\n'.join(current_answer_lines).strip()))
+            if current_block:
+                result_lines.append(self._render_faq_html(current_block))
+                all_faqs.extend(current_block)
+
+        return '\n'.join(result_lines), all_faqs
+
+    def _render_faq_html(self, faq_pairs):
+        """Рендерит список (question, answer) в HTML-аккордеон."""
+        import markdown as md
+        from django.utils.html import escape
+
+        items = []
+        for question, answer in faq_pairs:
+            answer_html = md.markdown(answer, extensions=['extra', 'nl2br']) if answer else ''
+            q_esc = escape(question)
+            items.append(
+                f'<details class="ck-faq-item group">\n'
+                f'<summary class="ck-faq-q">'
+                f'<span class="flex-1">{q_esc}</span>'
+                f'<svg class="ck-faq-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">'
+                f'<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>'
+                f'</svg>'
+                f'</summary>\n'
+                f'<div class="ck-faq-a">{answer_html}</div>\n'
+                f'</details>'
+            )
+
+        items_html = '\n'.join(items)
+        return (
+            '<div class="ck-faq not-prose">\n'
+            '<div class="ck-faq-header">'
+            '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">'
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+            '</svg>'
+            '<span>Часто задаваемые вопросы</span>'
+            '</div>\n'
+            f'{items_html}\n'
+            '</div>'
         )
 
 
@@ -155,6 +256,11 @@ class ArticleFAQ(models.Model):
     question = models.CharField(max_length=500, verbose_name='Вопрос')
     answer = models.TextField(verbose_name='Ответ')
     order = models.PositiveSmallIntegerField(default=0, verbose_name='Порядок')
+    is_auto = models.BooleanField(
+        default=False,
+        verbose_name='Авто (из контента)',
+        help_text='True — создан из #### Q : ... @@ синтаксиса в content_md',
+    )
 
     class Meta:
         ordering = ['order']
