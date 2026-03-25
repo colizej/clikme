@@ -150,10 +150,16 @@
 
     {# Meta row #}
     <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-(--color-text-muted) pb-6 mb-8 border-b border-(--color-border)">
-      <time datetime="{{ article.published_at|date:'Y-m-d' }}">📅 {{ article.published_at|date:"j E Y" }}</time>
       {% if article.author %}
       <span>✍️ {{ article.author.get_full_name|default:article.author.username }}</span>
       {% endif %}
+      <span class="flex items-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        {{ article.views_count }}
+      </span>
     </div>
 
     {# Body #}
@@ -194,11 +200,61 @@
     </div>
     {% endif %}
 
-    {# Share hint #}
-    <div class="mt-10 pt-6 border-t border-(--color-border) flex flex-wrap items-center gap-4">
-      <a href="/" class="ck-btn-outline text-sm py-2">
-        ← {% trans "Все статьи" %}
+    {# ── Prev / Next navigation ── #}
+    <nav class="mt-12 pt-8 border-t border-(--color-border) grid grid-cols-2 gap-4">
+      {% if prev_article %}
+      <a href="{{ prev_article.get_absolute_url }}" class="group flex flex-col gap-1 p-4 rounded-xl border border-(--color-border) hover:border-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
+        <span class="text-xs text-(--color-text-muted) flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          Предыдущая
+        </span>
+        <span class="text-sm font-medium text-(--color-text) group-hover:text-(--color-accent) transition-colors line-clamp-2 leading-snug">{{ prev_article.title }}</span>
       </a>
+      {% else %}
+      <div></div>
+      {% endif %}
+
+      {% if next_article %}
+      <a href="{{ next_article.get_absolute_url }}" class="group flex flex-col gap-1 p-4 rounded-xl border border-(--color-border) hover:border-(--color-accent) hover:bg-(--color-accent-light) transition-colors text-right">
+        <span class="text-xs text-(--color-text-muted) flex items-center justify-end gap-1">
+          Следующая
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </span>
+        <span class="text-sm font-medium text-(--color-text) group-hover:text-(--color-accent) transition-colors line-clamp-2 leading-snug">{{ next_article.title }}</span>
+      </a>
+      {% else %}
+      <div></div>
+      {% endif %}
+    </nav>
+
+    {# ── Related articles ── #}
+    {% if related_articles %}
+    <section class="mt-14">
+      <h2 class="font-serif text-xl font-bold mb-6 text-(--color-text)">Читайте также</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {% for rel in related_articles %}
+        <a href="{{ rel.get_absolute_url }}" class="group flex flex-col rounded-2xl overflow-hidden border border-(--color-border) hover:border-(--color-accent) hover:shadow-md transition-all">
+          {% if rel.image %}
+          <div class="aspect-[16/9] overflow-hidden bg-(--color-bg-warm)">
+            <img src="{{ rel.image.url }}" alt="{{ rel.image_alt|default:rel.title }}"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                 loading="lazy">
+          </div>
+          {% endif %}
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            {% if rel.category %}
+            <span class="text-xs font-medium text-(--color-accent)">{{ rel.category.name }}</span>
+            {% endif %}
+            <span class="text-sm font-semibold text-(--color-text) group-hover:text-(--color-accent) transition-colors leading-snug line-clamp-3">{{ rel.title }}</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <div class="mt-10">
+      <a href="/" class="ck-btn-outline text-sm py-2">← {% trans "Все статьи" %}</a>
     </div>
 
   </article>

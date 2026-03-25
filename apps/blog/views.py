@@ -57,6 +57,34 @@ class ArticleDetailView(DetailView):
     def get_queryset(self):
         return Article.objects.filter(is_published=True)
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        article = self.object
+        ctx['prev_article'] = (
+            Article.objects
+            .filter(is_published=True, published_at__lt=article.published_at)
+            .order_by('-published_at')
+            .first()
+        )
+        ctx['next_article'] = (
+            Article.objects
+            .filter(is_published=True, published_at__gt=article.published_at)
+            .order_by('published_at')
+            .first()
+        )
+        tag_ids = list(article.tags.values_list('id', flat=True))
+        if tag_ids:
+            ctx['related_articles'] = (
+                Article.objects
+                .filter(is_published=True, tags__in=tag_ids)
+                .exclude(pk=article.pk)
+                .distinct()
+                .order_by('-published_at')[:3]
+            )
+        else:
+            ctx['related_articles'] = []
+        return ctx
+
 
 class SearchView(ListView):
     template_name = 'blog/search.html'

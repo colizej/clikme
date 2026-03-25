@@ -191,6 +191,13 @@
   .ck-prose li > ol {
     @apply my-1 mt-1.5;
   }
+  .ck-prose ul li::marker {
+    color: var(--color-accent);
+  }
+  .ck-prose ol li::marker {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
 
   /* Task list (- [ ] / - [x] из marked) */
   .ck-prose ul:has(> li > input[type=checkbox]) {
