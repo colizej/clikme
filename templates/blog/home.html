@@ -203,10 +203,18 @@
           {% else %}
           <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-orange-50 to-amber-100">🌴</div>
           {% endif %}
-          {# Category overlay #}
-          {% if article.category %}
+          {# Tags overlay #}
+          {% with card_tags=article.tags.all %}
+          {% if card_tags %}
+          <div class="absolute top-3 left-3 flex flex-wrap gap-1">
+            {% for tag in card_tags|slice:":2" %}
+            <span class="ck-pill-white text-[11px]">{{ tag.name }}</span>
+            {% endfor %}
+          </div>
+          {% elif article.category %}
           <span class="absolute top-3 left-3 ck-pill-white">{{ article.category.name }}</span>
           {% endif %}
+          {% endwith %}
         </div>
         {# Text #}
         <div class="p-5 flex flex-col flex-1">
@@ -216,15 +224,6 @@
           {% if article.short_description %}
           <p class="text-xs text-(--color-text-muted) leading-relaxed line-clamp-2 mb-auto">{{ article.short_description|truncatewords:18 }}</p>
           {% endif %}
-          {% with card_tags=article.tags.all %}
-          {% if card_tags %}
-          <div class="flex flex-wrap gap-1 mt-3">
-            {% for tag in card_tags|slice:":3" %}
-            <span class="text-[10px] px-2 py-1 rounded-full bg-(--color-accent-light) text-(--color-accent) font-medium leading-none">{{ tag.name }}</span>
-            {% endfor %}
-          </div>
-          {% endif %}
-          {% endwith %}
           <div class="flex items-center justify-between mt-4 pt-4 border-t border-(--color-border)">
             <p class="text-xs text-(--color-text-muted)">{{ article.views_count }} просмотров</p>
             <span class="text-xs text-(--color-accent) font-semibold group-hover:underline">{% trans "Читать" %} →</span>

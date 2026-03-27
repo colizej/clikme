@@ -114,30 +114,53 @@
   <div class="w-full md:max-w-7xl md:mx-auto aspect-video overflow-hidden md:rounded-b-3xl md:relative">
     <img src="{{ article.image.url }}" alt="{{ article.image_alt|default:article.title }}"
          class="w-full h-full object-cover object-center" loading="eager">
-    {# Desktop overlay: title + subtitle over image #}
-    <div class="hidden md:flex absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent md:rounded-b-3xl flex-col justify-end px-10 pb-20">
-      {% if article.category %}
+    {# Desktop overlay: breadcrumb + tags + title + views #}
+    <div class="hidden md:flex absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent md:rounded-b-3xl flex-col justify-end px-10 pb-10">
+      {# Breadcrumb #}
+      <nav aria-label="breadcrumb" class="text-xs text-white/60 mb-4 flex flex-wrap items-center gap-1.5">
+        <a href="/" class="hover:text-white transition-colors">{% trans "Главная" %}</a>
+        {% if article.category %}
+        <span>›</span>
+        <a href="/?category={{ article.category.slug }}" class="hover:text-white transition-colors">{{ article.category.name }}</a>
+        {% endif %}
+        <span>›</span>
+        <span class="text-white/40 truncate max-w-[300px]">{{ article.title }}</span>
+      </nav>
+      {# Tags #}
+      {% if article.tags.all %}
+      <div class="flex flex-wrap gap-2 mb-3">
+        {% for tag in article.tags.all %}
+        <a href="/?tag={{ tag.slug }}#tags"
+           class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/25 text-white backdrop-blur-sm border border-white/40 hover:bg-white/40 transition-colors">
+          #{{ tag.name }}
+        </a>
+        {% endfor %}
+      </div>
+      {% elif article.category %}
       <a href="/?category={{ article.category.slug }}"
-         class="inline-block self-start mb-4 px-3 py-1 rounded-full text-xs font-semibold bg-white/25 text-white backdrop-blur-sm border border-white/40 hover:bg-white/40 transition-colors">
+         class="inline-block self-start mb-3 px-3 py-1 rounded-full text-xs font-semibold bg-white/25 text-white backdrop-blur-sm border border-white/40 hover:bg-white/40 transition-colors">
         {{ article.category.name }}
       </a>
       {% endif %}
-      <h1 class="font-serif text-3xl lg:text-5xl font-black leading-tight text-white mb-3"
+      {# Title #}
+      <h1 class="font-serif text-3xl lg:text-5xl font-black leading-tight text-white mb-2"
           style="text-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.8);">
         {{ article.title }}
       </h1>
       {% if article.subtitle %}
-      <p class="text-base lg:text-lg text-white/90 leading-relaxed max-w-2xl"
+      <p class="text-base lg:text-lg text-white/90 leading-relaxed max-w-2xl mb-2"
          style="text-shadow: 0 1px 6px rgba(0,0,0,0.7);">{{ article.subtitle }}</p>
       {% endif %}
+      {# Views #}
+      <p class="text-xs text-white/50 mt-1">{{ article.views_count }} просмотров</p>
     </div>
   </div>
   {% endif %}
 
   <article class="max-w-3xl mx-auto px-4 py-10">
 
-    {# Breadcrumb #}
-    <nav aria-label="breadcrumb" class="text-xs text-(--color-text-muted) mb-6 flex flex-wrap items-center gap-1.5">
+    {# Breadcrumb — mobile only #}
+    <nav aria-label="breadcrumb" class="md:hidden text-xs text-(--color-text-muted) mb-6 flex flex-wrap items-center gap-1.5">
       <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
       {% if article.category %}
       <span class="text-(--color-border)">›</span>
@@ -148,11 +171,15 @@
       <span class="truncate max-w-[200px]">{{ article.title }}</span>
     </nav>
 
-    {# Category pill — mobile only (desktop shows on hero) #}
-    {% if article.category %}
-    <a href="/?category={{ article.category.slug }}" class="ck-pill hover:bg-(--color-accent-medium) transition-colors mb-5 inline-block md:hidden">
-      {{ article.category.name }}
-    </a>
+    {# Tags above title (mobile only) #}
+    {% if article.tags.all %}
+    <div class="flex flex-wrap gap-2 mb-4 md:hidden">
+      {% for tag in article.tags.all %}
+      <a href="/?tag={{ tag.slug }}#tags" class="ck-pill hover:bg-(--color-accent-medium) transition-colors">
+        #{{ tag.name }}
+      </a>
+      {% endfor %}
+    </div>
     {% endif %}
 
     {# Title — mobile only (desktop shows on hero) #}
@@ -164,13 +191,15 @@
     <p class="md:hidden text-lg text-(--color-text-muted) mb-5 leading-relaxed">{{ article.subtitle }}</p>
     {% endif %}
 
-    {# Meta row #}
-    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-(--color-text-muted) pb-6 mb-8 border-b border-(--color-border)">
+    {# Meta row — mobile only (desktop shows views in hero) #}
+    <div class="md:hidden flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-(--color-text-muted) pb-6 mb-8 border-b border-(--color-border)">
       {% if article.author %}
       <span>✍️ {{ article.author.get_full_name|default:article.author.username }}</span>
       {% endif %}
-      <span>{{ article.views_count }} просмотров</span>
+      <span class="ml-auto">{{ article.views_count }} просмотров</span>
     </div>
+    {# Divider desktop #}
+    <div class="hidden md:block border-b border-(--color-border) mb-8"></div>
 
     {# Body #}
     <div class="ck-prose">
