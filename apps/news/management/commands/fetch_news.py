@@ -116,6 +116,27 @@ def _strip_html(html: str) -> str:
     return re.sub(r'<[^>]+>', '', html or '').strip()
 
 
+# Хвост вида «18.03.2026 20:41 (Читать 3 мин.)» в RSS-сводках 74.ru / Shkulev Media
+_RSS_DATE_TAIL_RE = re.compile(
+    r'\s*\d{1,2}[./]\d{1,2}[./]\d{2,4}[,\s]*(?:\d{1,2}:\d{2})?\s*'
+    r'(?:\(Читать\s+\d+\s+мин\.?\))?\s*$',
+    re.IGNORECASE,
+)
+
+
+def _clean_summary(summary: str, title: str) -> str:
+    """Удаляет технические артефакты из RSS-сводки.
+
+    74.ru кладёт в <description>: «Рубрика Заголовок ДД.ММ.ГГГГ ЧЧ:ММ (Читать N мин.)»
+    После очистки, если оставшийся текст совпадает с заголовком — сводка бесполезна.
+    """
+    s = _RSS_DATE_TAIL_RE.sub('', summary).strip()
+    # Если после очистки хвоста summary == title или является его подстрокой — выбрасываем
+    if title and (s == title or s in title or title in s):
+        return ''
+    return s
+
+
 class Command(BaseCommand):
     help = 'Парсит RSS-ленты активных источников и сохраняет новости как черновики'
 
@@ -137,6 +158,10 @@ class Command(BaseCommand):
             help='Перезакачать тело статьи для записей с пустым body (e.g. e1.ru → 74.ru)'
         )
         parser.add_argument(
+            '--force', action='store_true',
+            help='При --refetch-body: перезакачать body даже если оно не пустое'
+        )
+        parser.add_argument(
             '--source-id', type=int, dest='refetch_source_id', default=None,
             help='При --refetch-body: ограничить по source pk'
         )
@@ -147,7 +172,7 @@ class Command(BaseCommand):
             return
 
         if options['refetch_body']:
-            self._refetch_bodies(source_id=options.get('refetch_source_id'))
+            self._refetch_bodies(source_id=options.get('refetch_source_id'), force=options.get('force', False))
             return
 
         source_id = options['source_id']
@@ -245,11 +270,14 @@ class Command(BaseCommand):
 
     # ── Refetch: перезагрузить тело для статей с пустым body ──────────────────
 
-    def _refetch_bodies(self, source_id: int | None = None):
+    def _refetch_bodies(self, source_id: int | None = None, force: bool = False):
         """Перезакачивает body (и при необходимости image) для NewsItem с пустым телом."""
-        qs = NewsItem.objects.filter(body='').order_by('pk')
-        if source_id:
-            qs = qs.filter(source_id=source_id)
+        if force and source_id:
+            qs = NewsItem.objects.filter(source_id=source_id).order_by('pk')
+        else:
+            qs = NewsItem.objects.filter(body='').order_by('pk')
+            if source_id:
+                qs = qs.filter(source_id=source_id)
         total = qs.count()
         self.stdout.write(f'Записей с пустым body: {total}')
         ok = fail = 0
@@ -321,9 +349,10 @@ class Command(BaseCommand):
                 continue
 
             title = _strip_html(entry.get('title', '')).strip()
-            summary = _strip_html(
-                entry.get('summary', '') or entry.get('description', '')
-            ).strip()
+            summary = _clean_summary(
+                _strip_html(entry.get('summary', '') or entry.get('description', '')).strip(),
+                title,
+            )
 
             if not title:
                 continue
@@ -344,6 +373,17 @@ class Command(BaseCommand):
                 turbo = entry.get('turbo_content') or entry.get('turbo:content')
                 if turbo:
                     body = turbo if isinstance(turbo, str) else ''
+
+            # Очищаем тело, полученное из RSS (category links, date, reading time)
+            if body:
+                body = self._clean_rss_body(body, title)
+
+            # ── Если RSS-тело — тизер/виджет (мало текста), скачиваем страницу ──
+            if body:
+                visible = re.sub(r'<[^>]+>', ' ', body)
+                visible = re.sub(r'\s+', ' ', visible).strip()
+                if len(visible) < 250:
+                    body = ''
 
             # ── Если в RSS нет полного тела — скачиваем страницу статьи ───────
             if not body:
@@ -414,6 +454,11 @@ class Command(BaseCommand):
         '[class*="sidebar"]', '[class*="widget"]',
         '[class*="popup"]', '[class*="modal"]',
         '[id*="sidebar"]', '[id*="banner"]',
+        # VietnamPlus share toolbar
+        '[class*="share"]', '[class*="toolbar"]', '[class*="social"]',
+        '[class*="article__social"]', '[class*="article__tags"]',
+        '[class*="article__related"]', '[class*="story__related"]',
+        'ul.share', '.share-box', '.share-buttons',
     ]
 
     # Кандидаты на «основной контент» (по убыванию приоритета)
@@ -421,14 +466,52 @@ class Command(BaseCommand):
         '#articleBody',               # Shkulev Media (74.ru / e1.ru)
         '[data-article-content]',     # Shkulev Media (74.ru / e1.ru)
         '.fck_detail',                # VNExpress (e.vnexpress.net, vnexpress.net)
-        'article',
+        'div.article__body',          # VietnamPlus / TTXVN
         '[itemprop="articleBody"]',
         '.article-body', '.article__body', '.article-content',
         '.post-body', '.post-content', '.entry-content',
         '.news-body', '.news-content', '.news__body',
         '.content-body', '.text-body',
+        'article',
         'main',
     ]
+
+    def _clean_rss_body(self, html: str, title: str = '') -> str:
+        """Очищает HTML-тело, полученное напрямую из RSS (turbo/content).
+
+        Убирает: рубричные ссылки /category/, плавающие даты «ДД.ММ.ГГГГ ЧЧ:ММ»,
+        «(Читать N мин.)», блоки «hidden», блоки «См. также», повтор заголовка.
+        """
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Удаляем ссылки на рубрики
+        for a in soup.find_all('a', href=True):
+            if any(p in a['href'] for p in ('/category/', '/rubric/', '/tag/', '/tags/', '/razdel/')):
+                a.decompose()
+
+        # Удаляем блоки «См. также» / «See also»
+        for strong in soup.find_all('strong'):
+            if re.search(r'также|see also|related|похожие', strong.get_text(), re.IGNORECASE):
+                sibling = strong.find_next_sibling('ul')
+                if sibling:
+                    sibling.decompose()
+                strong.decompose()
+
+        # Удаляем скрытые layout-обёртки (class содержит "hidden")
+        for el in soup.find_all(class_=lambda c: c and 'hidden' in c.split()):
+            el.unwrap()
+
+        result = str(soup)
+        # Дата + время (ДД.ММ.ГГГГ ЧЧ:ММ)
+        result = re.sub(r'\b\d{1,2}\.\d{2}\.\d{4}\s+\d{2}:\d{2}\b', '', result)
+        # «(Читать N мин.)»
+        result = re.sub(r'\(Читать\s+\d+\s+мин\.?\)', '', result, flags=re.IGNORECASE)
+        # Повтор заголовка как bare text (до первого <p>)
+        if title:
+            result = result.replace(title.strip(), '', 1)
+        # Пустые параграфы
+        result = re.sub(r'<p[^>]*>\s*</p>', '', result)
+        return result.strip()
 
     def _fetch_article_body(self, url: str) -> str:
         """Скачивает страницу статьи и возвращает HTML основного контента."""
@@ -457,6 +540,11 @@ class Command(BaseCommand):
         for noise in article_el.select(', '.join(self._NOISE_SELECTORS)):
             noise.decompose()
 
+        # Удаляем ссылки на рубрики/категории (не содержательные)
+        for a in article_el.find_all('a', href=True):
+            if any(p in a['href'] for p in ('/category/', '/rubric/', '/tag/', '/tags/', '/razdel/')):
+                a.decompose()
+
         # Оставляем только разрешённые теги
         allowed = {'p', 'h2', 'h3', 'h4', 'ul', 'ol', 'li',
                    'blockquote', 'strong', 'em', 'a', 'img', 'figure', 'figcaption'}
@@ -478,12 +566,18 @@ class Command(BaseCommand):
             img['loading'] = 'lazy'
             img['class'] = 'w-full rounded-xl my-4'
 
-        # Нормализуем <a>: только href
+        # Нормализуем <a>: только href (удаляем javascript: ссылки — соцкнопки)
         for a in article_el.find_all('a'):
             href = a.get('href', '')
+            if href.strip().startswith('javascript:'):
+                a.decompose()
+                continue
             a.attrs = {'href': href, 'target': '_blank', 'rel': 'noopener nofollow'}
 
         html = str(article_el)
+        # Убираем «Читать N мин.» и одиночные даты (ДД.ММ.ГГГГ ЧЧ:ММ)
+        html = re.sub(r'\(Читать\s+\d+\s+мин\.?\)', '', html, flags=re.IGNORECASE)
+        html = re.sub(r'\b\d{1,2}\.\d{2}\.\d{4}\s+\d{2}:\d{2}\b', '', html)
         # Убираем пустые параграфы
         html = re.sub(r'<p>\s*</p>', '', html)
         return html.strip()

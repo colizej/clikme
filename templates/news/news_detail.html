@@ -74,6 +74,10 @@
   <div class="ck-prose">
     {{ clean_body|safe }}
   </div>
+  {% elif clean_summary %}
+  <div class="ck-prose">
+    <p>{{ clean_summary }}</p>
+  </div>
   {% elif news_item.summary %}
   <div class="ck-prose">
     <p>{{ news_item.summary }}</p>

@@ -24,6 +24,17 @@ def _clean_article_body(html: str, title: str = '') -> str:
 
     soup = BeautifulSoup(html, 'html.parser')
 
+    # 0a. Remove share/social toolbars (e.g. VietnamPlus "Zalo Facebook Twitter...")
+    for el in list(soup.find_all(class_=True)):
+        cls = ' '.join(el.get('class', []))
+        if any(k in cls.lower() for k in ('share', 'social', 'toolbar', 'related', 'tags')):
+            el.decompose()
+
+    # 0b. Remove javascript:void(0) share links (VietnamPlus Share toolbar)
+    for a in list(soup.find_all('a', href=True)):
+        if a['href'].strip().startswith('javascript:'):
+            a.decompose()
+
     # 0b. Remove comment-count links (e.g. "4 комментария")
     for a in list(soup.find_all('a', href=True)):
         if 'comment' in a['href'].lower():
@@ -112,6 +123,36 @@ def _clean_article_body(html: str, title: str = '') -> str:
     return result
 
 
+def _clean_summary_tail(summary: str, body_html: str) -> str:
+    """Remove related-article titles that got concatenated at the end of a summary.
+
+    Some RSS feeds (e.g. VietnamPlus) include related article widgets in content:encoded.
+    Their heading texts end up appended to the summary without separators.
+    We extract heading texts from the body and use the first match as a cut point.
+    """
+    if not summary or not body_html:
+        return summary
+    soup = BeautifulSoup(body_html, 'html.parser')
+    # Collect all heading / title texts from the body (related article widgets)
+    heading_texts = []
+    for tag in soup.find_all(['h1', 'h2', 'h3', 'h4']):
+        t = tag.get_text(strip=True)
+        if len(t) > 10:
+            heading_texts.append(t)
+    # Also collect link texts that look like article titles (longish links)
+    for a in soup.find_all('a'):
+        t = a.get_text(strip=True)
+        if len(t) > 20:
+            heading_texts.append(t)
+    # Find the earliest cut position in summary
+    cut_at = len(summary)
+    for heading in heading_texts:
+        pos = summary.find(heading)
+        if pos != -1 and pos < cut_at:
+            cut_at = pos
+    return summary[:cut_at].strip()
+
+
 class NewsListView(ListView):
     model = NewsItem
     template_name = 'news/news_list.html'
@@ -132,5 +173,11 @@ class NewsDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['clean_body'] = _clean_article_body(self.object.body, self.object.title)
+        obj = self.object
+        clean_body = _clean_article_body(obj.body, obj.title)
+        ctx['clean_body'] = clean_body
+        # When body is a teaser (empty after cleaning), also clean summary tail:
+        # extract related-article headings from the body and truncate summary before them.
+        if not clean_body and obj.summary and obj.body:
+            ctx['clean_summary'] = _clean_summary_tail(obj.summary, obj.body)
         return ctx
