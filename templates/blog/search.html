@@ -14,7 +14,9 @@
   {# Articles #}
   {% if articles %}
   <section class="mb-10">
-    <h2 class="font-semibold text-sm uppercase tracking-wide text-(--color-text-muted) mb-4">{% trans "Статьи" %}</h2>
+    <h2 class="font-semibold text-sm uppercase tracking-wide mb-4 inline-flex items-center gap-2">
+      <span class="px-2.5 py-1 rounded-full bg-orange-100 text-orange-700">{% trans "Статьи" %}</span>
+    </h2>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for article in articles %}
       <a href="/{{ article.slug }}/" class="ck-article-card group p-4 flex gap-4 items-start">
@@ -33,7 +35,9 @@
   {# News #}
   {% if news_items %}
   <section class="mb-10">
-    <h2 class="font-semibold text-sm uppercase tracking-wide text-(--color-text-muted) mb-4">{% trans "Новости" %}</h2>
+    <h2 class="font-semibold text-sm uppercase tracking-wide mb-4 inline-flex items-center gap-2">
+      <span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700">{% trans "Новости" %}</span>
+    </h2>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for item in news_items %}
       <a href="/news/{{ item.slug }}/" class="ck-article-card group p-4 flex gap-4 items-start">
@@ -52,7 +56,9 @@
   {# Vendors #}
   {% if vendors %}
   <section class="mb-10">
-    <h2 class="font-semibold text-sm uppercase tracking-wide text-(--color-text-muted) mb-4">{% trans "Компании" %}</h2>
+    <h2 class="font-semibold text-sm uppercase tracking-wide mb-4 inline-flex items-center gap-2">
+      <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">{% trans "Компании" %}</span>
+    </h2>
     <div class="grid gap-4 sm:grid-cols-2">
       {% for vendor in vendors %}
       <a href="/{{ vendor.slug }}/" class="ck-vendor-card group flex items-center gap-4">
@@ -71,7 +77,9 @@
   {# Products #}
   {% if products %}
   <section class="mb-10">
-    <h2 class="font-semibold text-sm uppercase tracking-wide text-(--color-text-muted) mb-4">{% trans "Товары и услуги" %}</h2>
+    <h2 class="font-semibold text-sm uppercase tracking-wide mb-4 inline-flex items-center gap-2">
+      <span class="px-2.5 py-1 rounded-full bg-purple-100 text-purple-700">{% trans "Товары и услуги" %}</span>
+    </h2>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for product in products %}
       <a href="/{{ product.slug }}/" class="ck-article-card group p-4 flex gap-4 items-start">
