@@ -111,11 +111,37 @@ class NewsItem(models.Model):
         return minutes
 
 
-# ── Telegram auto-post signal ─────────────────────────────────────────────────
+# ── Signals ───────────────────────────────────────────────────────────────────
 
-from django.db.models.signals import post_save
+import os
+from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
+
+
+@receiver(pre_save, sender=NewsItem)
+def _delete_old_image_on_change(sender, instance, **kwargs):
+    """Удаляет старый файл картинки при замене на новый."""
+    if not instance.pk:
+        return
+    try:
+        old = NewsItem.objects.get(pk=instance.pk)
+    except NewsItem.DoesNotExist:
+        return
+    if old.image and old.image != instance.image:
+        if os.path.isfile(old.image.path):
+            os.remove(old.image.path)
+
+
+@receiver(post_delete, sender=NewsItem)
+def _delete_image_on_delete(sender, instance, **kwargs):
+    """Удаляет файл картинки при удалении NewsItem."""
+    if instance.image:
+        try:
+            if os.path.isfile(instance.image.path):
+                os.remove(instance.image.path)
+        except Exception:
+            pass
 
 
 @receiver(post_save, sender=NewsItem)

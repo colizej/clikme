@@ -49,18 +49,25 @@ def _html_to_md(html: str) -> str:
 
 
 def _download_image(url: str) -> ContentFile | None:
-    """Скачивает изображение по URL и возвращает (fname, ContentFile) или None."""
+    """Скачивает изображение по URL, конвертирует в WebP и возвращает (fname, ContentFile) или None."""
+    import io
+    from PIL import Image
+
     if not url or not url.startswith(('http://', 'https://')):
         return None
     try:
         r = httpx.get(url, timeout=15, follow_redirects=True, verify=False,
                       headers={'User-Agent': 'Mozilla/5.0 (compatible; ClikMeBot/1.0)'})
-        if r.status_code == 200 and r.headers.get('content-type', '').startswith('image'):
-            ext = r.headers.get('content-type', 'image/jpeg').split('/')[-1].split(';')[0].strip()
-            if ext not in ('jpeg', 'jpg', 'png', 'webp', 'gif'):
-                ext = 'jpg'
-            fname = f'{uuid.uuid4().hex}.{ext}'
-            return fname, ContentFile(r.content)
+        if r.status_code != 200 or not r.headers.get('content-type', '').startswith('image'):
+            return None
+        # Конвертируем в WebP через Pillow
+        img = Image.open(io.BytesIO(r.content))
+        if img.mode not in ('RGB', 'RGBA'):
+            img = img.convert('RGB')
+        buf = io.BytesIO()
+        img.save(buf, format='WEBP', quality=85, method=4)
+        fname = f'{uuid.uuid4().hex}.webp'
+        return fname, ContentFile(buf.getvalue())
     except Exception:
         pass
     return None
