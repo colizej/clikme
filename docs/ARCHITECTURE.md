@@ -24,7 +24,7 @@ clikme/
 │   │   └── management/commands/
 │   │       ├── import_vendors.py
 │   │       └── transliterate_slugs.py
-│   ├── news/                   ← NewsSource/NewsItem (источники не настроены)
+│   ├── news/                   ← NewsSource/NewsItem + fetch/translate/telegram
 │   ├── pages/                  ← 4 статические страницы + setup_redirects command
 │   ├── users/                  ← AbstractUser (user_type, points, telegram_id)
 │   └── newsletter/             ← Subscriber модель + SubscribeView
@@ -167,8 +167,13 @@ class NewsItem(models.Model):
     title = models.CharField(max_length=500)
     summary = models.TextField(blank=True)
 
-    image_url = models.URLField(blank=True)
+    image_url = models.URLField(blank=True, max_length=800)
     image = models.ImageField(upload_to='news/', blank=True)
+
+    # Контент (Markdown → HTML)
+    body_md = models.TextField(blank=True)               # редактируемый Markdown
+    body = models.TextField(blank=True)                  # HTML, генерируется из body_md при save()
+    is_edited = models.BooleanField(default=False)       # защита от перезаписи fetch/translate
 
     # AI-обработка
     ai_processed = models.BooleanField(default=False)   # True = AI уже обработал
@@ -198,13 +203,11 @@ apps/news/management/commands/
 ├── fetch_news.py          ← главная команда
 ├── publish_news.py        ← публикация из admin-action
 apps/news/
-├── fetchers/
-│   ├── base.py            ← абстрактный класс BaseFetcher
-│   ├── rss.py             ← RSS-парсер (feedparser)
-│   └── html.py            ← HTML-парсер (BeautifulSoup4)
-├── ai.py                  ← AI-обработка: перевод + рерайт + категоризация
-├── telegram.py            ← публикация в Telegram (без доп. библиотек)
-├── admin.py               ← кнопки "Опубликовать" / "Отклонить"
+├── management/commands/
+│   ├── fetch_news.py      ← RSS + HTML парсинг, html2text, is_edited-защита
+│   └── translate_news.py  ← DeepL → Gemini fallback, переводит body_md
+├── telegram.py            ← отправка в канал (multipart upload картинки)
+├── admin.py               ← actions: publish/reject/translate/send_to_telegram, колонка TG
 ```
 
 **Полный рабочий процесс:**
@@ -222,16 +225,19 @@ apps/news/
   (уже есть → пропустить)
            ↓
   source.needs_translation?
-  ДА → ai.translate(title, summary, 'vi'|'en' → 'ru')
+  ДА → translate_news (DeepL → Gemini fallback)
   НЕТ → записать как есть
            ↓
-  ai.enrich() ← рерайт заголовка + сжать summary
-           ␣
+  body_md сохраняется, body (HTML) генерируется автоматически
+           ↓
   status=draft, ждёт модерации
 
 /admin/news/newsitem/ ← ты открываешь
-  [Опубликовать] → сайт + Telegram
-  [Отклонить]  → status=rejected
+  [Перевести]          → translate_news для выбранных
+  [Опубликовать]       → status=published → post_save сигнал → Telegram (авто)
+  [Отправить в TG]     → ручная отправка (для запланированных)
+  [Отклонить]          → status=rejected
+  колонка TG: ✓ зелёная если telegram_message_id заполнен
 ```
 
 **AI-возможности (`apps/news/ai.py`):**

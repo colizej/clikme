@@ -48,10 +48,23 @@ class NewsItem(models.Model):
     summary_original = models.TextField(blank=True)
     title = models.CharField(max_length=500)
     summary = models.TextField(blank=True)
-    body = models.TextField(blank=True, help_text='Полный текст статьи (HTML или plain-text)')
+    body = models.TextField(blank=True, help_text='HTML-контент (генерируется из body_md при сохранении)')
 
-    image_url = models.URLField(blank=True)
+    image_url = models.URLField(blank=True, max_length=800)
     image = models.ImageField(upload_to='news/', blank=True)
+
+    # Markdown-источник (редактируется вручную или генерируется из HTML)
+    body_md = models.TextField(
+        blank=True,
+        verbose_name='Контент (Markdown)',
+        help_text='Редактируйте перевод здесь. HTML в «body» генерируется автоматически при сохранении.',
+    )
+    # Флаг: True → fetch_news и translate_news не перезапишут контент
+    is_edited = models.BooleanField(
+        default=False,
+        verbose_name='Отредактировано вручную',
+        help_text='Если включено — автоматический fetch/перевод не перезапишет контент.',
+    )
 
     ai_processed = models.BooleanField(default=False)
     ai_model_used = models.CharField(max_length=50, blank=True)
@@ -72,6 +85,20 @@ class NewsItem(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        # Если есть body_md — рендерим его в body
+        if self.body_md:
+            self.render_body()
+        super().save(*args, **kwargs)
+
+    def render_body(self):
+        """Рендерит body_md → body (Markdown → HTML)."""
+        import markdown
+        self.body = markdown.markdown(
+            self.body_md,
+            extensions=['extra', 'nl2br'],
+        )
+
     def get_absolute_url(self):
         return f'/news/{self.slug}/'
 
@@ -82,3 +109,32 @@ class NewsItem(models.Model):
         words = len(text.split())
         minutes = max(1, round(words / 200))
         return minutes
+
+
+# ── Telegram auto-post signal ─────────────────────────────────────────────────
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+
+
+@receiver(post_save, sender=NewsItem)
+def auto_send_to_telegram(sender, instance, created, **kwargs):
+    """
+    При сохранении новости со статусом PUBLISHED + published_at <= now
+    и telegram_message_id пустым — автоматически отправляет в канал.
+    """
+    if instance.status != NewsItem.PUBLISHED:
+        return
+    if instance.telegram_message_id:
+        return  # уже отправлено
+    if instance.published_at and instance.published_at > timezone.now():
+        return  # отложенная публикация — не отправлять пока
+    try:
+        from apps.news.telegram import send_news_item
+        ok, result = send_news_item(instance)
+        if ok:
+            # update_fields чтобы не вызвать рекурсию
+            NewsItem.objects.filter(pk=instance.pk).update(telegram_message_id=result)
+    except Exception:
+        pass  # не ломаем сохранение при ошибке Telegram

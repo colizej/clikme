@@ -61,17 +61,67 @@ def translate_selected(modeladmin, request, queryset):
     modeladmin.message_user(request, f'🌐 Переведено: {ok}/{queryset.count()}')
 
 
+@admin.action(description='📤 Отправить в Telegram')
+def send_to_telegram(modeladmin, request, queryset):
+    from apps.news.telegram import send_news_item
+    ok = fail = skip = 0
+    for item in queryset:
+        if item.telegram_message_id:
+            skip += 1
+            continue
+        success, result = send_news_item(item)
+        if success:
+            item.__class__.objects.filter(pk=item.pk).update(telegram_message_id=result)
+            ok += 1
+        else:
+            fail += 1
+            modeladmin.message_user(request, f'❌ [{item.pk}] {result}', messages.ERROR)
+    parts = []
+    if ok:
+        parts.append(f'✅ Отправлено: {ok}')
+    if skip:
+        parts.append(f'⏭ Уже в канале: {skip}')
+    if parts:
+        modeladmin.message_user(request, ' | '.join(parts))
+
+
 @admin.register(NewsItem)
 class NewsItemAdmin(admin.ModelAdmin):
     list_display = ('title_short', 'thumb', 'source', 'status_badge',
-                    'ai_processed', 'fetched_at', 'published_at')
-    list_filter = ('status', 'ai_processed', 'source')
+                    'ai_processed', 'is_edited', 'tg_sent', 'fetched_at', 'published_at')
+    list_filter = ('status', 'ai_processed', 'is_edited', 'source')
     search_fields = ('title', 'slug', 'summary')
     readonly_fields = ('ai_processed', 'ai_model_used', 'telegram_message_id',
                        'source_url', 'fetched_at', 'title_original', 'summary_original')
     date_hierarchy = 'fetched_at'
-    actions = [publish_selected, reject_selected, to_draft, translate_selected]
+    actions = [publish_selected, reject_selected, to_draft, translate_selected, send_to_telegram]
     change_list_template = 'admin/news/newsitem/change_list.html'
+
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'slug', 'status', 'is_edited'),
+        }),
+        ('Оригинал', {
+            'classes': ('collapse',),
+            'fields': ('title_original', 'summary_original'),
+        }),
+        ('Контент', {
+            'fields': ('summary', 'body_md'),
+        }),
+        ('Медиа', {
+            'fields': ('image', 'image_url'),
+        }),
+        ('Источник и SEO', {
+            'fields': ('source', 'source_url', 'ai_processed', 'ai_model_used',
+                       'telegram_message_id', 'fetched_at', 'published_at'),
+        }),
+    )
+
+    def save_model(self, request, obj, form, change):
+        # Если редактор изменил body_md — помечаем как отредактировано вручную
+        if change and 'body_md' in form.changed_data:
+            obj.is_edited = True
+        super().save_model(request, obj, form, change)
 
     def get_urls(self):
         urls = super().get_urls()
@@ -133,3 +183,9 @@ class NewsItemAdmin(admin.ModelAdmin):
         return format_html(
             '<span style="color:{};font-weight:600">{}</span>', color, label
         )
+
+    @admin.display(description='TG')
+    def tg_sent(self, obj):
+        if obj.telegram_message_id:
+            return format_html('<span style="color:{};font-weight:600">✓</span>', '#22c55e')
+        return format_html('<span style="color:{}">—</span>', '#ccc')

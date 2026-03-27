@@ -147,6 +147,11 @@ class Command(BaseCommand):
             src_lang = item.source.source_language if item.source else 'en'
             self.stdout.write(f'  [{item.pk}] {item.title[:70]}')
 
+            # Не перезаписываем контент, отредактированный вручную
+            if item.is_edited and not options['force']:
+                self.stdout.write('    ⏭ пропуск (is_edited=True, используйте --force)')
+                continue
+
             if options['dry_run']:
                 self.stdout.write('    [dry-run] пропуск')
                 continue
@@ -159,12 +164,18 @@ class Command(BaseCommand):
             # Переводим summary
             t_summary, _ = _translate(item.summary, src_lang)
 
-            # Переводим body (HTML)
-            t_body = item.body
-            if item.body:
+            # Переводим body_md (Markdown — чище для перевода)
+            t_body_md = item.body_md
+            if item.body_md:
+                translated, m = _translate(item.body_md, src_lang)
+                if m:
+                    t_body_md = translated
+                    model_used = m
+            elif item.body:
+                # Fallback: если body_md пустой — переводим body (HTML)
                 translated, m = _translate(item.body, src_lang)
                 if m:
-                    t_body = translated
+                    t_body_md = translated
                     model_used = m
 
             if not model_used:
@@ -176,7 +187,7 @@ class Command(BaseCommand):
             item.summary_original = item.summary_original or item.summary
             item.title = t_title
             item.summary = t_summary
-            item.body = t_body
+            item.body_md = t_body_md  # save() автоматически рендерит → body
             item.ai_processed = True
             item.ai_model_used = model_used
             # Обновляем slug под новый заголовок

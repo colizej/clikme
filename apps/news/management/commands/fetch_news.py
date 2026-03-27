@@ -23,6 +23,7 @@ import os
 import re
 import uuid
 import feedparser
+import html2text
 import httpx
 from bs4 import BeautifulSoup
 from django.core.files.base import ContentFile
@@ -31,6 +32,20 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from apps.news.models import NewsItem, NewsSource
+
+# html2text converter: body_images=False убирает мусорные data: URI
+_h2t = html2text.HTML2Text()
+_h2t.ignore_links = False
+_h2t.body_width = 0          # не переносить строки
+_h2t.ignore_images = False
+_h2t.images_as_html = False
+
+
+def _html_to_md(html: str) -> str:
+    """Конвертирует HTML → Markdown."""
+    if not html:
+        return ''
+    return _h2t.handle(html).strip()
 
 
 def _download_image(url: str) -> ContentFile | None:
@@ -282,13 +297,21 @@ class Command(BaseCommand):
         self.stdout.write(f'Записей с пустым body: {total}')
         ok = fail = 0
         for item in qs:
+            # Не перезаписываем контент, отредактированный вручную
+            if item.is_edited:
+                self.stdout.write(f'  [{item.pk}] ⏭ пропуск (is_edited=True): {item.title[:60]}')
+                skip_edited = getattr(self, '_skip_edited', 0) + 1
+                self._skip_edited = skip_edited
+                continue
+
             body = self._fetch_article_body(item.source_url)
             if not body:
                 self.stdout.write(f'  [{item.pk}] ✗ body не получено: {item.source_url[:80]}')
                 fail += 1
                 continue
             item.body = body
-            update_fields = ['body']
+            item.body_md = _html_to_md(body)
+            update_fields = ['body', 'body_md']
 
             # Если нет картинки — вытащить первый img из body
             if not item.image:
@@ -420,6 +443,7 @@ class Command(BaseCommand):
                 continue
 
             slug = _make_unique_slug(title)
+            body_md = _html_to_md(body)
             item = NewsItem.objects.create(
                 source=source,
                 source_url=url,
@@ -429,6 +453,7 @@ class Command(BaseCommand):
                 summary=summary,
                 summary_original=summary,
                 body=body,
+                body_md=body_md,
                 image_url=image_url,
                 status=NewsItem.DRAFT,
             )

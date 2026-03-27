@@ -58,3 +58,35 @@
 - Определён стек (уточнён в процессе): Django 6.0.3 + SQLite + Tailwind CSS v4 CLI
 
 ## Следующие записи добавлять по мере развития проекта...
+
+---
+
+## [Март 2026] — Новостная система: Markdown, источники, Telegram
+
+### Хранение контента в Markdown
+- Добавлены поля `body_md` (Markdown) и `is_edited` (защита от перезаписи) на модели `NewsItem`
+- `save()` автоматически рендерит `body_md` → `body` (HTML) через `markdown` с расширениями `extra`, `nl2br`
+- `fetch_news` при создании/обновлении конвертирует HTML → Markdown через `html2text`
+- `translate_news` переводит `body_md` (не HTML); уважает флаг `is_edited`
+- Миграция `0005_add_body_md_is_edited`
+- В admin: `body_md` — основное поле редактирования; HTML-поле `body` убрано из отображения
+- Бэкфилл: 110 существующих записей конвертированы в `body_md`
+
+### Новые источники новостей
+- Добавлен tourdom.ru/actual (pk=13, тип HTML, Nuxt.js SPA без RSS)
+- Парсинг через CSS-селектор `div.actual_item` → `a`, `strong`, `p`
+- Фильтрация по ключевым словам Вьетнама: `вьетнам,нячанг,нха транг,дананг,...`
+
+### Исправления
+- `image_url`: `max_length` увеличен с 200 до 800 (реальные URL достигают 385+ символов)
+- Миграция `0006_image_url_max_length`
+
+### Интеграция с Telegram
+- Создан `apps/news/telegram.py` — отправка новостей в канал через Bot API
+- Картинка скачивается сервером (multipart upload) — обходит ограничения Telegram на внешние URL
+- Приоритет изображения: локальный файл → внешний `image_url` → текстовый пост (запасной вариант)
+- Формат поста: картинка + `<b>Заголовок</b>` + Summary + `👆 Читать на сайте`
+- `post_save` сигнал на `NewsItem`: автоотправка при переводе в `status=published` (если `published_at ≤ now`)
+- Admin action **📤 Отправить в Telegram** — ручная отправка выбранных опубликованных новостей
+- Колонка `TG` в списке admin — зелёная ✓ если `telegram_message_id` заполнен
+- `.env`: добавлены `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHANNEL_ID`, `ADMIN_CHAT_ID`, `SITE_URL`
