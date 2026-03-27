@@ -9,13 +9,13 @@ class VendorAdmin(admin.ModelAdmin):
     list_editable = ('is_active', 'approved')
     search_fields = ('display_name', 'slug', 'telephone')
     prepopulated_fields = {'slug': ('display_name',)}
-    readonly_fields = ('description',)
+    readonly_fields = ()
     fieldsets = (
         ('Основное', {
             'fields': ('display_name', 'slug', 'city', 'is_active', 'approved'),
         }),
         ('Описание', {
-            'fields': ('description_md', 'description'),
+            'fields': ('description_md',),
             'description': 'Редактируйте описание в поле Markdown. HTML генерируется автоматически при сохранении.',
         }),
         ('SEO', {
