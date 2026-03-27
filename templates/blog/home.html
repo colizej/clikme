@@ -176,12 +176,12 @@
 
     {# ── Tag filter bar ── #}
     {% if all_tags and not request.GET.q %}
-    <div class="overflow-x-auto mb-10" style="scrollbar-width:none;-ms-overflow-style:none;">
+    <div id="tags" class="overflow-x-auto mb-10 scroll-mt-24" style="scrollbar-width:none;-ms-overflow-style:none;">
       <style>.tag-bar::-webkit-scrollbar{display:none}</style>
       <div class="tag-bar flex gap-2 min-w-max px-1 pb-1">
-        <a href="/" class="ck-pill transition-colors whitespace-nowrap {% if not active_tag %}bg-(--color-accent) text-white{% else %}hover:bg-(--color-accent-medium){% endif %}">{% trans "Все" %}</a>
+        <a href="/#tags" class="ck-pill transition-colors whitespace-nowrap {% if not active_tag %}bg-(--color-accent) text-white{% else %}hover:bg-(--color-accent-medium){% endif %}">{% trans "Все" %}</a>
         {% for tag in all_tags %}
-        <a href="/?tag={{ tag.slug }}"
+        <a href="/?tag={{ tag.slug }}#tags"
            class="ck-pill transition-colors whitespace-nowrap {% if active_tag.slug == tag.slug %}bg-(--color-accent) text-white{% else %}hover:bg-(--color-accent-medium){% endif %}">
           {{ tag.name }}
         </a>
