@@ -83,8 +83,13 @@ def _clean_article_body(html: str, title: str = '') -> str:
         if items and all(li.find('a') for li in items):
             lst.decompose()
 
-    # 4. Walk top-level blocks; once we hit a hard trailer marker, cut it and everything after
+    # 4. Walk top-level blocks from the END; cut trailing source/tag markers.
+    #    Only remove an element if it is SHORT (≤120 visible chars) — real content
+    #    paragraphs with inline 'Источник: Name' photo captions are much longer.
     top_els = list(soup.find_all(['p', 'div', 'ul', 'ol', 'blockquote', 'h2', 'h3', 'h4', 'h5', 'section', 'aside']))
+    # Compute total visible length to detect trailer zone (last ~15%)
+    total_visible = len(soup.get_text(strip=True))
+    seen_chars = 0
     cutting = False
     for el in top_els:
         if not el.parent:
@@ -92,10 +97,15 @@ def _clean_article_body(html: str, title: str = '') -> str:
         if cutting:
             el.decompose()
             continue
-        text = el.get_text(separator=' ', strip=True).lower()
-        if any(text.startswith(m) or (m in text[:80] and len(text) < 400) for m in _TRAILER_MARKERS):
+        text = el.get_text(separator=' ', strip=True)
+        text_lower = text.lower()
+        text_len = len(text)
+        is_short = text_len <= 120
+        if is_short and any(text_lower.startswith(m) for m in _TRAILER_MARKERS):
             cutting = True
             el.decompose()
+            continue
+        seen_chars += text_len
 
     # 5. Remove blockquotes that are purely link lists (see-also styled as quote)
     for bq in list(soup.find_all('blockquote')):
@@ -107,14 +117,9 @@ def _clean_article_body(html: str, title: str = '') -> str:
         if links and text and len(link_text) / len(text) > 0.65:
             bq.decompose()
 
-    # 6. Regex fallback: cut HTML at any remaining trailer marker tag
+    # 6. (Step 6 removed — regex-based 'источник' matching caused false positives
+    #     on inline photo captions like 'Источник: Photographer Name')
     result = str(soup)
-    result = re.sub(
-        r'(<[^>]+>[^<]*(?:тэги|тег|теги|tags|статьи по теме|источник)[^<]*<[^>]+>.*)',
-        '',
-        result,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
 
     # 7. If remaining visible text is basically just the title (< 80 chars or == title)
     #    the body is a teaser-only feed — return '' so template falls back to summary.
