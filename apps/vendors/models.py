@@ -19,7 +19,7 @@ class Vendor(models.Model):
     image = models.ImageField(upload_to='catalog/vendor/', blank=True)
     city = models.CharField(max_length=100, blank=True)
     address = models.TextField(blank=True)
-    map_url = models.URLField(blank=True)
+    map_url = models.URLField(blank=True, max_length=600)
     telegram_url = models.URLField(blank=True)
 
     is_active = models.BooleanField(default=True)

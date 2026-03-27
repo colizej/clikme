@@ -57,6 +57,16 @@
     </div>
   </div>
 
+  {# Map #}
+  {% if vendor.map_url %}
+  <div class="mb-10 rounded-2xl overflow-hidden shadow-sm" style="height:360px;">
+    <iframe src="{{ vendor.map_url }}"
+            width="100%" height="360" style="border:0;" allowfullscreen=""
+            loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+            title="{{ vendor.display_name }} на карте"></iframe>
+  </div>
+  {% endif %}
+
   {# Products #}
   {% if vendor.products.all %}
   <section>
