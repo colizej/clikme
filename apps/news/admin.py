@@ -85,6 +85,24 @@ def send_to_telegram(modeladmin, request, queryset):
         modeladmin.message_user(request, ' | '.join(parts))
 
 
+@admin.action(description='🔁 Переотправить в Telegram (сбросить и отправить заново)')
+def resend_to_telegram(modeladmin, request, queryset):
+    from apps.news.telegram import send_news_item
+    ok = fail = 0
+    for item in queryset:
+        item.__class__.objects.filter(pk=item.pk).update(telegram_message_id='')
+        item.refresh_from_db()
+        success, result = send_news_item(item)
+        if success:
+            item.__class__.objects.filter(pk=item.pk).update(telegram_message_id=result)
+            ok += 1
+        else:
+            fail += 1
+            modeladmin.message_user(request, f'❌ [{item.pk}] {result}', messages.ERROR)
+    if ok:
+        modeladmin.message_user(request, f'✅ Переотправлено: {ok}')
+
+
 @admin.register(NewsItem)
 class NewsItemAdmin(admin.ModelAdmin):
     list_display = ('title_short', 'thumb', 'source', 'status_badge',
@@ -94,7 +112,7 @@ class NewsItemAdmin(admin.ModelAdmin):
     readonly_fields = ('ai_processed', 'ai_model_used', 'telegram_message_id',
                        'source_url', 'fetched_at', 'title_original', 'summary_original')
     date_hierarchy = 'fetched_at'
-    actions = [publish_selected, reject_selected, to_draft, translate_selected, send_to_telegram]
+    actions = [publish_selected, reject_selected, to_draft, translate_selected, send_to_telegram, resend_to_telegram]
     change_list_template = 'admin/news/newsitem/change_list.html'
 
     fieldsets = (
