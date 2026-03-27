@@ -8,6 +8,16 @@ from apps.news.models import NewsItem
 from apps.pages.models import Page
 
 
+def _ci_q(field, q):
+    """Case-insensitive contains for Cyrillic in SQLite.
+    SQLite LIKE is only ASCII case-insensitive, so we OR multiple case variants."""
+    variants = {q, q.lower(), q.upper(), q.title(), q.capitalize()}
+    combined = Q()
+    for v in variants:
+        combined |= Q(**{f'{field}__contains': v})
+    return combined
+
+
 class HomeView(ListView):
     model = Article
     template_name = 'blog/home.html'
@@ -26,9 +36,9 @@ class HomeView(ListView):
         cat_slug = self.request.GET.get('category', '').strip()
         if q:
             qs = qs.filter(
-                Q(title__icontains=q) |
-                Q(short_description__icontains=q) |
-                Q(meta_keywords__icontains=q)
+                _ci_q('title', q) |
+                _ci_q('short_description', q) |
+                _ci_q('meta_keywords', q)
             )
         if tag_slug:
             qs = qs.filter(tags__slug=tag_slug)
@@ -104,9 +114,9 @@ class SearchView(ListView):
         if not q or len(q) < 2:
             return Article.objects.none()
         return Article.objects.filter(
-            Q(title__icontains=q) |
-            Q(short_description__icontains=q) |
-            Q(meta_keywords__icontains=q),
+            _ci_q('title', q) |
+            _ci_q('short_description', q) |
+            _ci_q('meta_keywords', q),
             is_published=True
         ).order_by('-published_at')
 
@@ -116,15 +126,15 @@ class SearchView(ListView):
         ctx['query'] = q
         if q and len(q) >= 2:
             ctx['vendors'] = Vendor.objects.filter(
-                Q(display_name__icontains=q) | Q(description__icontains=q),
+                _ci_q('display_name', q) | _ci_q('description', q),
                 is_active=True
             )[:8]
             ctx['news_items'] = NewsItem.objects.filter(
-                Q(title__icontains=q) | Q(summary__icontains=q),
+                _ci_q('title', q) | _ci_q('summary', q),
                 status=NewsItem.PUBLISHED
             ).order_by('-pk')[:8]
             ctx['products'] = Product.objects.filter(
-                Q(name__icontains=q) | Q(description__icontains=q),
+                _ci_q('name', q) | _ci_q('description', q),
                 is_active=True
             ).select_related('vendor')[:8]
         return ctx
@@ -139,25 +149,25 @@ def search_api(request):
     results = []
 
     for a in Article.objects.filter(
-        Q(title__icontains=q) | Q(short_description__icontains=q),
+        _ci_q('title', q) | _ci_q('short_description', q),
         is_published=True
     ).only('title', 'slug')[:5]:
         results.append({'type': 'article', 'label': 'Статья', 'title': a.title, 'url': f'/{a.slug}/'})
 
     for n in NewsItem.objects.filter(
-        Q(title__icontains=q),
+        _ci_q('title', q),
         status=NewsItem.PUBLISHED
     ).only('title', 'slug')[:5]:
         results.append({'type': 'news', 'label': 'Новость', 'title': n.title, 'url': f'/news/{n.slug}/'})
 
     for v in Vendor.objects.filter(
-        Q(display_name__icontains=q),
+        _ci_q('display_name', q),
         is_active=True
     ).only('display_name', 'slug')[:5]:
         results.append({'type': 'vendor', 'label': 'Компания', 'title': v.display_name, 'url': f'/{v.slug}/'})
 
     for p in Product.objects.filter(
-        Q(name__icontains=q),
+        _ci_q('name', q),
         is_active=True
     ).only('name', 'slug')[:5]:
         results.append({'type': 'product', 'label': 'Товар', 'title': p.name, 'url': f'/{p.slug}/'})
