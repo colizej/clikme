@@ -13,15 +13,16 @@
 
   {# Articles #}
   {% if articles %}
-  <section class="mb-10">
-    <h2 class="font-semibold text-sm uppercase tracking-wide mb-4 inline-flex items-center gap-2">
-      <span class="px-2.5 py-1 rounded-full bg-orange-100 text-orange-700">{% trans "Статьи" %}</span>
-    </h2>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <section class="mb-8 border border-(--color-border) rounded-2xl overflow-hidden">
+    <div class="flex items-center gap-3 px-5 py-3 border-b-4 border-orange-400 bg-orange-50">
+      <span class="font-bold text-sm text-orange-700 uppercase tracking-wide">{% trans "Статьи" %}</span>
+      <span class="ml-auto text-xs text-orange-500">{{ articles|length }}</span>
+    </div>
+    <div class="grid gap-px bg-(--color-border) sm:grid-cols-2 lg:grid-cols-3">
       {% for article in articles %}
-      <a href="/{{ article.slug }}/" class="ck-article-card group p-4 flex gap-4 items-start">
+      <a href="/{{ article.slug }}/" class="group p-4 flex gap-4 items-start bg-white hover:bg-(--color-bg-warm) transition-colors">
         <img src="{% if article.image %}{{ article.image.url }}{% else %}{% static 'img/no_image-228x228.png' %}{% endif %}"
-             alt="{{ article.title }}" class="w-16 h-16 object-cover rounded-lg shrink-0" loading="lazy">
+             alt="{{ article.title }}" class="w-14 h-14 object-cover rounded-lg shrink-0" loading="lazy">
         <div>
           <h3 class="text-sm font-semibold group-hover:text-(--color-accent) transition-colors line-clamp-2">{{ article.title }}</h3>
           <p class="text-xs text-(--color-text-muted) mt-1">{{ article.published_at|date:"j E Y" }}</p>
@@ -34,15 +35,16 @@
 
   {# News #}
   {% if news_items %}
-  <section class="mb-10">
-    <h2 class="font-semibold text-sm uppercase tracking-wide mb-4 inline-flex items-center gap-2">
-      <span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700">{% trans "Новости" %}</span>
-    </h2>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <section class="mb-8 border border-(--color-border) rounded-2xl overflow-hidden">
+    <div class="flex items-center gap-3 px-5 py-3 border-b-4 border-green-400 bg-green-50">
+      <span class="font-bold text-sm text-green-700 uppercase tracking-wide">{% trans "Новости" %}</span>
+      <span class="ml-auto text-xs text-green-500">{{ news_items|length }}</span>
+    </div>
+    <div class="grid gap-px bg-(--color-border) sm:grid-cols-2 lg:grid-cols-3">
       {% for item in news_items %}
-      <a href="/news/{{ item.slug }}/" class="ck-article-card group p-4 flex gap-4 items-start">
+      <a href="/news/{{ item.slug }}/" class="group p-4 flex gap-4 items-start bg-white hover:bg-(--color-bg-warm) transition-colors">
         {% if item.image %}
-        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-16 h-16 object-cover rounded-lg shrink-0" loading="lazy">
+        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-14 h-14 object-cover rounded-lg shrink-0" loading="lazy">
         {% endif %}
         <div>
           <h3 class="text-sm font-semibold group-hover:text-(--color-accent) transition-colors line-clamp-2">{{ item.title }}</h3>
@@ -55,13 +57,14 @@
 
   {# Vendors #}
   {% if vendors %}
-  <section class="mb-10">
-    <h2 class="font-semibold text-sm uppercase tracking-wide mb-4 inline-flex items-center gap-2">
-      <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">{% trans "Компании" %}</span>
-    </h2>
-    <div class="grid gap-4 sm:grid-cols-2">
+  <section class="mb-8 border border-(--color-border) rounded-2xl overflow-hidden">
+    <div class="flex items-center gap-3 px-5 py-3 border-b-4 border-blue-400 bg-blue-50">
+      <span class="font-bold text-sm text-blue-700 uppercase tracking-wide">{% trans "Компании" %}</span>
+      <span class="ml-auto text-xs text-blue-500">{{ vendors|length }}</span>
+    </div>
+    <div class="grid gap-px bg-(--color-border) sm:grid-cols-2">
       {% for vendor in vendors %}
-      <a href="/{{ vendor.slug }}/" class="ck-vendor-card group flex items-center gap-4">
+      <a href="/{{ vendor.slug }}/" class="group flex items-center gap-4 p-4 bg-white hover:bg-(--color-bg-warm) transition-colors">
         <img src="{% if vendor.image %}{{ vendor.image.url }}{% else %}{% static 'img/no_image-228x228.png' %}{% endif %}"
              alt="{{ vendor.display_name }}" class="w-12 h-12 object-cover rounded-lg shrink-0" loading="lazy">
         <div>
@@ -76,15 +79,16 @@
 
   {# Products #}
   {% if products %}
-  <section class="mb-10">
-    <h2 class="font-semibold text-sm uppercase tracking-wide mb-4 inline-flex items-center gap-2">
-      <span class="px-2.5 py-1 rounded-full bg-purple-100 text-purple-700">{% trans "Товары и услуги" %}</span>
-    </h2>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <section class="mb-8 border border-(--color-border) rounded-2xl overflow-hidden">
+    <div class="flex items-center gap-3 px-5 py-3 border-b-4 border-purple-400 bg-purple-50">
+      <span class="font-bold text-sm text-purple-700 uppercase tracking-wide">{% trans "Товары и услуги" %}</span>
+      <span class="ml-auto text-xs text-purple-500">{{ products|length }}</span>
+    </div>
+    <div class="grid gap-px bg-(--color-border) sm:grid-cols-2 lg:grid-cols-3">
       {% for product in products %}
-      <a href="/{{ product.slug }}/" class="ck-article-card group p-4 flex gap-4 items-start">
+      <a href="/{{ product.slug }}/" class="group p-4 flex gap-4 items-start bg-white hover:bg-(--color-bg-warm) transition-colors">
         <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/no_image-228x228.png' %}{% endif %}"
-             alt="{{ product.name }}" class="w-16 h-16 object-cover rounded-lg shrink-0" loading="lazy">
+             alt="{{ product.name }}" class="w-14 h-14 object-cover rounded-lg shrink-0" loading="lazy">
         <div>
           <h3 class="text-sm font-semibold group-hover:text-(--color-accent) transition-colors line-clamp-2">{{ product.name }}</h3>
           {% if product.vendor %}<p class="text-xs text-(--color-text-muted)">{{ product.vendor.display_name }}</p>{% endif %}
