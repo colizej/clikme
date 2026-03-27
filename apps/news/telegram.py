@@ -90,7 +90,7 @@ def _build_caption(item) -> str:
         if len(summary) > max_summary:
             summary = summary[:max_summary].rsplit(' ', 1)[0] + '…'
         parts.append(summary)
-    parts.append(f'\U0001F446 <a href="{url}">Читать на сайте</a>')
+    parts.append(f'\U0001F449 <a href="{url}">Читать на сайте</a>')
 
     return '\n\n'.join(parts)
 
