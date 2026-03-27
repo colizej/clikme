@@ -35,6 +35,10 @@ def _clean_article_body(html: str, title: str = '') -> str:
         if a['href'].strip().startswith('javascript:'):
             a.decompose()
 
+    # 0c. Remove ad blocks injected into article body (Shkulev Media: 74.ru, ngs22.ru)
+    for el in list(soup.find_all(attrs={'data-creative': True})):
+        el.decompose()
+
     # 0b. Remove comment-count links (e.g. "4 комментария")
     for a in list(soup.find_all('a', href=True)):
         if 'comment' in a['href'].lower():

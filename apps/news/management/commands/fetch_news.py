@@ -459,6 +459,8 @@ class Command(BaseCommand):
         '[class*="article__social"]', '[class*="article__tags"]',
         '[class*="article__related"]', '[class*="story__related"]',
         'ul.share', '.share-box', '.share-buttons',
+        # Shkulev Media (74.ru / ngs22.ru / e1.ru) — ad blocks injected into article body
+        '[data-creative]',
     ]
 
     # Кандидаты на «основной контент» (по убыванию приоритета)
