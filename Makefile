@@ -2,7 +2,7 @@ PYTHON = venv/bin/python
 PORT   = 8003
 HOST   = 127.0.0.1
 
-.PHONY: dev css watch kill migrate superuser check collect deploy-check deploy status
+.PHONY: dev css watch kill migrate superuser check collect deploy-check deploy status fetch refetch-body
 
 # ── Основная команда разработки ──────────────────────────────────────────────
 dev: kill css
@@ -29,6 +29,18 @@ superuser:
 
 check:
 	$(PYTHON) manage.py check
+
+fetch:
+	$(PYTHON) manage.py fetch_news
+
+backfill-images:
+	$(PYTHON) manage.py fetch_news --backfill-images
+
+refetch-body:
+	$(PYTHON) manage.py fetch_news --refetch-body
+
+translate:
+	$(PYTHON) manage.py translate_news
 
 # ── Deploy helpers ────────────────────────────────────────────────────────────
 collect:

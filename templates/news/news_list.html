@@ -1,51 +1,74 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% trans "Новости Вьетнама" %} — ClikMe{% endblock %}
 {% block meta_description %}{% trans "Актуальные новости о Вьетнаме и Нячанге." %}{% endblock %}
 
 {% block content %}
 
-{# Hero mini #}
+{# ── Hero ── #}
 <section class="bg-(--color-bg-warm) py-12 px-4 border-b border-(--color-border)">
-  <div class="max-w-4xl mx-auto">
+  <div class="max-w-6xl mx-auto">
     <div class="inline-block ck-pill mb-3">🌏 {% trans "Лента новостей" %}</div>
     <h1 class="font-serif text-4xl md:text-5xl font-black text-(--color-text)">{% trans "Новости" %}</h1>
     <p class="text-(--color-text-muted) mt-2">{% trans "Актуальные новости о жизни во Вьетнаме" %}</p>
   </div>
 </section>
 
-<div class="max-w-4xl mx-auto px-4 py-10">
+<div class="max-w-6xl mx-auto px-4 py-10">
 
   {% if object_list %}
-  <div class="divide-y divide-(--color-border)">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for item in object_list %}
-    <article class="ck-news-item">
-      {% if item.image %}
-      <a href="/news/{{ item.slug }}/" class="shrink-0">
+    <article class="group ck-card flex flex-col">
+
+      {# ── Фото ── #}
+      <a href="/news/{{ item.slug }}/" class="block overflow-hidden bg-(--color-bg-warm)" style="aspect-ratio:16/9">
+        {% if item.image %}
         <img src="{{ item.image.url }}" alt="{{ item.title }}"
-             loading="lazy" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl">
-      </a>
-      {% elif item.image_url %}
-      <a href="/news/{{ item.slug }}/" class="shrink-0">
+             loading="lazy"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        {% elif item.image_url %}
         <img src="{{ item.image_url }}" alt="{{ item.title }}"
-             loading="lazy" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl">
+             loading="lazy"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        {% else %}
+        <div class="w-full h-full flex items-center justify-center bg-(--color-bg-warm)">
+          <img src="{% static 'img/no_image-600x200.png' %}" alt="" class="w-full h-full object-cover opacity-60">
+        </div>
+        {% endif %}
       </a>
-      {% endif %}
-      <div class="flex-1 min-w-0">
+
+      {# ── Контент ── #}
+      <div class="flex flex-col flex-1 p-5 gap-3">
+        <p class="text-xs text-(--color-text-muted)">
+          {{ item.published_at|date:"j E Y, H:i" }}
+          {% if item.source %}<span class="mx-1">·</span>{{ item.source.name }}{% endif %}
+        </p>
+
         <a href="/news/{{ item.slug }}/"
-           class="font-semibold text-sm leading-snug hover:text-(--color-accent) transition-colors line-clamp-2 block">
+           class="font-serif font-bold text-lg leading-snug group-hover:text-(--color-accent) transition-colors line-clamp-3 block">
           {{ item.title }}
         </a>
+
         {% if item.summary %}
-        <p class="text-xs text-(--color-text-muted) mt-1 line-clamp-2">{{ item.summary }}</p>
+        <p class="text-sm text-(--color-text-muted) leading-6 flex-1"
+           style="display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow:hidden">
+          {{ item.summary }}
+        </p>
         {% endif %}
-        <p class="text-xs text-(--color-text-muted) mt-2">{{ item.published_at|date:"j E, H:i" }}</p>
+
+        <a href="/news/{{ item.slug }}/"
+           class="mt-2 self-start inline-flex items-center gap-1 text-sm font-semibold
+                  text-(--color-accent) hover:gap-2.5 transition-all duration-200">
+          {% trans "Читать дальше" %} →
+        </a>
       </div>
     </article>
     {% endfor %}
   </div>
 
+  {# ── Пагинация ── #}
   {% if page_obj.has_other_pages %}
   <nav class="mt-10 flex justify-center gap-2">
     {% if page_obj.has_previous %}

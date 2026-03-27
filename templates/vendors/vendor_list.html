@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% trans "Компании и сервисы" %} — ClikMe{% endblock %}
 {% block meta_description %}{% trans "Компании, магазины и сервисы во Вьетнаме и Нячанге." %}{% endblock %}
@@ -18,9 +18,7 @@
         <img src="{{ vendor.image.url }}" alt="{{ vendor.display_name }}"
              class="w-full h-full object-cover" loading="lazy">
         {% else %}
-        <span class="text-2xl font-bold text-(--color-accent)">
-          {{ vendor.display_name|slice:":1" }}
-        </span>
+        <img src="{% static 'img/no_image-228x228.png' %}" alt="" class="w-full h-full object-cover opacity-60">
         {% endif %}
       </div>
       <p class="ck-vendor-square-name">{{ vendor.display_name }}</p>

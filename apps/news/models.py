@@ -13,6 +13,10 @@ class NewsSource(models.Model):
     html_selectors = models.JSONField(default=dict, blank=True)
     source_language = models.CharField(max_length=10, default='ru')
     needs_translation = models.BooleanField(default=False)
+    keywords = models.CharField(
+        max_length=500, blank=True,
+        help_text='Ключевые слова через запятую (фильтр). Пусто = брать всё.'
+    )
     is_active = models.BooleanField(default=True)
     last_fetched_at = models.DateTimeField(null=True, blank=True)
 
@@ -44,6 +48,7 @@ class NewsItem(models.Model):
     summary_original = models.TextField(blank=True)
     title = models.CharField(max_length=500)
     summary = models.TextField(blank=True)
+    body = models.TextField(blank=True, help_text='Полный текст статьи (HTML или plain-text)')
 
     image_url = models.URLField(blank=True)
     image = models.ImageField(upload_to='news/', blank=True)

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% trans "Поиск" %}{% if request.GET.q %}: «{{ request.GET.q }}»{% endif %} — ClikMe{% endblock %}
 
@@ -18,10 +18,8 @@
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for article in object_list %}
       <a href="/{{ article.slug }}/" class="ck-article-card group p-4 flex gap-4 items-start">
-        {% if article.image %}
-        <img src="{{ article.image.url }}" alt="{{ article.title }}"
-             class="w-16 h-16 object-cover rounded-lg shrink-0" loading="lazy">
-        {% endif %}
+        <img src="{% if article.image %}{{ article.image.url }}{% else %}{% static 'img/no_image-228x228.png' %}{% endif %}"
+             alt="{{ article.title }}" class="w-16 h-16 object-cover rounded-lg shrink-0" loading="lazy">
         <div>
           <h3 class="text-sm font-semibold group-hover:text-(--color-accent) transition-colors line-clamp-2">
             {{ article.title }}
@@ -41,10 +39,8 @@
     <div class="grid gap-4 sm:grid-cols-2">
       {% for vendor in vendors %}
       <a href="/{{ vendor.slug }}/" class="ck-vendor-card group flex items-center gap-4">
-        {% if vendor.image %}
-        <img src="{{ vendor.image.url }}" alt="{{ vendor.display_name }}"
-             class="w-12 h-12 object-cover rounded-lg shrink-0" loading="lazy">
-        {% endif %}
+        <img src="{% if vendor.image %}{{ vendor.image.url }}{% else %}{% static 'img/no_image-228x228.png' %}{% endif %}"
+             alt="{{ vendor.display_name }}" class="w-12 h-12 object-cover rounded-lg shrink-0" loading="lazy">
         <div>
           <h3 class="font-semibold group-hover:text-(--color-accent) transition-colors">{{ vendor.display_name }}</h3>
           {% if vendor.city %}<p class="text-xs text-(--color-muted)">{{ vendor.city }}</p>{% endif %}

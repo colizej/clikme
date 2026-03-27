@@ -275,7 +275,7 @@
 
   </article>
 
-  {% if request.user.is_superuser %}
+  {% if request.user.is_staff %}
   <a href="/admin/blog/article/{{ article.pk }}/change/"
      class="fixed top-20 right-4 z-50 flex items-center gap-2 bg-(--color-accent) hover:bg-(--color-accent-hover) text-white text-sm font-bold px-4 py-2.5 rounded-full shadow-xl transition-colors"
      target="_blank" title="Edit in admin">

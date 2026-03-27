@@ -9,3 +9,4 @@ lxml
 httpx
 markdown
 html2text
+google-genai
