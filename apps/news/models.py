@@ -38,6 +38,17 @@ class NewsItem(models.Model):
         (REJECTED, 'Отклонено'),
     ]
 
+    TAG_CHOICES = [
+        ('актуально', 'Актуально'),
+        ('интересно', 'Интересно'),
+        ('экономика', 'Экономика'),
+        ('туризм', 'Туризм'),
+        ('политика', 'Политика'),
+        ('спорт', 'Спорт'),
+        ('культура', 'Культура'),
+        ('технологии', 'Технологии'),
+    ]
+
     source = models.ForeignKey(
         NewsSource, on_delete=models.SET_NULL, null=True, related_name='items'
     )
@@ -69,6 +80,12 @@ class NewsItem(models.Model):
     ai_processed = models.BooleanField(default=False)
     ai_model_used = models.CharField(max_length=50, blank=True)
 
+    tag = models.CharField(
+        max_length=20, choices=TAG_CHOICES, blank=True, default='',
+        verbose_name='Тег',
+        help_text='Отображается на карточке новости вместо источника.',
+    )
+
     status = models.CharField(max_length=15, choices=STATUSES, default=DRAFT)
     telegram_message_id = models.CharField(max_length=50, blank=True)
 
@@ -84,6 +101,12 @@ class NewsItem(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def is_new(self):
+        if not self.published_at:
+            return False
+        return (timezone.now() - self.published_at).total_seconds() < 48 * 3600
 
     def save(self, *args, **kwargs):
         # Если есть body_md — рендерим его в body

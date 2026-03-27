@@ -88,24 +88,26 @@
       </a>
 
       {# Desktop nav — center #}
+      {% with path=request.path %}
       <nav class="hidden lg:flex items-center gap-1 flex-1">
         <a href="/"
-           class="px-4 py-2 rounded-full text-sm font-medium text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
-          {% trans "Статьи" %}
+           class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if path == '/' %}text-white bg-(--color-accent) font-semibold{% else %}text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light){% endif %}">
+          {% trans "Главная" %}
         </a>
         <a href="/news/"
-           class="px-4 py-2 rounded-full text-sm font-medium text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
+           class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if '/news/' in path %}text-white bg-(--color-accent) font-semibold{% else %}text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light){% endif %}">
           {% trans "Новости" %}
         </a>
-        <a href="/contacts/"
-           class="px-4 py-2 rounded-full text-sm font-medium text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
-          {% trans "Контакты" %}
-        </a>
         <a href="/vendors/"
-           class="px-4 py-2 rounded-full text-sm font-medium text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
+           class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if '/vendors/' in path %}text-white bg-(--color-accent) font-semibold{% else %}text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light){% endif %}">
           {% trans "Компании" %}
         </a>
+        <a href="/contacts/"
+           class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if path == '/contacts/' %}text-white bg-(--color-accent) font-semibold{% else %}text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light){% endif %}">
+          {% trans "Контакты" %}
+        </a>
       </nav>
+      {% endwith %}
 
       {# Right side: search + subscribe #}
       <div class="ml-auto flex items-center gap-2">
@@ -172,7 +174,7 @@
   <aside id="nav-mobile" role="dialog" aria-modal="true" aria-label="{% trans 'Навигация' %}">
 
     {# Drawer header: accent gradient #}
-    <div class="px-5 py-4" style="background: linear-gradient(135deg, var(--color-accent) 0%, #ff7a45 100%);">
+    <div class="px-5 py-4" style="background: var(--color-dark)">
       <div class="flex items-center justify-between">
         <a href="/" onclick="closeMobileNav()">
           <img src="{% static 'img/logo.png' %}" alt="ClikMe" class="h-8 w-auto"
@@ -199,7 +201,8 @@
     <nav class="flex-1 overflow-y-auto px-3 py-4">
       <p class="text-xs font-semibold uppercase tracking-widest text-(--color-text-muted) px-3 mb-3">{% trans "Разделы" %}</p>
 
-      <a href="/" onclick="closeMobileNav()" class="drawer-link">
+      {% with path=request.path %}
+      <a href="/" onclick="closeMobileNav()" class="drawer-link{% if path == '/' %} !bg-(--color-accent-light){% endif %}">
         <span class="drawer-icon">
           <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3l2-2h4l2 2h3a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2z"/>
@@ -207,12 +210,12 @@
           </svg>
         </span>
         <span class="drawer-label">
-          <strong>{% trans "Статьи" %}</strong>
+          <strong class="{% if path == '/' %}text-(--color-accent){% endif %}">{% trans "Главная" %}</strong>
           <small>{% trans "Путеводители и советы" %}</small>
         </span>
         <span class="drawer-arrow">›</span>
       </a>
-      <a href="/news/" onclick="closeMobileNav()" class="drawer-link">
+      <a href="/news/" onclick="closeMobileNav()" class="drawer-link{% if '/news/' in path %} !bg-(--color-accent-light){% endif %}">
         <span class="drawer-icon">
           <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 22H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2z"/>
@@ -220,12 +223,12 @@
           </svg>
         </span>
         <span class="drawer-label">
-          <strong>{% trans "Новости" %}</strong>
+          <strong class="{% if '/news/' in path %}text-(--color-accent){% endif %}">{% trans "Новости" %}</strong>
           <small>{% trans "Последние события Вьетнама" %}</small>
         </span>
         <span class="drawer-arrow">›</span>
       </a>
-      <a href="/vendors/" onclick="closeMobileNav()" class="drawer-link">
+      <a href="/vendors/" onclick="closeMobileNav()" class="drawer-link{% if '/vendors/' in path %} !bg-(--color-accent-light){% endif %}">
         <span class="drawer-icon">
           <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -233,12 +236,12 @@
           </svg>
         </span>
         <span class="drawer-label">
-          <strong>{% trans "Компании" %}</strong>
+          <strong class="{% if '/vendors/' in path %}text-(--color-accent){% endif %}">{% trans "Компании" %}</strong>
           <small>{% trans "Фирмы и организации" %}</small>
         </span>
         <span class="drawer-arrow">›</span>
       </a>
-      <a href="/contacts/" onclick="closeMobileNav()" class="drawer-link">
+      <a href="/contacts/" onclick="closeMobileNav()" class="drawer-link{% if path == '/contacts/' %} !bg-(--color-accent-light){% endif %}">
         <span class="drawer-icon">
           <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -246,11 +249,12 @@
           </svg>
         </span>
         <span class="drawer-label">
-          <strong>{% trans "Контакты" %}</strong>
+          <strong class="{% if path == '/contacts/' %}text-(--color-accent){% endif %}">{% trans "Контакты" %}</strong>
           <small>{% trans "Связаться с нами" %}</small>
         </span>
         <span class="drawer-arrow">›</span>
       </a>
+      {% endwith %}
     </nav>
 
     {# Subscribe footer #}

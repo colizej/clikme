@@ -105,9 +105,9 @@ def resend_to_telegram(modeladmin, request, queryset):
 
 @admin.register(NewsItem)
 class NewsItemAdmin(admin.ModelAdmin):
-    list_display = ('title_short', 'thumb', 'source', 'status_badge',
+    list_display = ('title_short', 'thumb', 'source', 'tag', 'status_badge',
                     'ai_processed', 'is_edited', 'tg_sent', 'fetched_at', 'published_at')
-    list_filter = ('status', 'ai_processed', 'is_edited', 'source')
+    list_filter = ('status', 'tag', 'ai_processed', 'is_edited', 'source')
     search_fields = ('title', 'slug', 'summary')
     readonly_fields = ('ai_processed', 'ai_model_used', 'telegram_message_id',
                        'source_url', 'fetched_at', 'title_original', 'summary_original')
@@ -117,7 +117,7 @@ class NewsItemAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'slug', 'status', 'is_edited'),
+            'fields': ('title', 'slug', 'status', 'tag', 'is_edited'),
         }),
         ('Оригинал', {
             'classes': ('collapse',),
