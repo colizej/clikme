@@ -48,7 +48,10 @@ class HomeView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['top_vendors'] = Vendor.objects.filter(is_active=True, approved=True)[:12]
+        ctx['top_vendors'] = Vendor.objects.filter(is_active=True, approved=True)[:10]
+        ctx['stats_articles'] = Article.objects.filter(is_published=True).count()
+        ctx['stats_vendors'] = Vendor.objects.filter(is_active=True, approved=True).count()
+        ctx['stats_news'] = NewsItem.objects.filter(status=NewsItem.PUBLISHED).count()
         ctx['all_tags'] = (
             Tag.objects
             .annotate(cnt=Count('article'))

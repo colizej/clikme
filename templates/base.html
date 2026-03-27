@@ -84,26 +84,26 @@
 
       {# Logo #}
       <a href="/" class="shrink-0 flex items-center">
-        <img src="{% static 'img/logo.png' %}" alt="ClikMe" class="h-9 w-auto">
+        <img src="{% static 'img/logo.png' %}" alt="ClikMe" class="h-11 w-auto">
       </a>
 
       {# Desktop nav — center #}
       {% with path=request.path %}
-      <nav class="hidden lg:flex items-center gap-1 flex-1">
+      <nav class="hidden lg:flex items-center gap-1 flex-1 justify-center">
         <a href="/"
-           class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if path == '/' %}text-white bg-(--color-accent) font-semibold{% else %}text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light){% endif %}">
+           class="px-3 py-1.5 text-sm font-medium transition-colors {% if path == '/' %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
           {% trans "Главная" %}
         </a>
         <a href="/news/"
-           class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if '/news/' in path %}text-white bg-(--color-accent) font-semibold{% else %}text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light){% endif %}">
+           class="px-3 py-1.5 text-sm font-medium transition-colors {% if '/news/' in path %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
           {% trans "Новости" %}
         </a>
         <a href="/vendors/"
-           class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if '/vendors/' in path %}text-white bg-(--color-accent) font-semibold{% else %}text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light){% endif %}">
+           class="px-3 py-1.5 text-sm font-medium transition-colors {% if '/vendors/' in path %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
           {% trans "Компании" %}
         </a>
         <a href="/contacts/"
-           class="px-4 py-2 rounded-full text-sm font-medium transition-colors {% if path == '/contacts/' %}text-white bg-(--color-accent) font-semibold{% else %}text-(--color-text-muted) hover:text-(--color-accent) hover:bg-(--color-accent-light){% endif %}">
+           class="px-3 py-1.5 text-sm font-medium transition-colors {% if path == '/contacts/' %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
           {% trans "Контакты" %}
         </a>
       </nav>
@@ -359,7 +359,7 @@
     </div>
 
     <div class="border-t border-white/10 py-4 text-center text-xs text-stone-600">
-      &copy; {% now "Y" %} ClikMe
+      &copy; 2025 – {% now "Y" %} ClikMe. Все права защищены.
     </div>
   </footer>
 
