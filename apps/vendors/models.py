@@ -15,7 +15,7 @@ class Vendor(models.Model):
     city = models.CharField(max_length=100, blank=True)
     address = models.TextField(blank=True)
     map_url = models.URLField(blank=True)
-    facebook_url = models.URLField(blank=True)
+    telegram_url = models.URLField(blank=True)
 
     is_active = models.BooleanField(default=True)
     approved = models.BooleanField(default=True)

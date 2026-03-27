@@ -4,7 +4,7 @@ Management command: import_vendors
 
 Данные из SQL:
   - oc9a_vendor: vendor_id, display_name, image, telephone, address, city,
-                 map_url, facebook_url, about, logo, banner
+                 map_url, facebook_url, about, logo, banner  # facebook_url kept for OC compat
   - oc9a_vendor_description: short description
   - oc9a_seo_url: vendor slug
   - oc9a_vendor_to_product + oc9a_product: products with slugs
@@ -424,7 +424,7 @@ class Command(BaseCommand):
                     exists.address = vdata.get("address", "")
                     exists.city = vdata.get("city", "")
                     exists.map_url = vdata.get("map_url", "")
-                    exists.facebook_url = vdata.get("facebook_url", "")
+                    exists.telegram_url = vdata.get("facebook_url", "")
                     if image_path:
                         exists.image = image_path
                     exists.save()
@@ -441,7 +441,7 @@ class Command(BaseCommand):
                         address=vdata.get("address", ""),
                         city=vdata.get("city", ""),
                         map_url=vdata.get("map_url", ""),
-                        facebook_url=vdata.get("facebook_url", ""),
+                        telegram_url=vdata.get("facebook_url", ""),
                         image=image_path,
                         is_active=bool(vdata.get("status", 1)),
                         approved=bool(vdata.get("approved", 1)),
