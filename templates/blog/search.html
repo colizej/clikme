@@ -18,9 +18,9 @@
       <span class="font-bold text-sm text-orange-700 uppercase tracking-wide">{% trans "Статьи" %}</span>
       <span class="ml-auto text-xs text-orange-500">{{ articles|length }}</span>
     </div>
-    <div class="grid gap-px bg-(--color-border) sm:grid-cols-2 lg:grid-cols-3">
+    <div class="divide-y divide-(--color-border)">
       {% for article in articles %}
-      <a href="/{{ article.slug }}/" class="group p-4 flex gap-4 items-start bg-white hover:bg-(--color-bg-warm) transition-colors">
+      <a href="/{{ article.slug }}/" class="group flex gap-4 items-start p-4 bg-white hover:bg-(--color-bg-warm) transition-colors">
         <img src="{% if article.image %}{{ article.image.url }}{% else %}{% static 'img/no_image-228x228.png' %}{% endif %}"
              alt="{{ article.title }}" class="w-14 h-14 object-cover rounded-lg shrink-0" loading="lazy">
         <div>
@@ -40,9 +40,9 @@
       <span class="font-bold text-sm text-green-700 uppercase tracking-wide">{% trans "Новости" %}</span>
       <span class="ml-auto text-xs text-green-500">{{ news_items|length }}</span>
     </div>
-    <div class="grid gap-px bg-(--color-border) sm:grid-cols-2 lg:grid-cols-3">
+    <div class="divide-y divide-(--color-border)">
       {% for item in news_items %}
-      <a href="/news/{{ item.slug }}/" class="group p-4 flex gap-4 items-start bg-white hover:bg-(--color-bg-warm) transition-colors">
+      <a href="/news/{{ item.slug }}/" class="group flex gap-4 items-start p-4 bg-white hover:bg-(--color-bg-warm) transition-colors">
         {% if item.image %}
         <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-14 h-14 object-cover rounded-lg shrink-0" loading="lazy">
         {% endif %}
@@ -62,7 +62,7 @@
       <span class="font-bold text-sm text-blue-700 uppercase tracking-wide">{% trans "Компании" %}</span>
       <span class="ml-auto text-xs text-blue-500">{{ vendors|length }}</span>
     </div>
-    <div class="grid gap-px bg-(--color-border) sm:grid-cols-2">
+    <div class="divide-y divide-(--color-border)">
       {% for vendor in vendors %}
       <a href="/{{ vendor.slug }}/" class="group flex items-center gap-4 p-4 bg-white hover:bg-(--color-bg-warm) transition-colors">
         <img src="{% if vendor.image %}{{ vendor.image.url }}{% else %}{% static 'img/no_image-228x228.png' %}{% endif %}"
@@ -84,9 +84,9 @@
       <span class="font-bold text-sm text-purple-700 uppercase tracking-wide">{% trans "Товары и услуги" %}</span>
       <span class="ml-auto text-xs text-purple-500">{{ products|length }}</span>
     </div>
-    <div class="grid gap-px bg-(--color-border) sm:grid-cols-2 lg:grid-cols-3">
+    <div class="divide-y divide-(--color-border)">
       {% for product in products %}
-      <a href="/{{ product.slug }}/" class="group p-4 flex gap-4 items-start bg-white hover:bg-(--color-bg-warm) transition-colors">
+      <a href="/{{ product.slug }}/" class="group flex gap-4 items-start p-4 bg-white hover:bg-(--color-bg-warm) transition-colors">
         <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/no_image-228x228.png' %}{% endif %}"
              alt="{{ product.name }}" class="w-14 h-14 object-cover rounded-lg shrink-0" loading="lazy">
         <div>
