@@ -7,6 +7,11 @@ class Vendor(models.Model):
 
     display_name = models.CharField(max_length=500)
     description = models.TextField(blank=True)
+    description_md = models.TextField(
+        blank=True,
+        verbose_name='Описание (Markdown)',
+        help_text='Редактируйте здесь. HTML в поле «description» генерируется автоматически при сохранении.',
+    )
     meta_description = models.CharField(max_length=500, blank=True)
     meta_keywords = models.CharField(max_length=500, blank=True)
 
@@ -28,6 +33,15 @@ class Vendor(models.Model):
 
     def __str__(self):
         return self.display_name
+
+    def save(self, *args, **kwargs):
+        if self.description_md:
+            import markdown
+            self.description = markdown.markdown(
+                self.description_md,
+                extensions=['extra', 'nl2br'],
+            )
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return f'/{self.slug}/'
