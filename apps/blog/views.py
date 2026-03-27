@@ -1,9 +1,10 @@
 from django.db.models import Count, Q
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.views.generic import ListView, DetailView
 
 from .models import Article, Category, Tag
 from apps.vendors.models import Vendor, Product
+from apps.news.models import NewsItem
 from apps.pages.models import Page
 
 
@@ -100,7 +101,7 @@ class SearchView(ListView):
 
     def get_queryset(self):
         q = self.request.GET.get('q', '').strip()
-        if not q or len(q) < 3:
+        if not q or len(q) < 2:
             return Article.objects.none()
         return Article.objects.filter(
             Q(title__icontains=q) |
@@ -113,12 +114,55 @@ class SearchView(ListView):
         ctx = super().get_context_data(**kwargs)
         q = self.request.GET.get('q', '').strip()
         ctx['query'] = q
-        if q and len(q) >= 3:
+        if q and len(q) >= 2:
             ctx['vendors'] = Vendor.objects.filter(
                 Q(display_name__icontains=q) | Q(description__icontains=q),
                 is_active=True
-            )[:5]
+            )[:8]
+            ctx['news_items'] = NewsItem.objects.filter(
+                Q(title__icontains=q) | Q(summary__icontains=q),
+                status=NewsItem.PUBLISHED
+            ).order_by('-pk')[:8]
+            ctx['products'] = Product.objects.filter(
+                Q(name__icontains=q) | Q(description__icontains=q),
+                is_active=True
+            ).select_related('vendor')[:8]
         return ctx
+
+
+def search_api(request):
+    """Live search JSON endpoint — returns up to 5 results per category."""
+    q = request.GET.get('q', '').strip()
+    if not q or len(q) < 2:
+        return JsonResponse({'results': []})
+
+    results = []
+
+    for a in Article.objects.filter(
+        Q(title__icontains=q) | Q(short_description__icontains=q),
+        is_published=True
+    ).only('title', 'slug')[:5]:
+        results.append({'type': 'article', 'label': 'Статья', 'title': a.title, 'url': f'/{a.slug}/'})
+
+    for n in NewsItem.objects.filter(
+        Q(title__icontains=q),
+        status=NewsItem.PUBLISHED
+    ).only('title', 'slug')[:5]:
+        results.append({'type': 'news', 'label': 'Новость', 'title': n.title, 'url': f'/news/{n.slug}/'})
+
+    for v in Vendor.objects.filter(
+        Q(display_name__icontains=q),
+        is_active=True
+    ).only('display_name', 'slug')[:5]:
+        results.append({'type': 'vendor', 'label': 'Компания', 'title': v.display_name, 'url': f'/{v.slug}/'})
+
+    for p in Product.objects.filter(
+        Q(name__icontains=q),
+        is_active=True
+    ).only('name', 'slug')[:5]:
+        results.append({'type': 'product', 'label': 'Товар', 'title': p.name, 'url': f'/{p.slug}/'})
+
+    return JsonResponse({'results': results})
 
 
 def slug_dispatch(request, slug):

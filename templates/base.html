@@ -153,16 +153,23 @@
     {# Search bar (collapsible, desktop) #}
     <div id="search-bar"
          class="hidden border-t border-(--color-border) bg-white px-4 py-3">
-      <form action="/" method="get"
-            class="max-w-2xl mx-auto flex items-center gap-3 bg-(--color-bg-warm) border border-(--color-border) rounded-full px-4 py-1">
-        <svg class="w-4 h-4 text-(--color-text-muted) shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
-        </svg>
-        <input id="search-input" type="search" name="q" autofocus
-               placeholder="{% trans 'Найти статью, место, компанию...' %}"
-               class="flex-1 bg-transparent outline-none py-2 text-sm placeholder-stone-400">
-        <button type="submit" class="ck-btn-accent py-1.5 px-4 text-xs">{% trans "Найти" %}</button>
-      </form>
+      <div class="max-w-2xl mx-auto relative">
+        <form action="/search/" method="get"
+              class="flex items-center gap-3 bg-(--color-bg-warm) border border-(--color-border) rounded-full px-4 py-1">
+          <svg class="w-4 h-4 text-(--color-text-muted) shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+          </svg>
+          <input id="search-input" type="search" name="q" autofocus
+                 autocomplete="off"
+                 placeholder="{% trans 'Найти статью, место, компанию...' %}"
+                 class="flex-1 bg-transparent outline-none py-2 text-sm placeholder-stone-400">
+          <button type="submit" class="ck-btn-accent py-1.5 px-4 text-xs">{% trans "Найти" %}</button>
+        </form>
+        {# Live results dropdown #}
+        <div id="search-dropdown"
+             class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-(--color-border) rounded-2xl shadow-xl z-50 overflow-hidden max-h-96 overflow-y-auto">
+        </div>
+      </div>
     </div>
 
   </header>
@@ -401,6 +408,51 @@
     }
     document.getElementById('search-toggle').addEventListener('click', toggleSearch);
     document.getElementById('search-toggle-mobile').addEventListener('click', toggleSearch);
+
+    /* Live search dropdown */
+    var searchDropdown = document.getElementById('search-dropdown');
+    var searchTimer = null;
+    var labelColors = {
+      'article': 'bg-blue-100 text-blue-700',
+      'news':    'bg-green-100 text-green-700',
+      'vendor':  'bg-orange-100 text-orange-700',
+      'product': 'bg-purple-100 text-purple-700',
+    };
+    function closeDropdown() {
+      searchDropdown.classList.add('hidden');
+      searchDropdown.innerHTML = '';
+    }
+    searchInput.addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      var q = searchInput.value.trim();
+      if (q.length < 2) { closeDropdown(); return; }
+      searchTimer = setTimeout(function () {
+        fetch('/search/api/?q=' + encodeURIComponent(q))
+          .then(function(r){ return r.json(); })
+          .then(function(data) {
+            if (!data.results || data.results.length === 0) { closeDropdown(); return; }
+            var html = '';
+            data.results.forEach(function(item) {
+              var badge = labelColors[item.type] || 'bg-stone-100 text-stone-600';
+              html += '<a href="' + item.url + '" class="flex items-center gap-3 px-4 py-2.5 hover:bg-(--color-bg-warm) transition-colors border-b border-(--color-border) last:border-0">'
+                + '<span class="text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ' + badge + '">' + item.label + '</span>'
+                + '<span class="text-sm truncate">' + item.title + '</span>'
+                + '</a>';
+            });
+            html += '<a href="/search/?q=' + encodeURIComponent(q) + '" class="flex items-center justify-center gap-2 px-4 py-3 text-xs text-(--color-accent) font-semibold hover:bg-(--color-bg-warm) transition-colors">'
+              + '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>'
+              + 'Показать все результаты</a>';
+            searchDropdown.innerHTML = html;
+            searchDropdown.classList.remove('hidden');
+          });
+      }, 250);
+    });
+    document.addEventListener('click', function(e) {
+      if (!searchBar.contains(e.target)) closeDropdown();
+    });
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closeDropdown(); }
+    });
 
     /* Subscribe form — AJAX */
     var subscribeSection = document.getElementById('subscribe');
