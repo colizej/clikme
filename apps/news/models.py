@@ -59,6 +59,8 @@ class NewsItem(models.Model):
     status = models.CharField(max_length=15, choices=STATUSES, default=DRAFT)
     telegram_message_id = models.CharField(max_length=50, blank=True)
 
+    views_count = models.PositiveIntegerField(default=0)
+
     fetched_at = models.DateTimeField(auto_now_add=True)
     published_at = models.DateTimeField(null=True, blank=True)
 
@@ -72,3 +74,11 @@ class NewsItem(models.Model):
 
     def get_absolute_url(self):
         return f'/news/{self.slug}/'
+
+    @property
+    def reading_time(self):
+        import re
+        text = re.sub(r'<[^>]+>', ' ', self.body or self.summary or '')
+        words = len(text.split())
+        minutes = max(1, round(words / 200))
+        return minutes
