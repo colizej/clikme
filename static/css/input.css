@@ -430,7 +430,9 @@ details.ck-faq-item[open] .ck-faq-q {
   @apply my-8 p-4 rounded-2xl bg-(--color-bg-warm) border border-(--color-border);
   max-width: 100%;
   margin-left: 0 !important;
+  margin-right: 0 !important;
   padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .ad-container--widget,
@@ -443,13 +445,19 @@ details.ck-faq-item[open] .ck-faq-q {
 }
 
 .ad-container .ad-intro {
-  margin-left: 0;
-  padding-left: 0;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  text-align: center;
 }
 
 .ad-container .ad-widget,
 .ad-container .ad-html {
   margin: 0 auto;
+  text-align: center;
+}
+
+.ad-container p.ad-intro {
+  margin-left: 0 !important;
 }
 
 .ad-intro {
@@ -494,9 +502,19 @@ details.ck-faq-item[open] .ck-faq-q {
   .ad-container {
     margin-left: -1rem !important;
     margin-right: -1rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
     border-left: none !important;
     border-right: none !important;
     border-radius: 0 !important;
+  }
+  
+  .ad-container p.ad-intro {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    text-align: center !important;
   }
 }
 
