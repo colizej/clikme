@@ -119,7 +119,7 @@ def render_ad_unit(ad, article=None):
         click_url += f"?article={article.slug}"
     
     # Inline styles to ensure full width and reset margins
-    html = f'<div class="ad-container" style="margin: 2rem 1rem; padding: 1rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center; width: calc(100% - 2rem); box-sizing: border-box;">'
+    html = f'<div class="ad-container" style="margin: 2rem 0; padding: 1.5rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center; width: 100%; box-sizing: border-box;">'
     
     if ad.intro_text:
         html += f'<p class="ad-intro" style="margin: 0 0 0.75rem; font-size: 0.875rem; color: var(--color-text-muted); font-weight: 500;">{ad.intro_text}</p>'
