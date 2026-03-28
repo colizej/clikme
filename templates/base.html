@@ -103,6 +103,10 @@
            class="px-3 py-1.5 text-sm font-medium transition-colors {% if path == '/' %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
           {% trans "Главная" %}
         </a>
+        <a href="/#articles"
+           class="px-3 py-1.5 text-sm font-medium transition-colors text-(--color-text) hover:text-(--color-accent)">
+          {% trans "Статьи" %}
+        </a>
         <a href="/news/"
            class="px-3 py-1.5 text-sm font-medium transition-colors {% if '/news/' in path %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
           {% trans "Новости" %}
@@ -228,6 +232,19 @@
         <span class="drawer-label">
           <strong class="{% if path == '/' %}text-(--color-accent){% endif %}">{% trans "Главная" %}</strong>
           <small>{% trans "Путеводители и советы" %}</small>
+        </span>
+        <span class="drawer-arrow">›</span>
+      </a>
+      <a href="/#articles" onclick="closeMobileNav()" class="drawer-link">
+        <span class="drawer-icon">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3l2-2h4l2 2h3a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6M9 17h4"/>
+          </svg>
+        </span>
+        <span class="drawer-label">
+          <strong>{% trans "Статьи" %}</strong>
+          <small>{% trans "Все публикации" %}</small>
         </span>
         <span class="drawer-arrow">›</span>
       </a>
