@@ -61,7 +61,7 @@ def render_ad_html(slot, ad, article=None):
     return ''
 
 
-@register.inclusion_tag('ads/unit.html', takes_context=True)
+@register.inclusion_tag('ads/ad_unit.html', takes_context=True)
 def ad_slot(context, slot_slug, article=None, page_type='article'):
     """
     Тег для вставки рекламной позиции.
@@ -91,12 +91,14 @@ def ad_slot(context, slot_slug, article=None, page_type='article'):
 @register.simple_tag
 def get_ad_html(slot_slug, article=None, page_type='article'):
     """
-    Возвращает HTML объявления для вставки.
+    Возвращает HTML объявления для вставки в контент.
     
     Usage:
         {% get_ad_html 'article-before_h2' article as ad_html %}
         {{ content|insert_before_first_h2:ad_html }}
     """
+    from django.template import engines
+    
     try:
         slot = AdSlot.objects.get(slug=slot_slug, page_type=page_type, is_active=True)
     except AdSlot.DoesNotExist:
@@ -106,41 +108,11 @@ def get_ad_html(slot_slug, article=None, page_type='article'):
     
     if ad:
         AdService.increment_impression(ad)
-        return render_ad_unit(ad, article)
+        
+        # Render template
+        django_engine = engines['django']
+        template = django_engine.get_template('ads/ad_unit.html')
+        context = {'ad': ad, 'article': article}
+        return template.render(context)
     
     return ''
-
-
-def render_ad_unit(ad, article=None):
-    """Генерирует HTML для объявления (полный контейнер)"""
-    slot_slug = ad.slot.slug if ad.slot else 'unknown'
-    click_url = f"/ads/click/{ad.id}/"
-    if article:
-        click_url += f"?article={article.slug}"
-    
-    # Inline styles - только внутренний padding
-    html = f'<div class="ad-container" style="padding: 1.5rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center; box-sizing: border-box; display: block !important;">'
-    
-    if ad.intro_text:
-        html += f'<p class="ad-intro" style="margin: 0 0 0.75rem; font-size: 0.875rem; color: var(--color-text-muted); font-weight: 500;">{ad.intro_text}</p>'
-    
-    if ad.ad_type == 'widget':
-        # Заменяем width в iframe на 100%
-        import re
-        widget_code = re.sub(r'width:\s*\d+px', 'width:100%', ad.widget_code)
-        widget_code = re.sub(r'width="\d+"', 'width="100%"', widget_code)
-        html += f'<div style="text-align: center; width: 100%;">{widget_code}</div>'
-    elif ad.ad_type == 'banner':
-        if ad.html_code:
-            html += f'<div style="text-align: center;">{ad.html_code}</div>'
-        elif ad.image:
-            html += f'<a href="{click_url}" target="_blank" rel="noopener sponsored" style="display: inline-block;"><img src="{ad.image.url}" alt="{ad.partner.name}" loading="lazy" style="max-width: 100%; height: auto;"></a>'
-    elif ad.ad_type == 'html':
-        html += f'<div style="text-align: center;">{ad.html_code}</div>'
-    elif ad.ad_type == 'text':
-        intro = f'{ad.intro_text} ' if ad.intro_text else ''
-        html += f'<a href="{click_url}" style="display: inline-block; padding: 0.5rem 1rem; background: var(--color-accent); color: white; border-radius: 9999px; font-weight: 600; text-decoration: none;" target="_blank" rel="noopener sponsored">{intro}{ad.text}</a>'
-    
-    html += '</div>'
-    
-    return mark_safe(html)
