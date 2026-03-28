@@ -74,11 +74,6 @@ class AdUnitAdmin(admin.ModelAdmin):
         }),
     )
     
-    class Media:
-        css = {
-            'all': ('ads/admin.css',)
-        }
-    
     def target_display(self, obj):
         if obj.target_article:
             return f"Статья: {obj.target_article.title[:30]}..."
