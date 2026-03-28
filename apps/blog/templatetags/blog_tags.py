@@ -46,7 +46,7 @@ def insert_before_first_h2(html: str, content: str) -> str:
 @register.filter(is_safe=True)
 def insert_into_content(html: str, content: str) -> str:
     """
-    Вставляет контент в середину HTML (после первой трети).
+    Вставляет контент перед 4-м h2 в HTML.
     
     Usage:
         {{ content|insert_into_content:ad_html }}
@@ -54,28 +54,21 @@ def insert_into_content(html: str, content: str) -> str:
     if not html or not content:
         return html
     
-    # Ищем позицию примерно в середине - после </ul> или </ol> если есть
-    # Или просто после первых 2 абзацев
+    # Находим все h2 в HTML
+    h2_positions = [m.start() for m in re.finditer(r'<h2', html, re.IGNORECASE)]
     
-    # Ищем закрывающие теги списков или h2/h3
-    patterns = [
-        r'</ul>',
-        r'</ol>',
-        r'<h2',
-        r'<h3',
-    ]
+    # Если есть хотя бы 4 h2, вставляем перед 4-м
+    if len(h2_positions) >= 4:
+        pos = h2_positions[3]  # 4-й h2 (индекс 3)
+        return mark_safe(html[:pos] + content + html[pos:])
     
-    pos = None
-    for pattern in patterns:
-        match = re.search(pattern, html, re.IGNORECASE)
-        if match:
-            pos = match.start()
-            break
+    # Если меньше 4 h2, вставляем перед последним
+    if h2_positions:
+        pos = h2_positions[-1]
+        return mark_safe(html[:pos] + content + html[pos:])
     
-    # Если не нашли, ищем примерно в трети документа
-    if pos is None:
-        pos = len(html) // 3
-    
+    # Если нет h2, вставляем в трети документа
+    pos = len(html) // 3
     return mark_safe(html[:pos] + content + html[pos:])
 
 
