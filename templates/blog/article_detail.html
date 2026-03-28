@@ -107,7 +107,7 @@
 {% endblock %}
 
 {% block content %}
-{% load static blog_tags %}
+{% load static blog_tags ads_tags %}
 
   {# ── Hero image ── #}
   {% if article.image %}
@@ -205,6 +205,9 @@
     <div class="ck-prose">
       {% if article.image %}{{ article.content|strip_first_image }}{% else %}{{ article.content|safe }}{% endif %}
     </div>
+
+    {# ── Ad slot: middle of article ── #}
+    {% ad_slot "article_middle" article %}
 
     {# ── FAQ блок (только ручные, не auto) ── #}
     {% if manual_faqs %}
