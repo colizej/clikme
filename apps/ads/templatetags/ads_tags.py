@@ -119,13 +119,17 @@ def render_ad_unit(ad, article=None):
         click_url += f"?article={article.slug}"
     
     # Inline styles to ensure full width and reset margins
-    html = f'<div class="ad-container" style="margin: 2rem 0; padding: 1rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center; width: 100%; box-sizing: border-box;">'
+    html = f'<div class="ad-container" style="margin: 2rem 1rem; padding: 1rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center; width: calc(100% - 2rem); box-sizing: border-box;">'
     
     if ad.intro_text:
         html += f'<p class="ad-intro" style="margin: 0 0 0.75rem; font-size: 0.875rem; color: var(--color-text-muted); font-weight: 500;">{ad.intro_text}</p>'
     
     if ad.ad_type == 'widget':
-        html += f'<div style="text-align: center;">{ad.widget_code}</div>'
+        # Заменяем width в iframe на 100%
+        import re
+        widget_code = re.sub(r'width:\s*\d+px', 'width:100%', ad.widget_code)
+        widget_code = re.sub(r'width="\d+"', 'width="100%"', widget_code)
+        html += f'<div style="text-align: center; width: 100%;">{widget_code}</div>'
     elif ad.ad_type == 'banner':
         if ad.html_code:
             html += f'<div style="text-align: center;">{ad.html_code}</div>'
