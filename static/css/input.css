@@ -422,3 +422,61 @@ details.ck-faq-item[open] .ck-faq-q {
 }
 .ck-faq-a p { margin: 0 0 .5em; }
 .ck-faq-a p:last-child { margin: 0; }
+
+/* ============================================================
+   Ad Container Styles
+   ============================================================ */
+.ad-container {
+  @apply my-8 p-4 rounded-2xl bg-(--color-bg-warm) border border-(--color-border);
+  max-width: 100%;
+}
+
+.ad-container--widget {
+  @apply text-center;
+}
+
+.ad-container--banner {
+  @apply text-center;
+}
+
+.ad-container--text {
+  @apply text-center;
+}
+
+.ad-intro {
+  @apply text-sm text-(--color-text-muted) mb-3 font-medium;
+}
+
+.ad-widget {
+  @apply flex justify-center;
+}
+
+.ad-widget iframe {
+  @apply rounded-xl;
+  max-width: 100%;
+  height: auto;
+}
+
+.ad-banner-link {
+  @apply inline-block;
+}
+
+.ad-banner-link img {
+  @apply rounded-xl max-w-full h-auto;
+}
+
+.ad-banner-placeholder {
+  @apply inline-block px-6 py-4 bg-(--color-accent-light) text-(--color-accent)
+         rounded-xl font-semibold;
+}
+
+.ad-text-link {
+  @apply inline-flex items-center gap-2 px-4 py-2
+         bg-(--color-accent) text-white rounded-full
+         font-semibold hover:bg-(--color-accent-hover) transition-colors;
+}
+
+.ad-disclaimer {
+  @apply block text-xs text-(--color-text-muted) mt-3;
+  opacity: 0.7;
+}
