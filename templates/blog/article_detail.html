@@ -270,6 +270,9 @@
       {% endif %}
     </nav>
 
+    {# ── Ad slot: end of article ── #}
+    {% ad_slot "article-end" article "article" %}
+
     {# ── Related articles ── #}
     {% if related_articles %}
     <section class="mt-14">
