@@ -113,49 +113,30 @@ def get_ad_html(slot_slug, article=None, page_type='article'):
 
 def render_ad_unit(ad, article=None):
     """Генерирует HTML для объявления (полный контейнер)"""
-    from django.template import Template, Context
+    slot_slug = ad.slot.slug if ad.slot else 'unknown'
+    click_url = f"/ads/click/{ad.id}/"
+    if article:
+        click_url += f"?article={article.slug}"
     
-    template_str = '''
-<div class="ad-container ad-container--{{ ad.ad_type }}" data-slot="{{ slot.slug }}" data-ad="{{ ad.id }}">
-    {% if ad.intro_text %}
-    <p class="ad-intro">{{ ad.intro_text }}</p>
-    {% endif %}
+    html = f'<div class="ad-container ad-container--{ad.ad_type}" data-slot="{slot_slug}" data-ad="{ad.id}">'
     
-    {% if ad.ad_type == 'widget' %}
-    <div class="ad-widget">
-        {{ ad.widget_code|safe }}
-    </div>
+    if ad.intro_text:
+        html += f'<p class="ad-intro">{ad.intro_text}</p>'
     
-    {% elif ad.ad_type == 'banner' %}
-    {% if ad.html_code %}
-    <div class="ad-html">{{ ad.html_code|safe }}</div>
-    {% elif ad.image %}
-    <a href="/ads/click/{{ ad.id }}/{% if article %}?article={{ article.slug }}{% endif %}" 
-       target="_blank" rel="noopener sponsored">
-        <img src="{{ ad.image.url }}" alt="{{ ad.partner.name }}" loading="lazy">
-    </a>
-    {% endif %}
+    if ad.ad_type == 'widget':
+        html += f'<div class="ad-widget">{ad.widget_code}</div>'
+    elif ad.ad_type == 'banner':
+        if ad.html_code:
+            html += f'<div class="ad-html">{ad.html_code}</div>'
+        elif ad.image:
+            html += f'<a href="{click_url}" target="_blank" rel="noopener sponsored"><img src="{ad.image.url}" alt="{ad.partner.name}" loading="lazy"></a>'
+    elif ad.ad_type == 'html':
+        html += f'<div class="ad-html">{ad.html_code}</div>'
+    elif ad.ad_type == 'text':
+        intro = f'{ad.intro_text} ' if ad.intro_text else ''
+        html += f'<a href="{click_url}" class="ad-text-link" target="_blank" rel="noopener sponsored">{intro}{ad.text}</a>'
     
-    {% elif ad.ad_type == 'html' %}
-    <div class="ad-html">{{ ad.html_code|safe }}</div>
+    html += '<span class="ad-disclaimer">Реклама</span>'
+    html += '</div>'
     
-    {% elif ad.ad_type == 'text' %}
-    <a href="/ads/click/{{ ad.id }}/{% if article %}?article={{ article.slug }}{% endif %}" 
-       class="ad-text-link"
-       target="_blank" rel="noopener sponsored">
-        {% if ad.intro_text %}{{ ad.intro_text }} {% endif %}{{ ad.text }}
-    </a>
-    {% endif %}
-    
-    <span class="ad-disclaimer">Реклама</span>
-</div>
-'''
-    
-    # Create a mock slot for template rendering
-    class MockSlot:
-        def __init__(self):
-            self.slug = slot_slug
-    
-    t = Template(template_str)
-    c = Context({'ad': ad, 'slot': MockSlot(), 'article': article})
-    return t.render(c)
+    return mark_safe(html)
