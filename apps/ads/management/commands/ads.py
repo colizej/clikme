@@ -170,16 +170,20 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(f'Слот найден: {slot}')
         
+        trip_widget_code = '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:320px;height:480px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>'
+        
         ads = [
             ('Trip.com Widget 320x480', 'widget', 'widget_320x480', 8,
-             '<iframe src="https://widgets.trip.com/widget2?campaign=clikme" width="320" height="480"></iframe>',
+             trip_widget_code,
              'Проверено читателями:'),
             ('Trip.com Widget 300x600', 'widget', 'widget_300x600', 7,
-             '<iframe src="https://widgets.trip.com/widget3?campaign=clikme" width="300" height="600"></iframe>',
+             trip_widget_code,
              'Лучшие предложения:'),
-            ('Trip.com Баннер 300x250', 'banner', 'banner_300x250', 6, 'https://www.trip.com/hotels',
+            ('Trip.com Баннер 300x250', 'banner', 'banner_300x250', 6,
+             trip_widget_code,
              'Рекомендуем:'),
-            ('Trip.com Баннер 728x90', 'banner', 'banner_728x90', 5, 'https://www.trip.com/deals',
+            ('Trip.com Баннер 728x90', 'banner', 'banner_728x90', 5,
+             trip_widget_code,
              'Горячие предложения:'),
         ]
         
