@@ -1,6 +1,29 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django import forms
 from .models import Partner, AdSlot, AdUnit, AdClick, ArticleAdPlacement
+
+
+class AdSlotChoiceField(forms.ModelChoiceField):
+    """Поле выбора с группировкой по типу страницы"""
+    
+    def label_from_instance(self, obj):
+        return f"{obj.name} ({obj.get_page_type_display()} — {obj.position})"
+
+
+class ArticleAdPlacementForm(forms.ModelForm):
+    """Форма для ручного размещения с группировкой позиций"""
+    
+    slot = AdSlotChoiceField(
+        queryset=AdSlot.objects.filter(is_active=True),
+        label="Позиция",
+        required=False,
+        widget=forms.Select(attrs={'class': 'select2'})
+    )
+    
+    class Meta:
+        model = ArticleAdPlacement
+        fields = '__all__'
 
 
 @admin.register(Partner)
@@ -106,7 +129,8 @@ class ArticleAdPlacementAdmin(admin.ModelAdmin):
     list_display = ['article', 'slot', 'ad_unit', 'position', 'is_active', 'order']
     list_filter = ['slot', 'is_active', 'position']
     search_fields = ['article__title', 'slot__name']
-    autocomplete_fields = ['article', 'slot', 'ad_unit']
+    autocomplete_fields = ['article', 'ad_unit']
+    form = ArticleAdPlacementForm
     ordering = ['article', 'order']
 
 
