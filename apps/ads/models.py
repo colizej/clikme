@@ -39,6 +39,24 @@ class AdSlot(models.Model):
         ('end', 'Конец'),
     ]
     
+    POSITION_LABELS = {
+        'top': {
+            'article': 'Начало статьи',
+            'news': 'Начало новости',
+            'product': 'Начало продукта',
+        },
+        'middle': {
+            'article': 'Середина статьи',
+            'news': 'Середина новости',
+            'product': 'Середина продукта',
+        },
+        'end': {
+            'article': 'Конец статьи',
+            'news': 'Конец новости',
+            'product': 'Конец продукта',
+        },
+    }
+    
     slug = models.SlugField("URL-слаг", max_length=100, unique=True)
     name = models.CharField("Название", max_length=255)
     description = models.TextField("Описание", blank=True)
@@ -60,6 +78,9 @@ class AdSlot(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_page_type_display()} — {self.get_position_display()})"
+    
+    def get_full_position_display(self):
+        return self.POSITION_LABELS.get(self.position, {}).get(self.page_type, self.get_position_display())
 
 
 class AdUnit(models.Model):

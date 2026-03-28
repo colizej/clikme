@@ -15,11 +15,15 @@ class PartnerAdmin(admin.ModelAdmin):
 
 @admin.register(AdSlot)
 class AdSlotAdmin(admin.ModelAdmin):
-    list_display = ['name', 'slug', 'page_type', 'position', 'is_active', 'order']
+    list_display = ['name', 'slug', 'page_type_display', 'is_active', 'order']
     list_filter = ['page_type', 'is_active']
     search_fields = ['name', 'slug']
     ordering = ['page_type', 'order', 'name']
     prepopulated_fields = {'slug': ('name',)}
+    
+    @admin.display(description='Тип / Позиция')
+    def page_type_display(self, obj):
+        return obj.get_full_position_display()
 
 
 @admin.register(AdUnit)
