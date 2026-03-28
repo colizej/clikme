@@ -201,13 +201,31 @@
     {# Divider desktop #}
     <div class="hidden md:block border-b border-(--color-border) mb-8"></div>
 
-    {# Body #}
-    <div class="ck-prose">
-      {% if article.image %}{{ article.content|strip_first_image }}{% else %}{{ article.content|safe }}{% endif %}
+    {# Desktop: grid with sidebar #}
+    <div class="hidden md:block">
+      <div class="flex gap-8">
+        <div class="flex-1 min-w-0">
+          {# Body #}
+          <div class="ck-prose">
+            {% if article.image %}{{ article.content|strip_first_image }}{% else %}{{ article.content|safe }}{% endif %}
+          </div>
+        </div>
+        <div class="w-80 shrink-0">
+          {# Sidebar ad - sticky on desktop #}
+          <div class="sticky top-24">
+            {% ad_slot "sidebar" article %}
+          </div>
+        </div>
+      </div>
     </div>
 
-    {# ── Ad slot: middle of article ── #}
-    {% ad_slot "article_middle" article %}
+    {# Mobile: inline ad #}
+    <div class="md:hidden">
+      <div class="ck-prose">
+        {% if article.image %}{{ article.content|strip_first_image }}{% else %}{{ article.content|safe }}{% endif %}
+      </div>
+      {% ad_slot "article_middle" article %}
+    </div>
 
     {# ── FAQ блок (только ручные, не auto) ── #}
     {% if manual_faqs %}

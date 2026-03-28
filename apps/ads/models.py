@@ -32,7 +32,6 @@ class AdSlot(models.Model):
         ('widget_300x600', 'Widget 300x600'),
         ('banner_728x90', 'Banner 728x90'),
         ('banner_300x250', 'Banner 300x250'),
-        ('banner_responsive', 'Баннер адаптивный'),
         ('text', 'Текстовая ссылка'),
     ]
     
