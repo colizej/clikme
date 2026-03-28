@@ -246,7 +246,7 @@
     {% endif %}
 
     {# ── Prev / Next navigation ── #}
-    <nav class="mt-12 pt-8 border-t border-(--color-border) grid grid-cols-2 gap-4">
+    <nav class="mt-12 pt-8 pb-6 border-t border-(--color-border) grid grid-cols-2 gap-4">
       {% if prev_article %}
       <a href="{{ prev_article.get_absolute_url }}" class="group flex flex-col gap-1 p-4 rounded-xl border border-(--color-border) hover:border-(--color-accent) hover:bg-(--color-accent-light) transition-colors">
         <span class="text-xs text-(--color-text-muted) flex items-center gap-1">
