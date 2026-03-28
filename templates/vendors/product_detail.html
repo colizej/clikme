@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n blog_tags %}
+{% load i18n blog_tags ads_tags %}
 
 {% block title %}{{ product.name }} — ClikMe{% endblock %}
 {% block meta_description %}{{ product.meta_description|default:product.description|truncatewords:25 }}{% endblock %}
@@ -9,6 +9,9 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-10">
+
+  {# ── Ad slot: top of product ── #}
+  {% ad_slot "product-top" product "product" %}
 
   <nav class="text-xs text-(--color-muted) mb-6 flex items-center gap-1">
     <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
