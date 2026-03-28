@@ -433,6 +433,18 @@ details.ck-faq-item[open] .ck-faq-q {
   margin-right: 0 !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Override ck-prose styles for ad-container */
+.ck-prose .ad-container {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
 }
 
 .ad-container--widget,
@@ -447,7 +459,7 @@ details.ck-faq-item[open] .ck-faq-q {
 .ad-container .ad-intro {
   margin-left: 0 !important;
   padding-left: 0 !important;
-  text-align: center;
+  text-align: center !important;
 }
 
 .ad-container .ad-widget,
