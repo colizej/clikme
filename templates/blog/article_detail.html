@@ -201,14 +201,16 @@
     {# Divider desktop #}
     <div class="hidden md:block border-b border-(--color-border) mb-8"></div>
 
-    {# Body - with ad before first h2 #}
+    {# Body - with ads inserted #}
     {% get_ad_html "article-before_h2" article "article" as before_h2_ad %}
+    {% get_ad_html "article_middle" article "article" as middle_ad %}
     <div class="ck-prose">
-      {% if article.image %}{{ article.content|strip_first_image|insert_before_first_h2:before_h2_ad }}{% else %}{{ article.content|insert_before_first_h2:before_h2_ad|safe }}{% endif %}
+      {% if article.image %}
+        {{ article.content|strip_first_image|insert_before_first_h2:before_h2_ad|insert_into_content:middle_ad }}
+      {% else %}
+        {{ article.content|insert_before_first_h2:before_h2_ad|insert_into_content:middle_ad|safe }}
+      {% endif %}
     </div>
-
-    {# ── Ad slot: middle of article ── #}
-    {% ad_slot "article_middle" article "article" %}
 
     {# ── FAQ блок (только ручные, не auto) ── #}
     {% if manual_faqs %}

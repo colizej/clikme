@@ -43,6 +43,42 @@ def insert_before_first_h2(html: str, content: str) -> str:
     return html
 
 
+@register.filter(is_safe=True)
+def insert_into_content(html: str, content: str) -> str:
+    """
+    Вставляет контент в середину HTML (после первой трети).
+    
+    Usage:
+        {{ content|insert_into_content:ad_html }}
+    """
+    if not html or not content:
+        return html
+    
+    # Ищем позицию примерно в середине - после </ul> или </ol> если есть
+    # Или просто после первых 2 абзацев
+    
+    # Ищем закрывающие теги списков или h2/h3
+    patterns = [
+        r'</ul>',
+        r'</ol>',
+        r'<h2',
+        r'<h3',
+    ]
+    
+    pos = None
+    for pattern in patterns:
+        match = re.search(pattern, html, re.IGNORECASE)
+        if match:
+            pos = match.start()
+            break
+    
+    # Если не нашли, ищем примерно в трети документа
+    if pos is None:
+        pos = len(html) // 3
+    
+    return mark_safe(html[:pos] + content + html[pos:])
+
+
 @register.filter
 def strip_first_image(html: str) -> str:
     """
