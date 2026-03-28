@@ -429,9 +429,6 @@ details.ck-faq-item[open] .ck-faq-q {
 /* Ad styles */
 .ad-container {
   @apply my-8 p-4 rounded-2xl bg-(--color-bg-warm) border border-(--color-border);
-  margin: 2rem 0 !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
 }
 
 .ad-container--widget,
@@ -444,14 +441,9 @@ details.ck-faq-item[open] .ck-faq-q {
   @apply text-sm text-(--color-text-muted) mb-3 font-medium;
 }
 
-/* Reset any inherited margins from ck-prose */
-.ck-prose p > .ad-container,
-.ck-prose li > .ad-container,
-.ck-prose div > .ad-container {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
+/* Allow inline styles to take precedence */
+.ad-container[style] {
+  margin: inherit !important;
 }
 
 /* Override ck-prose styles for ad-container */

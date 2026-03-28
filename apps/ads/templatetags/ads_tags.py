@@ -118,8 +118,8 @@ def render_ad_unit(ad, article=None):
     if article:
         click_url += f"?article={article.slug}"
     
-    # Inline styles - боковые отступы + padding внутри
-    html = f'<div class="ad-container" style="margin: 2rem 1rem; padding: 1.5rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center; width: calc(100% - 2rem); display: inline-block; box-sizing: border-box;">'
+    # Inline styles - боковые отступы
+    html = f'<div class="ad-container" style="margin: 2rem 1rem !important; padding: 1.5rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center; box-sizing: border-box; display: block !important;">'
     
     if ad.intro_text:
         html += f'<p class="ad-intro" style="margin: 0 0 0.75rem; font-size: 0.875rem; color: var(--color-text-muted); font-weight: 500;">{ad.intro_text}</p>'
