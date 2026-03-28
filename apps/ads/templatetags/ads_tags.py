@@ -61,8 +61,8 @@ def render_ad_html(slot, ad, article=None):
     return ''
 
 
-@register.inclusion_tag('ads/ad_unit.html', takes_context=True)
-def ad_slot(context, slot_slug, article=None, page_type='article'):
+@register.inclusion_tag('ads/ad_unit.html', takes_context=False)
+def ad_slot(slot_slug, article=None, page_type='article'):
     """
     Тег для вставки рекламной позиции.
     
