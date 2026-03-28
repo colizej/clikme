@@ -465,6 +465,20 @@ details.ck-faq-item[open] .ck-faq-q {
   @apply rounded-xl max-w-full h-auto;
 }
 
+/* Desktop: full width banners */
+@media (min-width: 768px) {
+  .ad-container--banner,
+  .ad-container--widget {
+    max-width: 100%;
+  }
+  
+  .ad-container--banner .ad-widget iframe,
+  .ad-container--widget .ad-widget iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
 .ad-banner-placeholder {
   @apply inline-block px-6 py-4 bg-(--color-accent-light) text-(--color-accent)
          rounded-xl font-semibold;
