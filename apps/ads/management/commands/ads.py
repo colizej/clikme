@@ -20,6 +20,9 @@ class Command(BaseCommand):
         # Деактивация просроченных
         subparsers.add_parser('cleanup', help='Деактивировать просроченные')
         
+        # Демо-данные Trip.com
+        subparsers.add_parser('demo', help='Создать демо-данные Trip.com')
+        
         # Создание слота
         slot_parser = subparsers.add_parser('create_slot', help='Создать слот')
         slot_parser.add_argument('slug', type=str, help='URL-слаг')
@@ -51,6 +54,8 @@ class Command(BaseCommand):
             self.handle_create_slot(options)
         elif action == 'create_ad':
             self.handle_create_ad(options)
+        elif action == 'demo':
+            self.handle_demo()
         else:
             self.stdout.write(self.style.ERROR('Неизвестное действие'))
             self.stdout.write(self.style.INFO('Доступные действия: list, stats, cleanup, create_slot, create_ad'))
@@ -132,3 +137,69 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f'Партнёр не найден: {options["partner_slug"]}'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Ошибка: {e}'))
+
+    def handle_demo(self):
+        self.stdout.write(self.style.SUCCESS('\n=== Создание демо-данных Trip.com ===\n'))
+        
+        partner, created = Partner.objects.get_or_create(
+            slug='trip-com',
+            defaults={
+                'name': 'Trip.com',
+                'url': 'https://www.trip.com',
+            }
+        )
+        if created:
+            self.stdout.write(f'Партнёр создан: {partner}')
+        else:
+            self.stdout.write(f'Партнёр найден: {partner}')
+        
+        slots = [
+            ('article_middle', 'Середина статьи', 'widget_320x480'),
+            ('sidebar', 'Сайдбар', 'widget_300x600'),
+            ('before_comments', 'Перед комментариями', 'banner_300x250'),
+            ('bottom', 'Низ статьи', 'banner_728x90'),
+        ]
+        
+        for slug, name, slot_type in slots:
+            slot, created = AdSlot.objects.get_or_create(
+                slug=slug,
+                defaults={'name': name, 'slot_type': slot_type}
+            )
+            if created:
+                self.stdout.write(f'Слот создан: {slot}')
+            else:
+                self.stdout.write(f'Слот найден: {slot}')
+        
+        ads = [
+            ('Trip.com Widget 320x480', 'widget', 'widget_320x480', 8,
+             '<iframe src="https://widgets.trip.com/widget2?campaign=clikme" width="320" height="480"></iframe>',
+             'Проверено читателями:'),
+            ('Trip.com Widget 300x600', 'widget', 'widget_300x600', 7,
+             '<iframe src="https://widgets.trip.com/widget3?campaign=clikme" width="300" height="600"></iframe>',
+             'Лучшие предложения:'),
+            ('Trip.com Баннер 300x250', 'banner', 'banner_300x250', 6, 'https://www.trip.com/hotels',
+             'Рекомендуем:'),
+            ('Trip.com Баннер 728x90', 'banner', 'banner_728x90', 5, 'https://www.trip.com/deals',
+             'Горячие предложения:'),
+        ]
+        
+        for name, ad_type, slot_type, priority, widget_or_link, intro in ads:
+            ad, created = AdUnit.objects.get_or_create(
+                partner=partner,
+                name=name,
+                defaults={
+                    'ad_type': ad_type,
+                    'slot_type': slot_type,
+                    'priority': priority,
+                    'widget_code': widget_or_link if ad_type == 'widget' else '',
+                    'link': widget_or_link if ad_type == 'banner' else '',
+                    'intro_text': intro,
+                }
+            )
+            if created:
+                self.stdout.write(f'Объявление создано: {ad}')
+            else:
+                self.stdout.write(f'Объявление найдено: {ad}')
+        
+        self.stdout.write(self.style.SUCCESS('\nДемо-данные готовы!'))
+        self.stdout.write('Используйте {% ad_slot "article_middle" %} в шаблоне.')
