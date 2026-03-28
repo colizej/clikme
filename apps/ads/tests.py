@@ -3,8 +3,9 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import Partner, AdSlot, AdUnit, AdClick
+from .models import Partner, AdSlot, AdUnit, AdClick, ArticleAdPlacement
 from .services import AdService
+from apps.blog.models import Category, Article
 
 
 class PartnerModelTest(TestCase):
@@ -320,3 +321,137 @@ class AdServiceTest(TestCase):
         self.assertEqual(stats['total_ads'], 2)
         self.assertEqual(stats['total_impressions'], 300)
         self.assertEqual(stats['total_clicks'], 15)
+
+
+class ArticleAdPlacementModelTest(TestCase):
+    """Тесты модели ArticleAdPlacement"""
+    
+    def setUp(self):
+        self.partner = Partner.objects.create(
+            name="Test Partner",
+            slug="test-partner",
+            url="https://example.com"
+        )
+        self.slot = AdSlot.objects.create(
+            slug="article_middle",
+            name="Середина статьи",
+            slot_type="widget_320x480"
+        )
+        self.ad = AdUnit.objects.create(
+            partner=self.partner,
+            name="Test Ad",
+            ad_type="widget",
+            slot_type="widget_320x480"
+        )
+        self.category = Category.objects.create(
+            name="Test Category",
+            slug="test-category"
+        )
+        self.article = Article.objects.create(
+            title="Test Article",
+            slug="test-article",
+            content="Test content",
+            category=self.category
+        )
+    
+    def test_create_placement(self):
+        """Создание размещения"""
+        placement = ArticleAdPlacement.objects.create(
+            article=self.article,
+            slot=self.slot,
+            ad_unit=self.ad,
+            position="before_h2"
+        )
+        self.assertEqual(str(placement), f"{self.article} — {self.slot.name} (before_h2)")
+        self.assertTrue(placement.is_active)
+    
+    def test_placement_without_ad_unit(self):
+        """Размещение без конкретного объявления (автовыбор)"""
+        placement = ArticleAdPlacement.objects.create(
+            article=self.article,
+            slot=self.slot,
+            position="end"
+        )
+        self.assertIsNone(placement.ad_unit)
+    
+    def test_unique_constraint(self):
+        """Уникальность article + slot + position"""
+        ArticleAdPlacement.objects.create(
+            article=self.article,
+            slot=self.slot,
+            position="before_h2"
+        )
+        with self.assertRaises(Exception):
+            ArticleAdPlacement.objects.create(
+                article=self.article,
+                slot=self.slot,
+                position="before_h2"
+            )
+
+
+class AdShortcodeTest(TestCase):
+    """Тесты парсинга шорткодов"""
+    
+    def setUp(self):
+        self.partner = Partner.objects.create(
+            name="Test Partner",
+            slug="test-partner",
+            url="https://example.com"
+        )
+        self.slot = AdSlot.objects.create(
+            slug="mid_slot",
+            name="Середина",
+            slot_type="banner_300x250",
+            fallback_text="<div class='ad-placeholder'>Реклама</div>"
+        )
+        AdSlot.objects.create(
+            slug="inactive_slot",
+            name="Неактивный",
+            slot_type="banner_300x250",
+            is_active=False
+        )
+    
+    def test_parse_single_shortcode(self):
+        """Парсит один шорткод"""
+        from .templatetags.ads_tags import parse_ad_shortcodes
+        
+        text = "Some text [ad:mid_slot] more text"
+        result = parse_ad_shortcodes(text)
+        
+        self.assertNotIn('[ad:mid_slot]', result)
+        self.assertIn('Some text', result)
+    
+    def test_parse_multiple_shortcodes(self):
+        """Парсит несколько шорткодов"""
+        from .templatetags.ads_tags import parse_ad_shortcodes
+        
+        text = "[ad:mid_slot] middle [ad:mid_slot] end"
+        result = parse_ad_shortcodes(text)
+        
+        self.assertNotIn('[ad:', result)
+        self.assertEqual(result.count('Some text'), 0)
+    
+    def test_inactive_slot_returns_empty(self):
+        """Неактивный слот возвращает пустую строку"""
+        from .templatetags.ads_tags import parse_ad_shortcodes
+        
+        text = "[ad:inactive_slot] test"
+        result = parse_ad_shortcodes(text)
+        
+        self.assertEqual(result, ' test')
+    
+    def test_nonexistent_slot_returns_empty(self):
+        """Несуществующий слот возвращает пустую строку"""
+        from .templatetags.ads_tags import parse_ad_shortcodes
+        
+        text = "Text [ad:nonexistent] more"
+        result = parse_ad_shortcodes(text)
+        
+        self.assertEqual(result, 'Text  more')
+    
+    def test_empty_text_returns_empty(self):
+        """Пустой текст возвращается как есть"""
+        from .templatetags.ads_tags import parse_ad_shortcodes
+        
+        self.assertEqual(parse_ad_shortcodes(''), '')
+        self.assertIsNone(parse_ad_shortcodes(None))

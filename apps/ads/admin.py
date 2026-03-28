@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Partner, AdSlot, AdUnit, AdClick
+from .models import Partner, AdSlot, AdUnit, AdClick, ArticleAdPlacement
 
 
 @admin.register(Partner)
@@ -68,6 +68,15 @@ class AdUnitAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('partner')
+
+
+@admin.register(ArticleAdPlacement)
+class ArticleAdPlacementAdmin(admin.ModelAdmin):
+    list_display = ['article', 'slot', 'ad_unit', 'position', 'is_active', 'order']
+    list_filter = ['slot', 'is_active', 'position']
+    search_fields = ['article__title', 'slot__name']
+    autocomplete_fields = ['article', 'slot', 'ad_unit']
+    ordering = ['article', 'order']
 
 
 @admin.register(AdClick)

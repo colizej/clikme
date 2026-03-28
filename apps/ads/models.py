@@ -180,3 +180,44 @@ class AdClick(models.Model):
 
     def __str__(self):
         return f"{self.ad_unit} — {self.created_at}"
+
+
+class ArticleAdPlacement(models.Model):
+    """Ручное размещение объявления в статье"""
+    
+    article = models.ForeignKey(
+        'blog.Article',
+        on_delete=models.CASCADE,
+        related_name='ad_placements',
+        verbose_name="Статья"
+    )
+    slot = models.ForeignKey(
+        AdSlot,
+        on_delete=models.CASCADE,
+        related_name='placements',
+        verbose_name="Слот"
+    )
+    ad_unit = models.ForeignKey(
+        AdUnit,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='placements',
+        verbose_name="Объявление (null = автовыбор)"
+    )
+    position = models.CharField(
+        "Позиция в тексте",
+        max_length=50,
+        help_text="Укажите где вставить: before_h2, after_paragraph, end"
+    )
+    is_active = models.BooleanField("Активно", default=True)
+    order = models.PositiveIntegerField("Порядок", default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Размещение в статье"
+        verbose_name_plural = "Размещения в статьях"
+        ordering = ['article', 'order']
+        unique_together = ['article', 'slot', 'position']
+
+    def __str__(self):
+        return f"{self.article} — {self.slot.name} ({self.position})"
