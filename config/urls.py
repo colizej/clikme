@@ -35,6 +35,7 @@ urlpatterns = [
     path('', include('apps.pages.urls')),
     path('', include('apps.newsletter.urls')),
     path('', include('apps.vendors.urls')),
+    path('', include('apps.ads.urls')),
     path('', include('apps.blog.urls')),  # slug_dispatch — последним
 
     # Robots
