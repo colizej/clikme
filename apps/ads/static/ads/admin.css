@@ -1,25 +1,22 @@
-/* AdUnit admin custom styles */
-
-#adunit_form .fieldset-wrapper fieldset[data-label="Контент"] .fieldset-title,
-#adunit_form .form-row.field-intro_text label {
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
+/* AdUnit admin - Контент section styles */
+.form-row.field-intro_text label {
+    font-size: 16px !important;
+    font-weight: bold !important;
     color: #e85d04 !important;
+    display: block !important;
+    margin-bottom: 6px !important;
 }
 
-#adunit_form .form-row.field-intro_text label {
-    display: block;
-    margin-bottom: 8px;
-}
-
-#adunit_form .form-row.field-intro_text textarea {
-    font-size: 1rem !important;
+.form-row.field-intro_text textarea {
+    font-size: 14px !important;
     font-weight: 600 !important;
-    border-color: #e85d04 !important;
+    border: 2px solid #e85d04 !important;
     background-color: #fff8f4 !important;
+    padding: 10px !important;
 }
 
-#adunit_form .form-row.field-intro_text textarea:focus {
+.form-row.field-intro_text textarea:focus {
     border-color: #d00000 !important;
-    box-shadow: 0 0 0 2px rgba(232, 93, 4, 0.2) !important;
+    box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.2) !important;
+    outline: none !important;
 }
