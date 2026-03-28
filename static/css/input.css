@@ -472,6 +472,13 @@ details.ck-faq-item[open] .ck-faq-q {
   }
 }
 
+/* Ad unit widget full width */
+.ad-unit iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
 /* Mobile: simple */
 @media (max-width: 767px) {
   .ad-container {
