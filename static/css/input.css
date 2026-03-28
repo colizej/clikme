@@ -426,15 +426,67 @@ details.ck-faq-item[open] .ck-faq-q {
 /* ============================================================
    Ad Container Styles
    ============================================================ */
-.ad-container {
-  @apply my-8 p-4 rounded-2xl bg-(--color-bg-warm) border border-(--color-border);
-  max-width: 100%;
+/* Ad wrapper - resets any inherited margins from parent */
+.ad-wrapper {
+  display: block;
+  width: 100%;
+  margin: 1.5rem 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+/* Reset any margins on li/p that contain ad-wrapper */
+.ck-prose li > .ad-wrapper,
+.ck-prose p > .ad-wrapper {
   margin-left: 0 !important;
   margin-right: 0 !important;
   padding-left: 0 !important;
-  padding-right: 0 !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
+  width: 100%;
+}
+
+.ad-container {
+  @apply my-0 p-4 rounded-2xl bg-(--color-bg-warm) border border-(--color-border);
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 1rem !important;
+}
+
+.ad-container--widget,
+.ad-container--banner,
+.ad-container--text {
+  @apply text-center;
+}
+
+.ad-container .ad-intro {
+  @apply text-sm text-(--color-text-muted) mb-3 font-medium;
+  text-align: center;
+}
+
+/* Desktop: full width banners */
+@media (min-width: 768px) {
+  .ad-wrapper {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  .ad-container {
+    width: 100%;
+  }
+}
+
+/* Mobile: edge to edge */
+@media (max-width: 767px) {
+  .ad-wrapper {
+    margin-left: -1rem !important;
+    margin-right: -1rem !important;
+  }
+  
+  .ad-container {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
 }
 
 /* Override ck-prose styles for ad-container */

@@ -118,25 +118,25 @@ def render_ad_unit(ad, article=None):
     if article:
         click_url += f"?article={article.slug}"
     
-    # Wrapper div to reset any inherited styles from parent
-    html = '<div style="display: block; width: 100%; margin: 0; padding: 0; background: transparent; border: none;"><div class="ad-container" style="width: 100%; max-width: 100%; margin: 1.5rem 0; padding: 1rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center;">'
+    # Full width wrapper + ad-container
+    html = '<div class="ad-wrapper"><div class="ad-container">'
     
     if ad.intro_text:
         html += f'<p class="ad-intro">{ad.intro_text}</p>'
     
     if ad.ad_type == 'widget':
-        html += f'<div style="text-align: center;">{ad.widget_code}</div>'
+        html += f'<div class="ad-widget">{ad.widget_code}</div>'
     elif ad.ad_type == 'banner':
         if ad.html_code:
-            html += f'<div style="text-align: center;">{ad.html_code}</div>'
+            html += f'<div class="ad-html">{ad.html_code}</div>'
         elif ad.image:
-            html += f'<a href="{click_url}" target="_blank" rel="noopener sponsored" style="display: block; text-align: center;"><img src="{ad.image.url}" alt="{ad.partner.name}" loading="lazy" style="display: inline;"></a>'
+            html += f'<a href="{click_url}" target="_blank" rel="noopener sponsored"><img src="{ad.image.url}" alt="{ad.partner.name}" loading="lazy"></a>'
     elif ad.ad_type == 'html':
-        html += f'<div style="text-align: center;">{ad.html_code}</div>'
+        html += f'<div class="ad-html">{ad.html_code}</div>'
     elif ad.ad_type == 'text':
         intro = f'{ad.intro_text} ' if ad.intro_text else ''
-        html += f'<a href="{click_url}" style="display: inline-block; padding: 0.5rem 1rem; background: var(--color-accent); color: white; border-radius: 9999px; font-weight: 600; text-decoration: none;" target="_blank" rel="noopener sponsored">{intro}{ad.text}</a>'
+        html += f'<a href="{click_url}" class="ad-text-link" target="_blank" rel="noopener sponsored">{intro}{ad.text}</a>'
     
-    html += '</div></div>'  # Close ad-container and wrapper
+    html += '</div></div>'  # Close ad-container and ad-wrapper
     
     return mark_safe(html)
