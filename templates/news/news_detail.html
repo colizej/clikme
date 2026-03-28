@@ -73,19 +73,17 @@
   {# ── Ad slot: top of news ── #}
   {% ad_slot "news-top" news_item "news" %}
 
-  {% get_ad_html "news-middle" news_item "news" as news_middle_ad %}
-
   {% if clean_body %}
   <div class="ck-prose">
-    {{ clean_body|insert_before_third_h2:news_middle_ad|safe }}
+    {{ clean_body|safe }}
   </div>
   {% elif clean_summary %}
   <div class="ck-prose">
-    <p>{{ clean_summary|insert_before_third_h2:news_middle_ad }}</p>
+    <p>{{ clean_summary }}</p>
   </div>
   {% elif news_item.summary %}
   <div class="ck-prose">
-    <p>{{ news_item.summary|insert_before_third_h2:news_middle_ad }}</p>
+    <p>{{ news_item.summary }}</p>
   </div>
   {% endif %}
 
@@ -104,8 +102,8 @@
   </div>
   {% endif %}
 
-  {# ── Ad slot: bottom of news ── #}
-  {% ad_slot "news-bottom" news_item "news" %}
+  {# ── Ad slot: end of news ── #}
+  {% ad_slot "news-end" news_item "news" %}
 
 </article>
 
