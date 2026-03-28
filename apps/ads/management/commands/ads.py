@@ -170,20 +170,20 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(f'Слот найден: {slot}')
         
-        trip_widget_code = '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:320px;height:480px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>'
+        trip_banner_code = '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:300px;height:250px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>'
         
         ads = [
-            ('Trip.com Widget 320x480', 'widget', 'widget_320x480', 8,
-             trip_widget_code,
+            ('Trip.com Баннер 300x250', 'banner', 'banner_300x250', 8,
+             trip_banner_code,
              'Проверено читателями:'),
-            ('Trip.com Widget 300x600', 'widget', 'widget_300x600', 7,
-             trip_widget_code,
+            ('Trip.com Виджет 320x480', 'widget', 'widget_320x480', 7,
+             '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:320px;height:480px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>',
              'Лучшие предложения:'),
-            ('Trip.com Баннер 300x250', 'banner', 'banner_300x250', 6,
-             trip_widget_code,
+            ('Trip.com Виджет Сайдбар', 'widget', 'widget_300x600', 6,
+             '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:300px;height:600px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>',
              'Рекомендуем:'),
             ('Trip.com Баннер 728x90', 'banner', 'banner_728x90', 5,
-             trip_widget_code,
+             '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:728px;height:90px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>',
              'Горячие предложения:'),
         ]
         

@@ -23,6 +23,8 @@
              {% if ad.widget_width %}width="{{ ad.widget_width }}"{% endif %}
              {% if ad.widget_height %}height="{{ ad.widget_height }}"{% endif %}
              loading="lazy">
+        {% elif ad.widget_code %}
+        <div class="ad-iframe-wrapper">{{ ad.widget_code|safe }}</div>
         {% else %}
         <span class="ad-banner-placeholder">{{ ad.partner.name }}</span>
         {% endif %}
