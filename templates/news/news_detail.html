@@ -87,6 +87,9 @@
   </div>
   {% endif %}
 
+  {# ── Ad slot: end of news (after content) ── #}
+  {% ad_slot "news-end" news_item "news" %}
+
   {% if news_item.source_url %}
   <div class="mt-10 pt-6 border-t border-(--color-border) flex items-center gap-4 flex-wrap">
     <div class="flex-1 min-w-0">
@@ -101,9 +104,6 @@
     </a>
   </div>
   {% endif %}
-
-  {# ── Ad slot: end of news ── #}
-  {% ad_slot "news-end" news_item "news" %}
 
 </article>
 

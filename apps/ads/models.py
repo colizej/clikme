@@ -33,6 +33,12 @@ class AdSlot(models.Model):
         ('product', 'Продукт'),
     ]
     
+    POSITION_CHOICES = [
+        ('top', 'Начало'),
+        ('middle', 'Середина'),
+        ('end', 'Конец'),
+    ]
+    
     slug = models.SlugField("URL-слаг", max_length=100, unique=True)
     name = models.CharField("Название", max_length=255)
     description = models.TextField("Описание", blank=True)
@@ -40,8 +46,8 @@ class AdSlot(models.Model):
     position = models.CharField(
         "Позиция",
         max_length=50,
+        choices=POSITION_CHOICES,
         default='middle',
-        help_text="before_h2, middle, before_faq, end (для статей) или top, middle, bottom"
     )
     fallback_text = models.TextField("Текст-заглушка", blank=True)
     is_active = models.BooleanField("Активен", default=True)
@@ -53,7 +59,7 @@ class AdSlot(models.Model):
         ordering = ['page_type', 'order', 'name']
 
     def __str__(self):
-        return f"{self.name} ({self.get_page_type_display()} — {self.position})"
+        return f"{self.name} ({self.get_page_type_display()} — {self.get_position_display()})"
 
 
 class AdUnit(models.Model):
