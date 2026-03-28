@@ -14,9 +14,9 @@ class AdService:
         
         Алгоритм:
         1. Найти все активные объявления для данной позиции (slot)
-        2. Фильтр по датам (если временные)
-        3. Фильтр по категориям статьи
-        4. Фильтр по лимитам показов
+        2. Если есть конкретная статья — сначала проверить ad_targeted к ней
+        3. Если есть конкретная новость — проверить ad_targeted к ней
+        4. Если нет конкретного таргетинга — показать объявления без таргетинга
         5. Выбрать по приоритету + случайность
         """
         if not slot or not slot.is_active:
@@ -24,47 +24,54 @@ class AdService:
         
         now = timezone.now()
         
-        # Базовый queryset - ищем объявления для конкретного слота
-        queryset = AdUnit.objects.filter(
+        base_queryset = AdUnit.objects.filter(
             slot=slot,
             is_active=True
         ).select_related('partner')
         
-        # Фильтр по датам
-        queryset = queryset.filter(
+        base_queryset = base_queryset.filter(
             Q(is_permanent=True) |
             Q(start_date__isnull=True, end_date__isnull=True) |
             Q(start_date__lte=now, end_date__gte=now)
         )
         
-        # Фильтр по лимитам показов
-        queryset = queryset.filter(
+        base_queryset = base_queryset.filter(
             Q(max_impressions__isnull=True) |
             Q(impressions_count__lt=F('max_impressions'))
         )
         
-        # Фильтр по категориям статьи
-        if article and article.category:
-            all_ads = list(queryset)
-            filtered_ads = []
-            for ad in all_ads:
-                cats = list(ad.target_categories.all())
-                if not cats or article.category in cats:
-                    filtered_ads.append(ad)
-            queryset = AdUnit.objects.filter(pk__in=[ad.pk for ad in filtered_ads])
+        queryset = base_queryset.distinct()
+        
+        if article:
+            queryset = AdService._filter_by_article(queryset, article)
         else:
-            queryset = queryset.filter(target_categories__isnull=True)
+            queryset = queryset.filter(target_article__isnull=True)
         
-        queryset = queryset.distinct()
-        
-        # Ротация: берём топ-3 по приоритету, случайный из них
-        top_units = list(queryset.order_by('-priority')[:3])
+        queryset = queryset.order_by('-priority')
+        top_units = list(queryset[:3])
         
         if top_units:
-            chosen = random.choice(top_units)
-            return chosen
+            return random.choice(top_units)
         
         return None
+    
+    @staticmethod
+    def _filter_by_article(queryset, article):
+        """
+        Фильтрация по статье с учётом приоритета:
+        Конкретная статья > Все статьи
+        """
+        all_ads = list(queryset)
+        
+        specific_ads = [ad for ad in all_ads if ad.target_article_id == article.pk]
+        if specific_ads:
+            return AdUnit.objects.filter(pk__in=[ad.pk for ad in specific_ads])
+        
+        generic_ads = [ad for ad in all_ads if ad.target_article_id is None]
+        if generic_ads:
+            return AdUnit.objects.filter(pk__in=[ad.pk for ad in generic_ads])
+        
+        return AdUnit.objects.none()
     
     @staticmethod
     def get_ad_by_slug(slot_slug: str, page_type: str = 'article', article=None) -> AdUnit | None:

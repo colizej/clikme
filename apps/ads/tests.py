@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import Partner, AdSlot, AdUnit, AdClick, ArticleAdPlacement
+from .models import Partner, AdSlot, AdUnit, AdClick
 from .services import AdService
 from apps.blog.models import Category, Article
 
@@ -339,73 +339,6 @@ class AdServiceTest(TestCase):
         self.assertEqual(stats['total_ads'], 2)
         self.assertEqual(stats['total_impressions'], 300)
         self.assertEqual(stats['total_clicks'], 15)
-
-
-class ArticleAdPlacementModelTest(TestCase):
-    """Тесты модели ArticleAdPlacement"""
-    
-    def setUp(self):
-        self.partner = Partner.objects.create(
-            name="Test Partner",
-            slug="test-partner",
-            url="https://example.com"
-        )
-        self.slot = AdSlot.objects.create(
-            slug="article-middle",
-            name="Середина статьи",
-            page_type="article",
-            position="middle"
-        )
-        self.ad = AdUnit.objects.create(
-            partner=self.partner,
-            name="Test Ad",
-            ad_type="widget",
-            slot=self.slot
-        )
-        self.category = Category.objects.create(
-            name="Test Category",
-            slug="test-category"
-        )
-        self.article = Article.objects.create(
-            title="Test Article",
-            slug="test-article",
-            content="Test content",
-            category=self.category
-        )
-    
-    def test_create_placement(self):
-        """Создание размещения"""
-        placement = ArticleAdPlacement.objects.create(
-            article=self.article,
-            slot=self.slot,
-            ad_unit=self.ad,
-            position="before_h2"
-        )
-        self.assertEqual(str(placement), f"{self.article} — {self.slot.name} (before_h2)")
-        self.assertTrue(placement.is_active)
-    
-    def test_placement_without_ad_unit(self):
-        """Размещение без конкретного объявления (автовыбор)"""
-        placement = ArticleAdPlacement.objects.create(
-            article=self.article,
-            slot=self.slot,
-            position="end"
-        )
-        self.assertIsNone(placement.ad_unit)
-    
-    def test_unique_constraint(self):
-        """Уникальность article + slot + position"""
-        ArticleAdPlacement.objects.create(
-            article=self.article,
-            slot=self.slot,
-            position="before_h2"
-        )
-        with self.assertRaises(Exception):
-            ArticleAdPlacement.objects.create(
-                article=self.article,
-                slot=self.slot,
-                position="before_h2"
-            )
 
 
 class AdShortcodeTest(TestCase):

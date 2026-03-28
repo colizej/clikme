@@ -1,29 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django import forms
-from .models import Partner, AdSlot, AdUnit, AdClick, ArticleAdPlacement
-
-
-class AdSlotChoiceField(forms.ModelChoiceField):
-    """Поле выбора с группировкой по типу страницы"""
-    
-    def label_from_instance(self, obj):
-        return f"{obj.name} ({obj.get_page_type_display()} — {obj.position})"
-
-
-class ArticleAdPlacementForm(forms.ModelForm):
-    """Форма для ручного размещения с группировкой позиций"""
-    
-    slot = AdSlotChoiceField(
-        queryset=AdSlot.objects.filter(is_active=True),
-        label="Позиция",
-        required=False,
-        widget=forms.Select(attrs={'class': 'select2'})
-    )
-    
-    class Meta:
-        model = ArticleAdPlacement
-        fields = '__all__'
+from .models import Partner, AdSlot, AdUnit, AdClick
 
 
 @admin.register(Partner)
@@ -48,17 +26,21 @@ class AdSlotAdmin(admin.ModelAdmin):
 class AdUnitAdmin(admin.ModelAdmin):
     list_display = [
         'name', 'partner', 'ad_type', 'slot', 
-        'priority', 'is_active', 'impressions_count', 'clicks_count'
+        'target_display', 'priority', 'is_active', 'impressions_count'
     ]
     list_filter = ['ad_type', 'slot', 'partner', 'is_active', 'is_permanent']
-    search_fields = ['name', 'partner__name']
+    search_fields = ['name', 'partner__name', 'target_article__title']
     readonly_fields = ['impressions_count', 'clicks_count', 'created_at', 'updated_at']
-    autocomplete_fields = ['slot']
+    autocomplete_fields = ['slot', 'target_article', 'target_news', 'target_categories']
     ordering = ['-priority', '-created_at']
     
     fieldsets = (
         ('Основное', {
             'fields': ('partner', 'name', 'ad_type', 'slot', 'is_active')
+        }),
+        ('Таргетинг', {
+            'fields': ('target_article', 'target_news'),
+            'description': 'Оставьте пустым для показа на всех страницах указанного типа. Конкретная страница имеет приоритет над "всеми".'
         }),
         ('Widget', {
             'fields': ('widget_code', 'widget_width', 'widget_height'),
@@ -84,13 +66,21 @@ class AdUnitAdmin(admin.ModelAdmin):
             'fields': ('is_permanent', 'start_date', 'end_date')
         }),
         ('Приоритет и лимиты', {
-            'fields': ('priority', 'max_impressions')
+            'fields': ('priority', 'max_impressions', 'target_categories')
         }),
         ('Статистика', {
             'fields': ('impressions_count', 'clicks_count'),
             'classes': ('collapse',),
         }),
     )
+    
+    def target_display(self, obj):
+        if obj.target_article:
+            return f"Статья: {obj.target_article.title[:30]}..."
+        if obj.target_news:
+            return f"Новость: {obj.target_news.title[:30]}..."
+        return "Все страницы"
+    target_display.short_description = "Показывать в"
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('partner', 'slot')
@@ -122,16 +112,6 @@ class AdUnitAdmin(admin.ModelAdmin):
             is_active=True, 
             slot__isnull=False
         ).values_list('slot_id', flat=True))
-
-
-@admin.register(ArticleAdPlacement)
-class ArticleAdPlacementAdmin(admin.ModelAdmin):
-    list_display = ['article', 'slot', 'ad_unit', 'position', 'is_active', 'order']
-    list_filter = ['slot', 'is_active', 'position']
-    search_fields = ['article__title', 'slot__name']
-    autocomplete_fields = ['article', 'ad_unit']
-    form = ArticleAdPlacementForm
-    ordering = ['article', 'order']
 
 
 @admin.register(AdClick)
