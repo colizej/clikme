@@ -118,25 +118,25 @@ def render_ad_unit(ad, article=None):
     if article:
         click_url += f"?article={article.slug}"
     
-    # Full width wrapper + ad-container
-    html = '<div class="ad-wrapper"><div class="ad-container">'
+    # Inline styles to ensure full width and reset margins
+    html = f'<div class="ad-container" style="margin: 2rem 0; padding: 1rem; background: var(--color-bg-warm); border-radius: 1rem; border: 1px solid var(--color-border); text-align: center; width: 100%; box-sizing: border-box;">'
     
     if ad.intro_text:
-        html += f'<p class="ad-intro">{ad.intro_text}</p>'
+        html += f'<p class="ad-intro" style="margin: 0 0 0.75rem; font-size: 0.875rem; color: var(--color-text-muted); font-weight: 500;">{ad.intro_text}</p>'
     
     if ad.ad_type == 'widget':
-        html += f'<div class="ad-widget">{ad.widget_code}</div>'
+        html += f'<div style="text-align: center;">{ad.widget_code}</div>'
     elif ad.ad_type == 'banner':
         if ad.html_code:
-            html += f'<div class="ad-html">{ad.html_code}</div>'
+            html += f'<div style="text-align: center;">{ad.html_code}</div>'
         elif ad.image:
-            html += f'<a href="{click_url}" target="_blank" rel="noopener sponsored"><img src="{ad.image.url}" alt="{ad.partner.name}" loading="lazy"></a>'
+            html += f'<a href="{click_url}" target="_blank" rel="noopener sponsored" style="display: inline-block;"><img src="{ad.image.url}" alt="{ad.partner.name}" loading="lazy" style="max-width: 100%; height: auto;"></a>'
     elif ad.ad_type == 'html':
-        html += f'<div class="ad-html">{ad.html_code}</div>'
+        html += f'<div style="text-align: center;">{ad.html_code}</div>'
     elif ad.ad_type == 'text':
         intro = f'{ad.intro_text} ' if ad.intro_text else ''
-        html += f'<a href="{click_url}" class="ad-text-link" target="_blank" rel="noopener sponsored">{intro}{ad.text}</a>'
+        html += f'<a href="{click_url}" style="display: inline-block; padding: 0.5rem 1rem; background: var(--color-accent); color: white; border-radius: 9999px; font-weight: 600; text-decoration: none;" target="_blank" rel="noopener sponsored">{intro}{ad.text}</a>'
     
-    html += '</div></div>'  # Close ad-container and ad-wrapper
+    html += '</div>'
     
     return mark_safe(html)
