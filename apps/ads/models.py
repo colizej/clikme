@@ -25,31 +25,35 @@ class Partner(models.Model):
 
 
 class AdSlot(models.Model):
-    """Слоты размещения рекламы"""
+    """Позиции размещения рекламы"""
     
-    SLOT_TYPES = [
-        ('widget_320x480', 'Widget 320x480'),
-        ('widget_300x600', 'Widget 300x600'),
-        ('banner_728x90', 'Banner 728x90'),
-        ('banner_300x250', 'Banner 300x250'),
-        ('text', 'Текстовая ссылка'),
+    PAGE_TYPES = [
+        ('article', 'Статья'),
+        ('news', 'Новость'),
+        ('product', 'Продукт'),
     ]
     
     slug = models.SlugField("URL-слаг", max_length=100, unique=True)
     name = models.CharField("Название", max_length=255)
     description = models.TextField("Описание", blank=True)
-    slot_type = models.CharField("Тип слота", max_length=50, choices=SLOT_TYPES)
+    page_type = models.CharField("Тип страницы", max_length=20, choices=PAGE_TYPES, default='article')
+    position = models.CharField(
+        "Позиция",
+        max_length=50,
+        default='middle',
+        help_text="before_h2, middle, before_faq, end (для статей) или top, middle, bottom"
+    )
     fallback_text = models.TextField("Текст-заглушка", blank=True)
     is_active = models.BooleanField("Активен", default=True)
     order = models.PositiveIntegerField("Порядок", default=0)
 
     class Meta:
-        verbose_name = "Слот"
-        verbose_name_plural = "Слоты"
-        ordering = ['order', 'name']
+        verbose_name = "Позиция"
+        verbose_name_plural = "Позиции"
+        ordering = ['page_type', 'order', 'name']
 
     def __str__(self):
-        return f"{self.name} ({self.slot_type})"
+        return f"{self.name} ({self.get_page_type_display()} — {self.position})"
 
 
 class AdUnit(models.Model):
@@ -57,11 +61,13 @@ class AdUnit(models.Model):
     
     TYPE_WIDGET = 'widget'
     TYPE_BANNER = 'banner'
+    TYPE_HTML = 'html'
     TYPE_TEXT = 'text'
     
     TYPE_CHOICES = [
         (TYPE_WIDGET, 'Widget'),
-        (TYPE_BANNER, 'Баннер'),
+        (TYPE_BANNER, 'Баннер (статичный)'),
+        (TYPE_HTML, 'HTML/JS код'),
         (TYPE_TEXT, 'Текстовая ссылка'),
     ]
     
@@ -74,6 +80,14 @@ class AdUnit(models.Model):
     name = models.CharField("Название", max_length=255)
     ad_type = models.CharField("Тип", max_length=20, choices=TYPE_CHOICES)
     
+    slot = models.ForeignKey(
+        AdSlot,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='ad_units',
+        verbose_name="Позиция"
+    )
+    
     # Widget fields
     widget_code = models.TextField("Код виджета (iframe/script)", blank=True)
     widget_width = models.PositiveIntegerField("Ширина виджета", null=True, blank=True)
@@ -83,14 +97,16 @@ class AdUnit(models.Model):
     image = models.ImageField("Изображение", upload_to='ads/banners/', blank=True)
     link = models.URLField("Ссылка", max_length=500, blank=True)
     
+    # HTML/JS fields
+    html_code = models.TextField("HTML/JS код", blank=True,
+        help_text="Код для динамических баннеров (Google Ads, Yandex, и т.д.)")
+    
     # Text link fields
     text = models.CharField("Текст ссылки", max_length=255, blank=True)
     
     # Common fields
     intro_text = models.CharField("Подводка", max_length=500, blank=True,
         help_text="Текст перед объявлением: 'Лучшие отели Нячанга:'")
-    slot_type = models.CharField("Тип слота", max_length=50, choices=AdSlot.SLOT_TYPES,
-        help_text="К какому слоту подходит это объявление")
     
     # Period
     is_permanent = models.BooleanField("Постоянный", default=True)
@@ -138,11 +154,9 @@ class AdUnit(models.Model):
         
         now = timezone.now()
         
-        # Проверка лимита показов
         if self.max_impressions and self.impressions_count >= self.max_impressions:
             return False
         
-        # Проверка периода
         if not self.is_permanent:
             if self.start_date and now < self.start_date:
                 return False
@@ -195,7 +209,7 @@ class ArticleAdPlacement(models.Model):
         AdSlot,
         on_delete=models.CASCADE,
         related_name='placements',
-        verbose_name="Слот"
+        verbose_name="Позиция"
     )
     ad_unit = models.ForeignKey(
         AdUnit,

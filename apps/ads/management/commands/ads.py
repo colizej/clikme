@@ -153,50 +153,63 @@ class Command(BaseCommand):
         else:
             self.stdout.write(f'Партнёр найден: {partner}')
         
-        slots = [
-            ('article_middle', 'Середина статьи', 'widget_320x480'),
-            ('sidebar', 'Сайдбар', 'widget_300x600'),
-            ('before_comments', 'Перед комментариями', 'banner_300x250'),
-            ('bottom', 'Низ статьи', 'banner_728x90'),
+        # Создаём позиции для статей
+        article_positions = [
+            ('article-before_h2', 'Перед H2', 'article', 'before_h2'),
+            ('article-middle', 'Середина статьи', 'article', 'middle'),
+            ('article-before_faq', 'Перед FAQ', 'article', 'before_faq'),
+            ('article-end', 'Конец статьи', 'article', 'end'),
         ]
         
-        for slug, name, slot_type in slots:
+        # Создаём позиции для новостей
+        news_positions = [
+            ('news-top', 'Верх новости', 'news', 'top'),
+            ('news-middle', 'Середина новости', 'news', 'middle'),
+            ('news-bottom', 'Низ новости', 'news', 'bottom'),
+        ]
+        
+        # Создаём позиции для продуктов
+        product_positions = [
+            ('product-top', 'Верх продукта', 'product', 'top'),
+            ('product-bottom', 'Низ продукта', 'product', 'bottom'),
+        ]
+        
+        all_positions = article_positions + news_positions + product_positions
+        
+        for slug, name, page_type, position in all_positions:
             slot, created = AdSlot.objects.get_or_create(
                 slug=slug,
-                defaults={'name': name, 'slot_type': slot_type}
+                defaults={
+                    'name': name,
+                    'page_type': page_type,
+                    'position': position,
+                }
             )
             if created:
-                self.stdout.write(f'Слот создан: {slot}')
+                self.stdout.write(f'Позиция создана: {slot}')
             else:
-                self.stdout.write(f'Слот найден: {slot}')
+                self.stdout.write(f'Позиция найдена: {slot}')
         
+        # Создаём объявления для разных позиций
+        trip_widget_code = '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:320px;height:480px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>'
         trip_banner_code = '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:300px;height:250px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>'
         
-        ads = [
-            ('Trip.com Баннер 300x250', 'banner', 'banner_300x250', 8,
-             trip_banner_code,
-             'Проверено читателями:'),
-            ('Trip.com Виджет 320x480', 'widget', 'widget_320x480', 7,
-             '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:320px;height:480px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>',
-             'Лучшие предложения:'),
-            ('Trip.com Виджет Сайдбар', 'widget', 'widget_300x600', 6,
-             '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:300px;height:600px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>',
-             'Рекомендуем:'),
-            ('Trip.com Баннер 728x90', 'banner', 'banner_728x90', 5,
-             '<iframe border="0" src="https://ru.trip.com/partners/ad/S2654290?Allianceid=6229959&SID=192412375&trip_sub1=" style="width:728px;height:90px" frameborder="0" scrolling="no" style="border:none" id="S2654290"></iframe>',
-             'Горячие предложения:'),
+        # Находим позицию для статей
+        article_middle_slot = AdSlot.objects.get(slug='article-middle')
+        
+        ads_data = [
+            ('Trip.com Widget 320x480', 'widget', article_middle_slot, 8, trip_widget_code, 'Проверено читателями:'),
         ]
         
-        for name, ad_type, slot_type, priority, widget_or_link, intro in ads:
+        for name, ad_type, slot, priority, code, intro in ads_data:
             ad, created = AdUnit.objects.get_or_create(
                 partner=partner,
                 name=name,
                 defaults={
                     'ad_type': ad_type,
-                    'slot_type': slot_type,
+                    'slot': slot,
                     'priority': priority,
-                    'widget_code': widget_or_link if ad_type == 'widget' else '',
-                    'link': widget_or_link if ad_type == 'banner' else '',
+                    'widget_code': code,
                     'intro_text': intro,
                 }
             )
@@ -206,4 +219,5 @@ class Command(BaseCommand):
                 self.stdout.write(f'Объявление найдено: {ad}')
         
         self.stdout.write(self.style.SUCCESS('\nДемо-данные готовы!'))
-        self.stdout.write('Используйте {% ad_slot "article_middle" %} в шаблоне.')
+        self.stdout.write('Позиции: article-middle, article-end и т.д.')
+        self.stdout.write('Используйте {% ad_slot "article-middle" article %} в шаблоне.')

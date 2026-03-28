@@ -27,12 +27,14 @@ class AdSlotModelTest(TestCase):
     
     def test_create_slot(self):
         slot = AdSlot.objects.create(
-            slug="article_middle",
+            slug="article-middle",
             name="Середина статьи",
-            slot_type="widget_320x480"
+            page_type="article",
+            position="middle"
         )
-        self.assertEqual(slot.slug, "article_middle")
-        self.assertEqual(str(slot), "Середина статьи (widget_320x480)")
+        self.assertEqual(slot.slug, "article-middle")
+        self.assertEqual(slot.page_type, "article")
+        self.assertEqual(slot.position, "middle")
 
 
 class AdUnitModelTest(TestCase):
@@ -44,13 +46,19 @@ class AdUnitModelTest(TestCase):
             slug="trip-com",
             url="https://www.trip.com"
         )
+        self.slot = AdSlot.objects.create(
+            slug="article-middle",
+            name="Середина статьи",
+            page_type="article",
+            position="middle"
+        )
     
     def test_create_widget_ad(self):
         ad = AdUnit.objects.create(
             partner=self.partner,
             name="Trip.com Widget",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             widget_code='<iframe src="https://trip.com"></iframe>'
         )
         self.assertEqual(ad.ad_type, "widget")
@@ -63,7 +71,7 @@ class AdUnitModelTest(TestCase):
             partner=self.partner,
             name="Active Ad",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             is_permanent=True,
             is_active=True
         )
@@ -75,7 +83,7 @@ class AdUnitModelTest(TestCase):
             partner=self.partner,
             name="Inactive Ad",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             is_active=False
         )
         self.assertFalse(ad.is_visible())
@@ -86,7 +94,7 @@ class AdUnitModelTest(TestCase):
             partner=self.partner,
             name="Expired Ad",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             is_permanent=False,
             start_date=timezone.now() - timedelta(days=10),
             end_date=timezone.now() - timedelta(days=1)
@@ -99,7 +107,7 @@ class AdUnitModelTest(TestCase):
             partner=self.partner,
             name="Limited Ad",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             max_impressions=100,
             impressions_count=100
         )
@@ -116,11 +124,17 @@ class AdClickViewTest(TestCase):
             slug="trip-com",
             url="https://www.trip.com"
         )
+        self.slot = AdSlot.objects.create(
+            slug="article-middle",
+            name="Середина",
+            page_type="article",
+            position="middle"
+        )
         self.ad = AdUnit.objects.create(
             partner=self.partner,
             name="Trip.com Widget",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             link="https://www.trip.com/hotels"
         )
     
@@ -178,11 +192,17 @@ class AdPixelViewTest(TestCase):
             slug="trip-com",
             url="https://www.trip.com"
         )
+        self.slot = AdSlot.objects.create(
+            slug="article-middle",
+            name="Середина",
+            page_type="article",
+            position="middle"
+        )
         self.ad = AdUnit.objects.create(
             partner=self.partner,
             name="Trip.com Widget",
             ad_type="widget",
-            slot_type="widget_320x480"
+            slot=self.slot
         )
     
     def test_pixel_returns_gif(self):
@@ -204,9 +224,10 @@ class AdServiceTest(TestCase):
             url="https://www.trip.com"
         )
         self.slot = AdSlot.objects.create(
-            slug="article_middle",
+            slug="article-middle",
             name="Середина статьи",
-            slot_type="widget_320x480"
+            page_type="article",
+            position="middle"
         )
     
     def test_get_ad_for_slot_returns_ad(self):
@@ -215,7 +236,7 @@ class AdServiceTest(TestCase):
             partner=self.partner,
             name="Test Ad",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             is_active=True
         )
         
@@ -236,7 +257,7 @@ class AdServiceTest(TestCase):
             partner=self.partner,
             name="Test Ad",
             ad_type="widget",
-            slot_type="widget_320x480"
+            slot=self.slot
         )
         
         result = AdService.get_ad_for_slot(self.slot)
@@ -244,24 +265,21 @@ class AdServiceTest(TestCase):
     
     def test_rotation_picks_from_top_priority(self):
         """Ротация выбирает из топ-3 по приоритету"""
-        # Создаём 5 объявлений с разными приоритетами
         for i in range(5):
             AdUnit.objects.create(
                 partner=self.partner,
                 name=f"Ad {i}",
                 ad_type="widget",
-                slot_type="widget_320x480",
-                priority=10 - i  # 10, 9, 8, 7, 6
+                slot=self.slot,
+                priority=10 - i
             )
         
-        # Вызываем много раз и проверяем что все из топ-3
         selected_priorities = set()
         for _ in range(20):
             ad = AdService.get_ad_for_slot(self.slot)
             if ad:
                 selected_priorities.add(ad.priority)
         
-        # Должны быть только приоритеты 10, 9, 8
         self.assertTrue(selected_priorities.issubset({10, 9, 8}))
     
     def test_increment_impression(self):
@@ -270,7 +288,7 @@ class AdServiceTest(TestCase):
             partner=self.partner,
             name="Test Ad",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             impressions_count=10
         )
         
@@ -285,7 +303,7 @@ class AdServiceTest(TestCase):
             partner=self.partner,
             name="Expired Ad",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             is_permanent=False,
             end_date=timezone.now() - timedelta(days=1),
             is_active=True
@@ -303,7 +321,7 @@ class AdServiceTest(TestCase):
             partner=self.partner,
             name="Test Ad 1",
             ad_type="widget",
-            slot_type="widget_320x480",
+            slot=self.slot,
             impressions_count=100,
             clicks_count=5
         )
@@ -311,7 +329,7 @@ class AdServiceTest(TestCase):
             partner=self.partner,
             name="Test Ad 2",
             ad_type="banner",
-            slot_type="banner_728x90",
+            slot=self.slot,
             impressions_count=200,
             clicks_count=10
         )
@@ -333,15 +351,16 @@ class ArticleAdPlacementModelTest(TestCase):
             url="https://example.com"
         )
         self.slot = AdSlot.objects.create(
-            slug="article_middle",
+            slug="article-middle",
             name="Середина статьи",
-            slot_type="widget_320x480"
+            page_type="article",
+            position="middle"
         )
         self.ad = AdUnit.objects.create(
             partner=self.partner,
             name="Test Ad",
             ad_type="widget",
-            slot_type="widget_320x480"
+            slot=self.slot
         )
         self.category = Category.objects.create(
             name="Test Category",
@@ -401,13 +420,15 @@ class AdShortcodeTest(TestCase):
         self.slot = AdSlot.objects.create(
             slug="mid_slot",
             name="Середина",
-            slot_type="banner_300x250",
+            page_type="article",
+            position="middle",
             fallback_text="<div class='ad-placeholder'>Реклама</div>"
         )
         AdSlot.objects.create(
             slug="inactive_slot",
             name="Неактивный",
-            slot_type="banner_300x250",
+            page_type="article",
+            position="middle",
             is_active=False
         )
     

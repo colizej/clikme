@@ -10,10 +10,10 @@ class AdService:
     @staticmethod
     def get_ad_for_slot(slot: AdSlot, article=None) -> AdUnit | None:
         """
-        Получить объявление для слота.
+        Получить объявление для позиции.
         
         Алгоритм:
-        1. Найти все активные объявления для слота
+        1. Найти все активные объявления для данной позиции (slot)
         2. Фильтр по датам (если временные)
         3. Фильтр по категориям статьи
         4. Фильтр по лимитам показов
@@ -24,9 +24,9 @@ class AdService:
         
         now = timezone.now()
         
-        # Базовый queryset
+        # Базовый queryset - ищем объявления для конкретного слота
         queryset = AdUnit.objects.filter(
-            slot_type=slot.slot_type,
+            slot=slot,
             is_active=True
         ).select_related('partner')
         
@@ -45,25 +45,16 @@ class AdService:
         
         # Фильтр по категориям статьи
         if article and article.category:
-            # Сначала получаем все объявления
             all_ads = list(queryset)
-            
-            # Фильтруем в Python для ManyToMany
             filtered_ads = []
             for ad in all_ads:
                 cats = list(ad.target_categories.all())
-                # Показываем если:
-                # - нет таргетинга (пустой ManyToMany)
-                # - или совпадает с категорией статьи
                 if not cats or article.category in cats:
                     filtered_ads.append(ad)
-            
             queryset = AdUnit.objects.filter(pk__in=[ad.pk for ad in filtered_ads])
         else:
-            # Если категория неизвестна — показываем только без таргетинга
             queryset = queryset.filter(target_categories__isnull=True)
         
-        # Получаем уникальные объявления
         queryset = queryset.distinct()
         
         # Ротация: берём топ-3 по приоритету, случайный из них
@@ -74,6 +65,15 @@ class AdService:
             return chosen
         
         return None
+    
+    @staticmethod
+    def get_ad_by_slug(slot_slug: str, page_type: str = 'article', article=None) -> AdUnit | None:
+        """Получить объявление по slug позиции и типу страницы"""
+        try:
+            slot = AdSlot.objects.get(slug=slot_slug, page_type=page_type, is_active=True)
+            return AdService.get_ad_for_slot(slot, article)
+        except AdSlot.DoesNotExist:
+            return None
     
     @staticmethod
     def increment_impression(ad_unit: AdUnit):

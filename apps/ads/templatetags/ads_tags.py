@@ -31,58 +31,58 @@ def parse_ad_shortcodes(text, article=None):
         ad = AdService.get_ad_for_slot(slot, article)
         if ad:
             AdService.increment_impression(ad)
-            return render_ad_html(slot, ad)
+            return render_ad_html(slot, ad, article)
         return slot.fallback_text or ''
     
     result = AD_SHORTCODE_PATTERN.sub(replace_shortcode, text)
     return mark_safe(result)
 
 
-def render_ad_html(slot, ad):
+def render_ad_html(slot, ad, article=None):
     """Генерирует HTML для объявления"""
+    click_url = f"/ads/click/{ad.id}/"
+    if article:
+        click_url += f"?article={article.slug}"
+    
     if ad.ad_type == 'widget':
         return ad.widget_code or ''
     elif ad.ad_type == 'banner':
-        alt = ad.text or ad.partner.name
-        click_url = f"/ads/click/{ad.id}/"
-        if ad.article:
-            click_url += f"?article={ad.article.slug}"
-        return f'<a href="{click_url}" target="_blank" rel="nofollow"><img src="{ad.image.url}" alt="{alt}" width="{ad.widget_width or 300}" height="{ad.widget_height or 250}"></a>'
+        if ad.html_code:
+            return ad.html_code
+        if ad.image:
+            alt = ad.text or ad.partner.name
+            return f'<a href="{click_url}" target="_blank" rel="nofollow sponsored"><img src="{ad.image.url}" alt="{alt}" loading="lazy"></a>'
+        return ''
+    elif ad.ad_type == 'html':
+        return ad.html_code or ''
     elif ad.ad_type == 'text':
-        click_url = f"/ads/click/{ad.id}/"
-        if ad.article:
-            click_url += f"?article={ad.article.slug}"
         intro = f'{ad.intro_text} ' if ad.intro_text else ''
-        return f'<a href="{click_url}" target="_blank" rel="nofollow">{intro}{ad.text}</a>'
+        return f'<a href="{click_url}" target="_blank" rel="nofollow sponsored">{intro}{ad.text}</a>'
     return ''
 
 
 @register.inclusion_tag('ads/unit.html', takes_context=True)
-def ad_slot(context, slot_slug, article=None):
+def ad_slot(context, slot_slug, article=None, page_type='article'):
     """
-    Тег для вставки рекламного слота.
+    Тег для вставки рекламной позиции.
     
     Usage:
-        {% ad_slot 'article_middle' article %}
-        {% ad_slot 'before_faq' %}
+        {% ad_slot 'article-middle' article %}
+        {% ad_slot 'article-end' article 'article' %}
+        {% ad_slot 'news-top' None 'news' %}
     """
-    from apps.ads.models import AdSlot
-    
     try:
-        slot = AdSlot.objects.get(slug=slot_slug, is_active=True)
+        slot = AdSlot.objects.get(slug=slot_slug, page_type=page_type, is_active=True)
     except AdSlot.DoesNotExist:
-        return {'slot': None, 'ad': None, 'slot_type': None, 'article': article}
+        return {'slot': None, 'ad': None, 'article': article}
     
-    # Получаем объявление через сервис
     ad = AdService.get_ad_for_slot(slot, article)
     
-    # Увеличиваем счётчик показов
     if ad:
         AdService.increment_impression(ad)
     
     return {
         'slot': slot,
         'ad': ad,
-        'slot_type': slot.slot_type,
         'article': article,
     }
