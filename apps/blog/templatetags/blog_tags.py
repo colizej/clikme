@@ -23,7 +23,7 @@ def price_format(value):
         return value
 
 
-@register.filter
+@register.filter(is_safe=True)
 def insert_before_first_h2(html: str, content: str) -> str:
     """
     Вставляет контент перед первым <h2 в HTML.
@@ -38,7 +38,7 @@ def insert_before_first_h2(html: str, content: str) -> str:
     match = re.search(r'<h2', html, re.IGNORECASE)
     if match:
         pos = match.start()
-        return html[:pos] + content + html[pos:]
+        return mark_safe(html[:pos] + content + html[pos:])
     
     return html
 
