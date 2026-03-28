@@ -429,18 +429,27 @@ details.ck-faq-item[open] .ck-faq-q {
 .ad-container {
   @apply my-8 p-4 rounded-2xl bg-(--color-bg-warm) border border-(--color-border);
   max-width: 100%;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 
-.ad-container--widget {
-  @apply text-center;
-}
-
+.ad-container--widget,
 .ad-container--banner {
   @apply text-center;
 }
 
 .ad-container--text {
   @apply text-center;
+}
+
+.ad-container .ad-intro {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.ad-container .ad-widget,
+.ad-container .ad-html {
+  margin: 0 auto;
 }
 
 .ad-intro {
@@ -470,12 +479,24 @@ details.ck-faq-item[open] .ck-faq-q {
   .ad-container--banner,
   .ad-container--widget {
     max-width: 100%;
+    margin-left: 0 !important;
   }
   
   .ad-container--banner .ad-widget iframe,
   .ad-container--widget .ad-widget iframe {
     width: 100% !important;
     max-width: 100% !important;
+  }
+}
+
+/* Mobile: no margins */
+@media (max-width: 767px) {
+  .ad-container {
+    margin-left: -1rem !important;
+    margin-right: -1rem !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
   }
 }
 
