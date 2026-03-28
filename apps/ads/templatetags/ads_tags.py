@@ -136,7 +136,6 @@ def render_ad_unit(ad, article=None):
         intro = f'{ad.intro_text} ' if ad.intro_text else ''
         html += f'<a href="{click_url}" class="ad-text-link" target="_blank" rel="noopener sponsored">{intro}{ad.text}</a>'
     
-    html += '<span class="ad-disclaimer">Реклама</span>'
     html += '</div>'
     
     return mark_safe(html)

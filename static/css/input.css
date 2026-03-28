@@ -489,8 +489,3 @@ details.ck-faq-item[open] .ck-faq-q {
          bg-(--color-accent) text-white rounded-full
          font-semibold hover:bg-(--color-accent-hover) transition-colors;
 }
-
-.ad-disclaimer {
-  @apply block text-xs text-(--color-text-muted) mt-3;
-  opacity: 0.7;
-}
