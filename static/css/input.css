@@ -428,7 +428,7 @@ details.ck-faq-item[open] .ck-faq-q {
    ============================================================ */
 /* Ad styles */
 .ad-container {
-  @apply my-8 p-4 rounded-2xl bg-(--color-bg-warm) border border-(--color-border);
+  @apply rounded-2xl bg-(--color-bg-warm) border border-(--color-border);
 }
 
 .ad-container--widget,
@@ -438,50 +438,6 @@ details.ck-faq-item[open] .ck-faq-q {
 }
 
 .ad-container .ad-intro {
-  @apply text-sm text-(--color-text-muted) mb-3 font-medium;
-}
-
-/* Allow inline styles to take precedence */
-.ad-container[style] {
-  margin: inherit !important;
-}
-
-/* Override ck-prose styles for ad-container */
-.ck-prose .ad-container {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  margin-top: 2rem !important;
-  margin-bottom: 2rem !important;
-}
-
-.ad-container--widget,
-.ad-container--banner {
-  @apply text-center;
-}
-
-.ad-container--text {
-  @apply text-center;
-}
-
-.ad-container .ad-intro {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  text-align: center !important;
-}
-
-.ad-container .ad-widget,
-.ad-container .ad-html {
-  margin: 0 auto;
-  text-align: center;
-}
-
-.ad-container p.ad-intro {
-  margin-left: 0 !important;
-}
-
-.ad-intro {
   @apply text-sm text-(--color-text-muted) mb-3 font-medium;
 }
 
@@ -507,35 +463,19 @@ details.ck-faq-item[open] .ck-faq-q {
 @media (min-width: 768px) {
   .ad-container--banner,
   .ad-container--widget {
-    max-width: 100%;
-    margin-left: 0 !important;
+    width: 100%;
   }
   
   .ad-container--banner .ad-widget iframe,
   .ad-container--widget .ad-widget iframe {
     width: 100% !important;
-    max-width: 100% !important;
   }
 }
 
-/* Mobile: no margins */
+/* Mobile: simple */
 @media (max-width: 767px) {
   .ad-container {
-    margin-left: -1rem !important;
-    margin-right: -1rem !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-radius: 0 !important;
-  }
-  
-  .ad-container p.ad-intro {
-    margin-left: 0 !important;
-    padding-left: 0 !important;
-    text-align: center !important;
+    width: 100%;
   }
 }
 
