@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static ads_tags %}
+{% load i18n static ads_tags blog_tags %}
 
 {% block title %}{{ news_item.title }} — ClikMe{% endblock %}
 {% block meta_description %}{{ news_item.summary|truncatewords:30 }}{% endblock %}
@@ -73,22 +73,21 @@
   {# ── Ad slot: top of news ── #}
   {% ad_slot "news-top" news_item "news" %}
 
+  {% get_ad_html "news-middle" news_item "news" as news_middle_ad %}
+
   {% if clean_body %}
   <div class="ck-prose">
-    {{ clean_body|safe }}
+    {{ clean_body|insert_before_third_h2:news_middle_ad|safe }}
   </div>
   {% elif clean_summary %}
   <div class="ck-prose">
-    <p>{{ clean_summary }}</p>
+    <p>{{ clean_summary|insert_before_third_h2:news_middle_ad }}</p>
   </div>
   {% elif news_item.summary %}
   <div class="ck-prose">
-    <p>{{ news_item.summary }}</p>
+    <p>{{ news_item.summary|insert_before_third_h2:news_middle_ad }}</p>
   </div>
   {% endif %}
-
-  {# ── Ad slot: middle of news ── #}
-  {% ad_slot "news-middle" news_item "news" %}
 
   {% if news_item.source_url %}
   <div class="mt-10 pt-6 border-t border-(--color-border) flex items-center gap-4 flex-wrap">

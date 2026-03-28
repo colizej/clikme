@@ -72,6 +72,30 @@ def insert_into_content(html: str, content: str) -> str:
     return mark_safe(html[:pos] + content + html[pos:])
 
 
+@register.filter(is_safe=True)
+def insert_before_third_h2(html: str, content: str) -> str:
+    """
+    Вставляет контент перед 3-м h2 в HTML.
+    Если h2 меньше 3, не вставляет ничего.
+    
+    Usage:
+        {{ content|insert_before_third_h2:ad_html }}
+    """
+    if not html or not content:
+        return html
+    
+    # Находим все h2 в HTML
+    h2_positions = [m.start() for m in re.finditer(r'<h2', html, re.IGNORECASE)]
+    
+    # Если есть хотя бы 3 h2, вставляем перед 3-м
+    if len(h2_positions) >= 3:
+        pos = h2_positions[2]  # 3-й h2 (индекс 2)
+        return mark_safe(html[:pos] + content + html[pos:])
+    
+    # Если меньше 3 h2, не вставляем
+    return mark_safe(html)
+
+
 @register.filter
 def strip_first_image(html: str) -> str:
     """
