@@ -9,6 +9,13 @@
   <h1 class="font-serif text-3xl md:text-4xl font-bold mb-2">{% trans "Компании и сервисы" %}</h1>
   <p class="text-(--color-text-muted) mb-10">{% trans "Проверенные компании, магазины и сервисы" %}</p>
 
+  {# SEO текст в начале #}
+  <div class="ck-prose mb-10 p-6 bg-(--color-bg-warm) rounded-2xl">
+    <p>
+      {% trans "В каталоге собраны проверенные компании и сервисы Нячанга: рестораны русской и вьетнамской кухни, кафе, магазины, туристические агентства, салоны красоты и другие полезные места для жизни и отдыха во Вьетнаме." %}
+    </p>
+  </div>
+
   {% if object_list %}
   <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
     {% for vendor in object_list %}
@@ -28,5 +35,13 @@
   {% else %}
   <p class="text-(--color-text-muted)">{% trans "Пока ничего нет." %}</p>
   {% endif %}
+
+  {# SEO текст в конце #}
+  <div class="ck-prose mt-10 p-6 bg-(--color-bg-warm) rounded-2xl">
+    <h2 class="font-serif text-xl font-bold mb-3">{% trans "Как добавить компанию" %}</h2>
+    <p class="mb-0">
+      {% trans "Знаете хорошее место в Нячанге? Напишите нам — мы добавим проверенные компании в каталог. Все компании проходят модерацию перед публикацией." %}
+    </p>
+  </div>
 </div>
 {% endblock %}

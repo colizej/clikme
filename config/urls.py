@@ -1,10 +1,30 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, register_converter
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
+from django.views.generic import RedirectView
+
+class TrailingSlashConverter:
+    regex = r'/?'
+    
+    def to_python(self, value):
+        return value.rstrip('/') if value.endswith('/') else value
+    
+    def to_url(self, value):
+        return value
+
+register_converter(TrailingSlashConverter, 'trailing_slash')
 
 urlpatterns = [
+    # Редиректы для миграции с OpenCart
+    path('about_us/', RedirectView.as_view(url='/contacts/', permanent=True)),
+    path('about_us', RedirectView.as_view(url='/contacts/', permanent=True)),
+    path('delivery/', RedirectView.as_view(url='/contacts/', permanent=True)),
+    path('delivery', RedirectView.as_view(url='/contacts/', permanent=True)),
+    path('politika-konfidencialnosti/', RedirectView.as_view(url='/privacy/', permanent=True)),
+    path('politika-konfidencialnosti', RedirectView.as_view(url='/privacy/', permanent=True)),
+    
     path(f'{settings.ADMIN_URL}/', admin.site.urls),
 
     # Auth

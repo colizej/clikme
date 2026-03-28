@@ -171,3 +171,43 @@ PLACE_SCHEMA = {
 ### Baseline (зафиксировать ДО миграции)
 Скопировать из GSC топ-20 страниц с позициями в файл:
 `docs/seo_baseline_[дата].csv`
+
+---
+
+## ⚠️ Технические недоработки (аудит март 2026)
+
+### Критичные
+
+| # | Проблема | Где | Действие |
+|---|----------|-----|----------|
+| 1 | **Sitemap URL захардкожен** | `apps/pages/robots.py:14` | Заменить `https://clikme.ru` на `https://{request.get_host()}` |
+| 2 | **BreadcrumbList ссылки ведут на `/`** | `article_detail.html:77` | Категория должна вести на `/category/{slug}/`, не на `/?category=` |
+
+### Важные
+
+| # | Проблема | Где | Действие |
+|---|----------|-----|----------|
+| 3 | **Нет og:image:width/height** | Шаблоны | Добавить для предотвращения CLS: `<meta property="og:image:width" content="1200">` |
+| 4 | **Нет WebSite schema** | Шаблоны | Добавить JSON-LD с `SearchAction` для внутреннего поиска |
+| 5 | **Нет Organization schema** | base.html/footer | Добавить publisher/organization на главной и в footer |
+| 6 | **Pagination без prev/next** | Списки статей | Добавить `<link rel="prev">` и `<link rel="next">` на страницах 2+ |
+
+### Оптимизация
+
+| # | Проблема | Где | Действие |
+|---|----------|-----|----------|
+| 7 | **sitemap.xml неполный** | `templates/pages/sitemap.xml` | Добавить `/vendors/` и `/vendors/{slug}/` страницы |
+| 8 | **ImageObject schema** | `article_detail.html` | Добавить для важных статейных изображений |
+| 9 | **hero image — eager** | `article_detail.html:116` | ✅ Уже `loading="eager"` — правильно |
+
+### Уже реализовано ✅
+
+- ✅ `<meta name="viewport">` на всех страницах
+- ✅ Canonical URLs
+- ✅ Open Graph + Twitter Card
+- ✅ JSON-LD: Article, BreadcrumbList, FAQPage
+- ✅ robots.txt (с оговоркой про URL)
+- ✅ Семантическая разметка (header, nav, main, article)
+- ✅ Mobile-first дизайн
+- ✅ `loading="lazy"` для картинок в карточках
+- ✅ noindex для приватных страниц
