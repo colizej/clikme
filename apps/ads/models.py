@@ -98,6 +98,13 @@ class AdUnit(models.Model):
     end_date = models.DateTimeField("Конец показа", null=True, blank=True)
     
     # Targeting
+    target_categories = models.ManyToManyField(
+        'blog.Category',
+        blank=True,
+        verbose_name="Категории статей",
+        help_text="Показывать только в статьях этих категорий"
+    )
+    
     priority = models.PositiveIntegerField(
         "Приоритет", default=5,
         validators=[MinValueValidator(1), MaxValueValidator(10)],

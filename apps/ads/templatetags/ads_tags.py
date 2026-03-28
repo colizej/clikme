@@ -1,6 +1,5 @@
-import random
 from django import template
-from django.db.models import F
+from apps.ads.services import AdService
 
 register = template.Library()
 
@@ -11,47 +10,22 @@ def ad_slot(context, slot_slug, article=None):
     Тег для вставки рекламного слота.
     
     Usage:
-        {% ad_slot 'article_middle' article as ad %}
-        
+        {% ad_slot 'article_middle' article %}
+        {% ad_slot 'before_faq' %}
     """
-    from ads.models import AdUnit, AdSlot
+    from apps.ads.models import AdSlot
     
     try:
         slot = AdSlot.objects.get(slug=slot_slug, is_active=True)
     except AdSlot.DoesNotExist:
-        return {'slot': None, 'ad': None, 'slot_type': None}
+        return {'slot': None, 'ad': None, 'slot_type': None, 'article': article}
     
-    # Поиск активных объявлений для слота
-    queryset = AdUnit.objects.filter(
-        slot_type=slot.slot_type,
-        is_active=True
-    )
+    # Получаем объявление через сервис
+    ad = AdService.get_ad_for_slot(slot, article)
     
-    # Фильтр по датам
-    now = context['request']._current_scheme_host  # не используем, но оставим
-    from django.utils import timezone
-    now = timezone.now()
-    queryset = queryset.filter(
-        models.Q(is_permanent=True) |
-        models.Q(start_date__lte=now, end_date__gte=now)
-    )
-    
-    # Фильтр по лимитам
-    queryset = queryset.filter(
-        models.Q(max_impressions__isnull=True) |
-        models.Q(impressions_count__lt=F('max_impressions'))
-    )
-    
-    # Ротация: берём топ-3 по приоритету, случайный из них
-    top_units = list(queryset.order_by('-priority')[:3])
-    
-    ad = None
-    if top_units:
-        ad = random.choice(top_units)
-        # Увеличиваем счётчик показов
-        AdUnit.objects.filter(pk=ad.pk).update(
-            impressions_count=F('impressions_count') + 1
-        )
+    # Увеличиваем счётчик показов
+    if ad:
+        AdService.increment_impression(ad)
     
     return {
         'slot': slot,
@@ -59,7 +33,3 @@ def ad_slot(context, slot_slug, article=None):
         'slot_type': slot.slot_type,
         'article': article,
     }
-
-
-# Нужен импорт для QuerySet фильтрации
-from django.db import models
