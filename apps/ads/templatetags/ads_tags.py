@@ -86,3 +86,76 @@ def ad_slot(context, slot_slug, article=None, page_type='article'):
         'ad': ad,
         'article': article,
     }
+
+
+@register.simple_tag
+def get_ad_html(slot_slug, article=None, page_type='article'):
+    """
+    Возвращает HTML объявления для вставки.
+    
+    Usage:
+        {% get_ad_html 'article-before_h2' article as ad_html %}
+        {{ content|insert_before_first_h2:ad_html }}
+    """
+    try:
+        slot = AdSlot.objects.get(slug=slot_slug, page_type=page_type, is_active=True)
+    except AdSlot.DoesNotExist:
+        return ''
+    
+    ad = AdService.get_ad_for_slot(slot, article)
+    
+    if ad:
+        AdService.increment_impression(ad)
+        return render_ad_unit(ad, article)
+    
+    return ''
+
+
+def render_ad_unit(ad, article=None):
+    """Генерирует HTML для объявления (полный контейнер)"""
+    from django.template import Template, Context
+    
+    template_str = '''
+<div class="ad-container ad-container--{{ ad.ad_type }}" data-slot="{{ slot.slug }}" data-ad="{{ ad.id }}">
+    {% if ad.intro_text %}
+    <p class="ad-intro">{{ ad.intro_text }}</p>
+    {% endif %}
+    
+    {% if ad.ad_type == 'widget' %}
+    <div class="ad-widget">
+        {{ ad.widget_code|safe }}
+    </div>
+    
+    {% elif ad.ad_type == 'banner' %}
+    {% if ad.html_code %}
+    <div class="ad-html">{{ ad.html_code|safe }}</div>
+    {% elif ad.image %}
+    <a href="/ads/click/{{ ad.id }}/{% if article %}?article={{ article.slug }}{% endif %}" 
+       target="_blank" rel="noopener sponsored">
+        <img src="{{ ad.image.url }}" alt="{{ ad.partner.name }}" loading="lazy">
+    </a>
+    {% endif %}
+    
+    {% elif ad.ad_type == 'html' %}
+    <div class="ad-html">{{ ad.html_code|safe }}</div>
+    
+    {% elif ad.ad_type == 'text' %}
+    <a href="/ads/click/{{ ad.id }}/{% if article %}?article={{ article.slug }}{% endif %}" 
+       class="ad-text-link"
+       target="_blank" rel="noopener sponsored">
+        {% if ad.intro_text %}{{ ad.intro_text }} {% endif %}{{ ad.text }}
+    </a>
+    {% endif %}
+    
+    <span class="ad-disclaimer">Реклама</span>
+</div>
+'''
+    
+    # Create a mock slot for template rendering
+    class MockSlot:
+        def __init__(self):
+            self.slug = slot_slug
+    
+    t = Template(template_str)
+    c = Context({'ad': ad, 'slot': MockSlot(), 'article': article})
+    return t.render(c)

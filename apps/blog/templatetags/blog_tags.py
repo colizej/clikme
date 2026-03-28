@@ -24,6 +24,26 @@ def price_format(value):
 
 
 @register.filter
+def insert_before_first_h2(html: str, content: str) -> str:
+    """
+    Вставляет контент перед первым <h2 в HTML.
+    
+    Usage:
+        {{ article.content|insert_before_first_h2:ad_html }}
+    """
+    if not html or not content:
+        return html
+    
+    # Находим первое <h2 (case insensitive)
+    match = re.search(r'<h2', html, re.IGNORECASE)
+    if match:
+        pos = match.start()
+        return html[:pos] + content + html[pos:]
+    
+    return html
+
+
+@register.filter
 def strip_first_image(html: str) -> str:
     """
     Убирает первое изображение из HTML контента статьи.

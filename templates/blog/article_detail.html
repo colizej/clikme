@@ -201,12 +201,10 @@
     {# Divider desktop #}
     <div class="hidden md:block border-b border-(--color-border) mb-8"></div>
 
-    {# ── Ad slot: before h2 (top of article) ── #}
-    {% ad_slot "article-before_h2" article "article" %}
-
-    {# Body #}
+    {# Body - with ad before first h2 #}
+    {% get_ad_html "article-before_h2" article "article" as before_h2_ad %}
     <div class="ck-prose">
-      {% if article.image %}{{ article.content|strip_first_image }}{% else %}{{ article.content|safe }}{% endif %}
+      {% if article.image %}{{ article.content|strip_first_image|insert_before_first_h2:before_h2_ad }}{% else %}{{ article.content|insert_before_first_h2:before_h2_ad|safe }}{% endif %}
     </div>
 
     {# ── Ad slot: middle of article ── #}
