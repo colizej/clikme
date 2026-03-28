@@ -102,6 +102,9 @@
   </div>
   {% endif %}
 
+  {# ── Ad slot: bottom of news ── #}
+  {% ad_slot "news-bottom" news_item "news" %}
+
 </article>
 
 {% if request.user.is_staff %}
