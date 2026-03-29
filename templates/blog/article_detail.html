@@ -290,8 +290,8 @@
           </div>
           {% endif %}
           <div class="p-4 flex flex-col gap-2 flex-1">
-            {% if rel.category %}
-            <span class="text-xs font-medium text-(--color-accent)">{{ rel.category.name }}</span>
+            {% if rel.tags.first %}
+            <span class="text-xs font-medium text-(--color-accent)">{{ rel.tags.first.name }}</span>
             {% endif %}
             <span class="text-sm font-semibold text-(--color-text) group-hover:text-(--color-accent) transition-colors leading-snug line-clamp-3">{{ rel.title }}</span>
           </div>

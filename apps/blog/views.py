@@ -75,7 +75,7 @@ class ArticleDetailView(DetailView):
     context_object_name = 'article'
 
     def get_queryset(self):
-        return Article.objects.filter(is_published=True)
+        return Article.objects.filter(is_published=True).prefetch_related('tags')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -98,6 +98,7 @@ class ArticleDetailView(DetailView):
                 Article.objects
                 .filter(is_published=True, tags__in=tag_ids)
                 .exclude(pk=article.pk)
+                .prefetch_related('tags')
                 .distinct()
                 .order_by('-published_at')[:3]
             )
