@@ -12,10 +12,16 @@
     border-right: 1px solid #ddd;
 }
 
-/* Markdown syntax highlighting */
-.cm-header {
+/* Headers - blue and bold */
+.cm-header,
+.cm-header-1,
+.cm-header-2,
+.cm-header-3,
+.cm-header-4,
+.cm-header-5,
+.cm-header-6 {
     font-weight: 700;
-    color: #0066cc;
+    color: #0066cc !important;
 }
 
 .cm-header-1 { font-size: 1.4em; }
@@ -23,52 +29,61 @@
 .cm-header-3 { font-size: 1.1em; }
 .cm-header-4, .cm-header-5, .cm-header-6 { font-size: 1em; }
 
+/* Links - blue */
 .cm-link {
-    color: #0066cc;
+    color: #0066cc !important;
     text-decoration: underline;
 }
 
-.cm-url {
-    color: #008800;
+/* URLs in links - green */
+.cm-url,
+.cm-formatting-link-url,
+a[href] .cm-url {
+    color: #008800 !important;
 }
 
+/* Quotes - gray italic */
 .cm-quote {
-    color: #888;
+    color: #666 !important;
     font-style: italic;
 }
 
+/* Lists - orange */
 .cm-list {
-    color: #cc6600;
+    color: #cc6600 !important;
 }
 
+/* Bold and italic */
 .cm-strong {
-    font-weight: 700;
+    font-weight: 700 !important;
 }
 
 .cm-em {
-    font-style: italic;
+    font-style: italic !important;
 }
 
-.cm-code {
+/* Inline code - pink on gray */
+.cm-code,
+.cm-monospace {
     background-color: #f5f5f5;
     border-radius: 3px;
     padding: 0 4px;
-    color: #c7254e;
+    color: #c7254e !important;
 }
 
+/* Comments */
 .cm-comment {
-    color: #888;
+    color: #888 !important;
 }
 
+/* HR */
 .cm-hr {
-    color: #ccc;
+    color: #ccc !important;
 }
 
-/* Link highlighting in editor */
-.cm-s-eclipse .cm-link {
-    color: #0066cc;
-}
-
-.cm-s-eclipse .cm-url {
-    color: #008800;
+/* All URLs - force green */
+span.cm-variable-2,
+span.cm-link,
+span.cm-url {
+    color: #008800 !important;
 }
