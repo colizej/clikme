@@ -51,13 +51,13 @@ urlpatterns = [
     # Auth
     path('accounts/', include('django.contrib.auth.urls')),
 
-    # Apps — blog первый (slug_dispatch проверяет статьи)
+    # Apps — vendors ПЕРЕД blog (slug_dispatch проверяет статьи)
     path('news/', include('apps.news.urls')),
     path('', include('apps.pages.urls')),
     path('', include('apps.newsletter.urls')),
     path('', include('apps.ads.urls')),
+    path('', include('apps.vendors.urls')),  # /vendors/ должен работать
     path('', include('apps.blog.urls')),
-    path('', include('apps.vendors.urls')),  # vendors последним
 
     # Robots
     path('robots.txt', include('apps.pages.robots')),
