@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from apps.core.utils.image_utils import process_image_field
 
 
 class Partner(models.Model):
@@ -22,6 +23,11 @@ class Partner(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.logo and self.logo.name and not self.logo.name.endswith('.webp'):
+            process_image_field(self.logo)
 
 
 class AdSlot(models.Model):
@@ -168,6 +174,11 @@ class AdUnit(models.Model):
 
     def __str__(self):
         return f"{self.partner.name} — {self.name}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image and self.image.name and not self.image.name.endswith('.webp'):
+            process_image_field(self.image)
     
     def is_visible(self):
         """Проверяет, активно ли объявление в текущий момент"""

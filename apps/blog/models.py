@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from apps.core.utils.image_utils import process_image_field
 
 
 class Category(models.Model):
@@ -23,6 +24,11 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return f'/{self.slug}/'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image and self.image.name and not self.image.name.endswith('.webp'):
+            process_image_field(self.image)
 
 
 class Tag(models.Model):
@@ -99,7 +105,8 @@ class Article(models.Model):
     def save(self, *args, **kwargs):
         self.render_content()
         super().save(*args, **kwargs)
-        # Синхронизируем auto-FAQ из content_md
+        if self.image and self.image.name and not self.image.name.endswith('.webp'):
+            process_image_field(self.image)
         if self.pk and hasattr(self, '_parsed_faqs'):
             self.faqs.filter(is_auto=True).delete()
             for i, (q, a) in enumerate(self._parsed_faqs):
@@ -357,4 +364,9 @@ class ArticleImage(models.Model):
 
     def shortcode(self):
         return f'[image{self.number}]'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image and self.image.name and not self.image.name.endswith('.webp'):
+            process_image_field(self.image)
 

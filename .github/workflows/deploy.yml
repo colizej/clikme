@@ -1,9 +1,8 @@
 name: Deploy to EU server
 
 on:
-  # push:
-  #   branches: [main]
-  workflow_dispatch:  # только ручной запуск
+  push:
+    branches: [main]
 
 jobs:
   deploy:
@@ -18,20 +17,10 @@ jobs:
           script: |
             set -e
             cd /home/clikme/clikme
-
-            # Бэкап БД перед деплоем
-            cp db.sqlite3 "db.sqlite3.$(date +%Y%m%d_%H%M)" 2>/dev/null || true
-
             git pull origin main
             source venv/bin/activate
             pip install -r requirements.txt -q
             python manage.py migrate --run-syncdb
             python manage.py collectstatic --no-input --clear
-
-            # Пересборка Tailwind (если шаблоны менялись)
-            if git diff --name-only HEAD~1 HEAD | grep -qE 'templates/|static/css/input.css'; then
-              ./tailwindcss -i static/css/input.css -o static/css/style.css --minify
-            fi
-
             sudo systemctl restart clikme
             echo "Deployed: $(git log --oneline -1)"

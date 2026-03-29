@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from apps.core.utils.image_utils import process_image_field
 
 
 class NewsSource(models.Model):
@@ -113,6 +114,8 @@ class NewsItem(models.Model):
         if self.body_md:
             self.render_body()
         super().save(*args, **kwargs)
+        if self.image and self.image.name and not self.image.name.endswith('.webp'):
+            process_image_field(self.image)
 
     def render_body(self):
         """Рендерит body_md → body (Markdown → HTML)."""

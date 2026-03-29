@@ -1,4 +1,5 @@
 from django.db import models
+from apps.core.utils.image_utils import process_image_field
 
 
 class Vendor(models.Model):
@@ -42,6 +43,8 @@ class Vendor(models.Model):
                 extensions=['extra', 'nl2br'],
             )
         super().save(*args, **kwargs)
+        if self.image and self.image.name and not self.image.name.endswith('.webp'):
+            process_image_field(self.image)
 
     def get_absolute_url(self):
         return f'/{self.slug}/'
@@ -69,6 +72,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image and self.image.name and not self.image.name.endswith('.webp'):
+            process_image_field(self.image)
 
     def get_absolute_url(self):
         return f'/{self.slug}/'

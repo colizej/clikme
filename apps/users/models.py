@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from apps.core.utils.image_utils import process_image_field
 
 
 class User(AbstractUser):
@@ -17,3 +18,8 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.avatar and self.avatar.name and not self.avatar.name.endswith('.webp'):
+            process_image_field(self.avatar)
