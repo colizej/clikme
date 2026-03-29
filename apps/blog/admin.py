@@ -4,11 +4,17 @@ from django.utils.html import format_html
 from .models import Category, Tag, Article, ArticleFAQ, ArticleImage
 
 
-# ── Plain textarea (no rich editor) ─────────────────────────────────────────
+# ── CodeMirror widget for Markdown ───────────────────────────────────────────
+
+class CodeMirrorTextarea(forms.Textarea):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('attrs', {})['class'] = 'codemirror-field'
+        super().__init__(*args, **kwargs)
+
 
 class ArticleForm(forms.ModelForm):
     content_md = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 30, 'class': 'vLargeTextField'}),
+        widget=CodeMirrorTextarea(attrs={'rows': 30}),
         required=False,
         label='Контент (Markdown)',
     )
@@ -113,4 +119,18 @@ class ArticleAdmin(admin.ModelAdmin):
         }),
     )
 
+    class Media:
+        css = {
+            'all': [
+                'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css',
+                'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css',
+                'css/admin-codemirror.css',
+            ],
+        }
+        js = [
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js',
+            'js/admin_codemirror.js',
+        ]
 
+    

@@ -1,0 +1,74 @@
+/* CodeMirror Markdown editor styles */
+.CodeMirror {
+    height: auto;
+    min-height: 500px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.CodeMirror-gutters {
+    background-color: #f5f5f5;
+    border-right: 1px solid #ddd;
+}
+
+/* Markdown syntax highlighting */
+.cm-header {
+    font-weight: 700;
+    color: #0066cc;
+}
+
+.cm-header-1 { font-size: 1.4em; }
+.cm-header-2 { font-size: 1.25em; }
+.cm-header-3 { font-size: 1.1em; }
+.cm-header-4, .cm-header-5, .cm-header-6 { font-size: 1em; }
+
+.cm-link {
+    color: #0066cc;
+    text-decoration: underline;
+}
+
+.cm-url {
+    color: #008800;
+}
+
+.cm-quote {
+    color: #888;
+    font-style: italic;
+}
+
+.cm-list {
+    color: #cc6600;
+}
+
+.cm-strong {
+    font-weight: 700;
+}
+
+.cm-em {
+    font-style: italic;
+}
+
+.cm-code {
+    background-color: #f5f5f5;
+    border-radius: 3px;
+    padding: 0 4px;
+    color: #c7254e;
+}
+
+.cm-comment {
+    color: #888;
+}
+
+.cm-hr {
+    color: #ccc;
+}
+
+/* Link highlighting in editor */
+.cm-s-eclipse .cm-link {
+    color: #0066cc;
+}
+
+.cm-s-eclipse .cm-url {
+    color: #008800;
+}
