@@ -4,7 +4,36 @@
 {% block title %}{{ news_item.title }} — ClikMe{% endblock %}
 {% block meta_description %}{{ news_item.summary|truncatewords:30 }}{% endblock %}
 {% block meta_extra %}
-  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/news/{{ news_item.slug }}/">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="{{ news_item.title }}">
+  <meta property="og:description" content="{{ news_item.summary|truncatewords:30 }}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/news/{{ news_item.slug }}/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="ClikMe">
+  {% if news_item.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ news_item.image.url }}">
+  {% elif news_item.image_url %}<meta property="og:image" content="{{ news_item.image_url }}">{% endif %}
+  {% if news_item.published_at %}<meta property="article:published_time" content="{{ news_item.published_at|date:'c' }}">{% endif %}
+
+  <meta name="twitter:card" content="{% if news_item.image or news_item.image_url %}summary_large_image{% else %}summary{% endif %}">
+  <meta name="twitter:title" content="{{ news_item.title }}">
+  <meta name="twitter:description" content="{{ news_item.summary|truncatewords:30 }}">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": "{{ news_item.title|escapejs }}",
+    "description": "{{ news_item.summary|truncatewords:30|escapejs }}",
+    {% if news_item.image %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ news_item.image.url }}",
+    {% elif news_item.image_url %}"image": "{{ news_item.image_url }}",{% endif %}
+    {% if news_item.published_at %}"datePublished": "{{ news_item.published_at|date:'c' }}",{% endif %}
+    "inLanguage": "ru",
+    {% if news_item.source %}"publisher": {"@type": "Organization", "name": "{{ news_item.source.name|escapejs }}"},{% endif %}
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "{{ request.scheme }}://{{ request.get_host }}/news/{{ news_item.slug }}/"}
+  }
+  </script>
 {% endblock %}
 
 {% block content %}

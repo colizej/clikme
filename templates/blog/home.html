@@ -5,6 +5,28 @@
 
 {% block extra_head %}
 <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/">
+
+{% if page_obj.number == 1 and not request.GET.q and not request.GET.tag and not request.GET.category %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "ClikMe",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/",
+  "description": "Всё о жизни и отдыхе во Вьетнаме: статьи, компании, новости.",
+  "inLanguage": "ru",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "{{ request.scheme }}://{{ request.get_host }}/search/?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{% endif %}
+
 {% if page_obj.has_other_pages %}
   {% if page_obj.has_previous %}
     <link rel="prev" href="{{ request.path }}?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.tag %}tag={{ request.GET.tag }}&{% endif %}page={{ page_obj.previous_page_number }}">

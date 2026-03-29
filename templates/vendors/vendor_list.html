@@ -4,6 +4,32 @@
 {% block title %}{% trans "Компании и сервисы" %} — ClikMe{% endblock %}
 {% block meta_description %}{% trans "Компании, магазины и сервисы во Вьетнаме и Нячанге." %}{% endblock %}
 
+{% block meta_extra %}
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/vendors/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% trans 'Компании и сервисы' %} — ClikMe">
+  <meta property="og:description" content="{% trans 'Компании, магазины и сервисы во Вьетнаме и Нячанге.' %}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/vendors/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="ClikMe">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Компании и сервисы в Нячанге",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/vendors/",
+    "numberOfItems": {{ object_list|length }},
+    "itemListElement": [
+      {% for vendor in object_list %}
+      {"@type": "ListItem", "position": {{ forloop.counter }}, "url": "{{ request.scheme }}://{{ request.get_host }}/{{ vendor.slug }}/", "name": "{{ vendor.display_name|escapejs }}"}{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+  </script>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-10">
   <h1 class="font-serif text-3xl md:text-4xl font-bold mb-2">{% trans "Компании и сервисы" %}</h1>

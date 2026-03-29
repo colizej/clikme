@@ -3,12 +3,33 @@
 
 {% block title %}{% trans "Страница не найдена" %} — ClikMe{% endblock %}
 
+{% block meta_extra %}
+<meta name="robots" content="noindex,follow">
+{% endblock %}
+
 {% block content %}
-<div class="max-w-xl mx-auto px-4 py-24 text-center">
-  <div class="text-8xl mb-6">🌴</div>
+<div class="max-w-2xl mx-auto px-4 py-20 text-center">
+  <div class="text-7xl mb-4">🌴</div>
   <p class="text-7xl font-black text-(--color-accent) mb-4">404</p>
-  <h1 class="font-serif text-2xl font-bold mb-4">{% trans "Страница не найдена" %}</h1>
-  <p class="text-(--color-text-muted) mb-8">{% trans "Возможно, страница была удалена или вы перешли по неверной ссылке." %}</p>
-  <a href="/" class="ck-btn-accent">{% trans "На главную" %}</a>
+  <h1 class="font-serif text-2xl font-bold mb-3">{% trans "Страница не найдена" %}</h1>
+  <p class="text-(--color-text-muted) mb-10">{% trans "Возможно, страница была удалена или вы перешли по неверной ссылке." %}</p>
+
+  <div class="flex flex-wrap justify-center gap-3 mb-14">
+    <a href="/" class="ck-btn-accent">{% trans "На главную" %}</a>
+    <a href="/news/" class="ck-btn-outline">{% trans "Новости" %}</a>
+    <a href="/vendors/" class="ck-btn-outline">{% trans "Компании" %}</a>
+    <a href="/search/" class="ck-btn-outline">{% trans "Поиск" %}</a>
+  </div>
+
+  {% if nav_categories %}
+  <div class="border-t border-(--color-border) pt-10">
+    <p class="text-sm text-(--color-text-muted) mb-4">{% trans "Разделы сайта" %}</p>
+    <div class="flex flex-wrap justify-center gap-2">
+      {% for cat in nav_categories %}
+      <a href="{{ cat.get_absolute_url }}" class="ck-pill hover:bg-(--color-accent-medium) transition-colors">{{ cat.name }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
