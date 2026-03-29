@@ -14,6 +14,7 @@ def robots_txt(request):
         f"Disallow: /django-admin/",
         "Disallow: /api/",
         "Disallow: /accounts/",
+        "Disallow: /search/",
         "",
         f"Sitemap: {sitemap_url}",
     ]
