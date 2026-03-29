@@ -4,7 +4,45 @@
 {% block title %}{{ product.name }} — ClikMe{% endblock %}
 {% block meta_description %}{{ product.meta_description|default:product.description|truncatewords:25 }}{% endblock %}
 {% block meta_extra %}
-  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/{{ product.slug }}/">
+
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="{{ product.name }} — ClikMe">
+  <meta property="og:description" content="{{ product.meta_description|default:product.description|truncatewords:25 }}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/{{ product.slug }}/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="ClikMe">
+  {% if product.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}">{% endif %}
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "{{ product.name|escapejs }}",
+    {% if product.meta_description %}"description": "{{ product.meta_description|escapejs }}",{% elif product.description %}"description": "{{ product.description|striptags|truncatewords:50|escapejs }}",{% endif %}
+    {% if product.image %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}",{% endif %}
+    {% if product.vendor %}"brand": {"@type": "Brand", "name": "{{ product.vendor.display_name|escapejs }}"},{% endif %}
+    {% if product.price %}"offers": {
+      "@type": "Offer",
+      "price": "{{ product.price }}",
+      "priceCurrency": "VND",
+      "availability": "https://schema.org/InStock",
+      "seller": {"@type": "Organization", "name": "{{ product.vendor.display_name|escapejs }}"}
+    }{% endif %}
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Главная", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
+      {% if product.vendor %}{"@type": "ListItem", "position": 2, "name": "{{ product.vendor.display_name|escapejs }}", "item": "{{ request.scheme }}://{{ request.get_host }}/{{ product.vendor.slug }}/"},{% endif %}
+      {"@type": "ListItem", "position": {% if product.vendor %}3{% else %}2{% endif %}, "name": "{{ product.name|escapejs }}", "item": "{{ request.scheme }}://{{ request.get_host }}/{{ product.slug }}/"}
+    ]
+  }
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -16,7 +54,7 @@
   <nav class="text-xs text-(--color-muted) mb-6 flex items-center gap-1">
     <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
     <span>/</span>
-    <a href="/{{ product.vendor.slug }}/"
+    <a href="{{ product.vendor.get_absolute_url }}"
        class="hover:text-(--color-accent) transition-colors">{{ product.vendor.display_name }}</a>
     <span>/</span>
     <span class="truncate">{{ product.name }}</span>
@@ -42,7 +80,7 @@
 
       <div class="mt-6">
         <p class="text-sm text-(--color-muted)">{% trans "Предлагает:" %}
-          <a href="/{{ product.vendor.slug }}/"
+          <a href="{{ product.vendor.get_absolute_url }}"
              class="text-(--color-accent) hover:underline font-semibold">
             {{ product.vendor.display_name }}
           </a>

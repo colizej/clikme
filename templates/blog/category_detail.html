@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ category.meta_title|default:category.name }} — ClikMe{% endblock %}
+{% block meta_description %}{{ category.meta_description|default:category.description|truncatewords:25 }}{% endblock %}
+
+{% block extra_head %}
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/{{ category.slug }}/">
+{% if page_obj.has_other_pages %}
+  {% if page_obj.has_previous %}
+    <link rel="prev" href="/{{ category.slug }}/?page={{ page_obj.previous_page_number }}">
+  {% endif %}
+  {% if page_obj.has_next %}
+    <link rel="next" href="/{{ category.slug }}/?page={{ page_obj.next_page_number }}">
+  {% endif %}
+{% endif %}
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ category.meta_title|default:category.name }} — ClikMe">
+<meta property="og:description" content="{{ category.meta_description|default:category.description|truncatewords:25 }}">
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/{{ category.slug }}/">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="ClikMe">
+{% if category.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ category.image.url }}">{% endif %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Главная", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
+    {"@type": "ListItem", "position": 2, "name": "{{ category.name|escapejs }}", "item": "{{ request.scheme }}://{{ request.get_host }}/{{ category.slug }}/"}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+  {# Breadcrumb #}
+  <nav class="text-xs text-(--color-text-muted) mb-6 flex items-center gap-1.5">
+    <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+    <span>›</span>
+    <span class="text-(--color-text)">{{ category.name }}</span>
+  </nav>
+
+  {# Header #}
+  <div class="mb-10">
+    {% if category.image %}
+    <div class="aspect-[3/1] rounded-2xl overflow-hidden mb-6">
+      <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover">
+    </div>
+    {% endif %}
+    <h1 class="font-serif text-4xl md:text-5xl font-black text-(--color-text) mb-3">{{ category.name }}</h1>
+    {% if category.description %}
+    <p class="text-(--color-text-muted) text-base max-w-2xl leading-relaxed">{{ category.description }}</p>
+    {% endif %}
+    <p class="text-xs text-(--color-text-muted) mt-2">
+      {% blocktrans count count=page_obj.paginator.count %}{{ count }} статья{% plural %}{{ count }} статей{% endblocktrans %}
+    </p>
+  </div>
+
+  {# Article grid #}
+  {% if object_list %}
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for article in object_list %}
+    <a href="{{ article.get_absolute_url }}" class="ck-article-card group flex flex-col">
+      <div class="relative aspect-[16/10] overflow-hidden bg-(--color-bg-warm)">
+        {% if article.image %}
+        <img src="{{ article.image.url }}" alt="{{ article.image_alt|default:article.title }}"
+             loading="lazy" decoding="async"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        {% else %}
+        <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-orange-50 to-amber-100">🌴</div>
+        {% endif %}
+        {% with card_tags=article.tags.all %}
+        {% if card_tags %}
+        <div class="absolute top-3 left-3 flex flex-wrap gap-1">
+          {% for tag in card_tags|slice:":2" %}
+          <span class="ck-pill-white text-[11px]">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+      </div>
+      <div class="p-5 flex flex-col flex-1">
+        <h2 class="font-bold text-sm leading-snug line-clamp-3 mb-3 group-hover:text-(--color-accent) transition-colors">
+          {{ article.title }}
+        </h2>
+        {% if article.short_description %}
+        <p class="text-xs text-(--color-text-muted) leading-relaxed line-clamp-2 mb-auto">{{ article.short_description|truncatewords:18 }}</p>
+        {% endif %}
+        <div class="flex items-center justify-between mt-4 pt-4 border-t border-(--color-border)">
+          <p class="text-xs text-(--color-text-muted)">{{ article.views_count }} {% trans "просмотров" %}</p>
+          <span class="text-xs text-(--color-accent) font-semibold group-hover:underline">{% trans "Читать" %} →</span>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {# Pagination #}
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-14 flex justify-center items-center gap-2" aria-label="{% trans 'Страницы' %}">
+    {% if page_obj.has_previous %}
+    <a href="/{{ category.slug }}/?page={{ page_obj.previous_page_number }}"
+       class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">‹</a>
+    {% endif %}
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+      <span class="w-10 h-10 flex items-center justify-center rounded-full bg-(--color-accent) text-white font-bold text-sm">{{ num }}</span>
+      {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+      <a href="/{{ category.slug }}/?page={{ num }}"
+         class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <a href="/{{ category.slug }}/?page={{ page_obj.next_page_number }}"
+       class="w-10 h-10 flex items-center justify-center rounded-full border border-(--color-border) hover:bg-(--color-accent-light) hover:border-(--color-accent) transition-colors text-sm">›</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-24 text-(--color-text-muted)">
+    <p class="text-xl font-semibold mb-2">{% trans "В этой категории пока нет статей" %}</p>
+    <a href="/" class="ck-btn-outline mt-6 inline-block">{% trans "На главную" %}</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

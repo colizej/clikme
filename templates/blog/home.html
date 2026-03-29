@@ -4,6 +4,7 @@
 {% block title %}{% if page_obj.number > 1 %}Стр. {{ page_obj.number }} — {% endif %}ClikMe — Вьетнам, Нячанг{% endblock %}
 
 {% block extra_head %}
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/">
 {% if page_obj.has_other_pages %}
   {% if page_obj.has_previous %}
     <link rel="prev" href="{{ request.path }}?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.tag %}tag={{ request.GET.tag }}&{% endif %}page={{ page_obj.previous_page_number }}">
@@ -205,7 +206,7 @@
     {% if object_list %}
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {% for article in object_list %}
-      <a href="/{{ article.slug }}/" class="ck-article-card group flex flex-col">
+      <a href="{{ article.get_absolute_url }}" class="ck-article-card group flex flex-col">
         {# Image #}
         <div class="relative aspect-[16/10] overflow-hidden bg-(--color-bg-warm)">
           {% if article.image %}

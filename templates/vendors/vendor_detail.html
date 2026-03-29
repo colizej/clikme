@@ -4,7 +4,43 @@
 {% block title %}{{ vendor.display_name }} — ClikMe{% endblock %}
 {% block meta_description %}{{ vendor.meta_description|default:vendor.description|truncatewords:25 }}{% endblock %}
 {% block meta_extra %}
-  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/{{ vendor.slug }}/">
+
+  <meta property="og:type" content="business.business">
+  <meta property="og:title" content="{{ vendor.display_name }} — ClikMe">
+  <meta property="og:description" content="{{ vendor.meta_description|default:vendor.description|truncatewords:25 }}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/{{ vendor.slug }}/">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="ClikMe">
+  {% if vendor.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ vendor.image.url }}">{% endif %}
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "{{ vendor.display_name|escapejs }}",
+    {% if vendor.meta_description %}"description": "{{ vendor.meta_description|escapejs }}",{% elif vendor.description %}"description": "{{ vendor.description|striptags|truncatewords:50|escapejs }}",{% endif %}
+    "url": "{{ request.scheme }}://{{ request.get_host }}/{{ vendor.slug }}/",
+    {% if vendor.image %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ vendor.image.url }}",{% endif %}
+    {% if vendor.telephone %}"telephone": "{{ vendor.telephone|escapejs }}",{% endif %}
+    {% if vendor.address or vendor.city %}"address": {
+      "@type": "PostalAddress"{% if vendor.city %},"addressLocality": "{{ vendor.city|escapejs }}"{% endif %}{% if vendor.address %},"streetAddress": "{{ vendor.address|escapejs }}"{% endif %}
+    },{% endif %}
+    "inLanguage": "ru"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Главная", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
+      {"@type": "ListItem", "position": 2, "name": "Компании", "item": "{{ request.scheme }}://{{ request.get_host }}/vendors/"},
+      {"@type": "ListItem", "position": 3, "name": "{{ vendor.display_name|escapejs }}", "item": "{{ request.scheme }}://{{ request.get_host }}/{{ vendor.slug }}/"}
+    ]
+  }
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -66,7 +102,7 @@
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for product in vendor.products.all %}
       {% if product.is_active %}
-      <a href="/{{ product.slug }}/" class="ck-article-card group flex flex-col overflow-hidden">
+      <a href="{{ product.get_absolute_url }}" class="ck-article-card group flex flex-col overflow-hidden">
         {% if product.image %}
         <div class="aspect-video overflow-hidden bg-(--color-bg-warm)">
           <img src="{{ product.image.url }}" alt="{{ product.name }}"

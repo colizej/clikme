@@ -49,12 +49,13 @@ class SitemapView(TemplateView):
     content_type = 'application/xml'
 
     def get_context_data(self, **kwargs):
-        from apps.blog.models import Article
+        from apps.blog.models import Article, Category
         from apps.vendors.models import Vendor
         from apps.news.models import NewsItem
         ctx = super().get_context_data(**kwargs)
         ctx['base_url'] = self.request.build_absolute_uri('/').rstrip('/')
-        ctx['articles'] = Article.objects.filter(is_published=True).only('slug', 'published_at')
+        ctx['articles'] = Article.objects.filter(is_published=True).select_related('category').only('slug', 'published_at', 'category__slug')
+        ctx['categories'] = Category.objects.filter(is_active=True).only('slug')
         ctx['vendors'] = Vendor.objects.filter(is_active=True, approved=True).only('slug')
         ctx['news_items'] = NewsItem.objects.filter(status='published').only('slug', 'published_at')[:200]
         ctx['pages'] = Page.objects.filter(is_published=True).only('slug', 'updated_at')

@@ -22,7 +22,7 @@ class HomeView(ListView):
     model = Article
     template_name = 'blog/home.html'
     context_object_name = 'articles'
-    paginate_by = 12
+    paginate_by = 18
 
     def get_queryset(self):
         qs = (
@@ -75,7 +75,16 @@ class ArticleDetailView(DetailView):
     context_object_name = 'article'
 
     def get_queryset(self):
-        return Article.objects.filter(is_published=True).prefetch_related('tags')
+        return Article.objects.filter(is_published=True).select_related('category').prefetch_related('tags')
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        # Если в URL передана категория — проверяем соответствие, иначе 301 на canonical
+        cat_in_url = kwargs.get('cat')
+        article_cat_slug = self.object.category.slug if self.object.category else None
+        if cat_in_url is not None and cat_in_url != article_cat_slug:
+            return HttpResponseRedirect(self.object.get_absolute_url(), status=301)
+        return self.render_to_response(self.get_context_data())
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -155,8 +164,8 @@ def search_api(request):
     for a in Article.objects.filter(
         _ci_q('title', q) | _ci_q('short_description', q),
         is_published=True
-    ).only('title', 'slug')[:5]:
-        results.append({'type': 'article', 'label': 'Статья', 'title': a.title, 'url': f'/{a.slug}/'})
+    ).select_related('category').only('title', 'slug', 'category__slug')[:5]:
+        results.append({'type': 'article', 'label': 'Статья', 'title': a.title, 'url': a.get_absolute_url()})
 
     for n in NewsItem.objects.filter(
         _ci_q('title', q),
@@ -179,8 +188,35 @@ def search_api(request):
     return JsonResponse({'results': results})
 
 
+class CategoryDetailView(ListView):
+    template_name = 'blog/category_detail.html'
+    context_object_name = 'articles'
+    paginate_by = 18
+
+    def get_queryset(self):
+        self.category = Category.objects.filter(slug=self.kwargs['slug'], is_active=True).first()
+        if not self.category:
+            raise Http404
+        return (
+            Article.objects
+            .filter(category=self.category, is_published=True)
+            .select_related('category')
+            .prefetch_related('tags')
+            .order_by('-published_at')
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['category'] = self.category
+        return ctx
+
+
 def slug_dispatch(request, slug):
-    """Диспатчер: Article | Vendor | Product | Page по slug"""
+    """Диспатчер: Category | Article | Vendor | Product | Page по slug"""
+    category = Category.objects.filter(slug=slug, is_active=True).first()
+    if category:
+        return CategoryDetailView.as_view()(request, slug=slug)
+
     article = Article.objects.filter(slug=slug, is_published=True).first()
     if article:
         # Если у статьи есть категория — редирект на каноничный URL
