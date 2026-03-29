@@ -6,22 +6,17 @@
 .editor-preview h5,
 .editor-preview h6 {
     font-weight: 700;
+    font-size: 0.9rem !important;
 }
 
 .editor-preview h1 {
-    font-size: 1.25rem !important;
-}
-
-.editor-preview h2 {
-    font-size: 1.1rem !important;
-}
-
-.editor-preview h3 {
     font-size: 1rem !important;
 }
 
-.editor-preview h4,
-.editor-preview h5,
-.editor-preview h6 {
+.editor-preview h2 {
     font-size: 0.95rem !important;
+}
+
+.editor-preview h3 {
+    font-size: 0.9rem !important;
 }
