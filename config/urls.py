@@ -132,8 +132,8 @@ urlpatterns = [
     path('', include('apps.pages.urls')),
     path('', include('apps.newsletter.urls')),
     path('', include('apps.ads.urls')),
-    path('', include('apps.blog.urls')),
-    path('', include('apps.vendors.urls')),  # vendors/<slug>/ и <slug>/ для вендоров
+    path('', include('apps.vendors.urls')),  # vendors/ — точное совпадение до catch-all
+    path('', include('apps.blog.urls')),     # <slug>/ — catch-all последним
 
     # Robots
     path('robots.txt', include('apps.pages.robots')),
