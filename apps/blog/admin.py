@@ -121,7 +121,10 @@ class ArticleAdmin(admin.ModelAdmin):
 
     class Media:
         css = {
-            'all': ['https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css'],
+            'all': [
+                'https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css',
+                'css/admin-markdown.css',
+            ],
         }
         js = [
             'https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js',
