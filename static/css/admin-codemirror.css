@@ -49,7 +49,8 @@ a[href] .cm-url {
 }
 
 /* Lists - orange */
-.cm-list {
+.cm-list,
+.cm-keyword {
     color: #cc6600 !important;
 }
 
@@ -81,9 +82,8 @@ a[href] .cm-url {
     color: #ccc !important;
 }
 
-/* All URLs - force green */
-span.cm-variable-2,
-span.cm-link,
-span.cm-url {
+/* URL-specific - green */
+span.cm-url,
+span.cm-link {
     color: #008800 !important;
 }
