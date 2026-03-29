@@ -1,5 +1,5 @@
 from django.db.models import Count, Q
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, HttpResponseRedirect
 from django.views.generic import ListView, DetailView
 
 from .models import Article, Category, Tag
@@ -183,6 +183,11 @@ def slug_dispatch(request, slug):
     """Диспатчер: Article | Vendor | Product | Page по slug"""
     article = Article.objects.filter(slug=slug, is_published=True).first()
     if article:
+        # Если у статьи есть категория — редирект на каноничный URL
+        if article.category:
+            canonical_url = article.get_absolute_url()
+            if request.path != canonical_url:
+                return HttpResponseRedirect(canonical_url, status=301)
         return ArticleDetailView.as_view()(request, slug=slug)
 
     vendor = Vendor.objects.filter(slug=slug, is_active=True).first()
