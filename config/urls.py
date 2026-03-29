@@ -51,13 +51,13 @@ urlpatterns = [
     # Auth
     path('accounts/', include('django.contrib.auth.urls')),
 
-    # Apps — специфические пути ПЕРЕД slug-диспатчером blog
+    # Apps — blog первый (slug_dispatch проверяет статьи)
     path('news/', include('apps.news.urls')),
     path('', include('apps.pages.urls')),
     path('', include('apps.newsletter.urls')),
-    path('', include('apps.vendors.urls')),
     path('', include('apps.ads.urls')),
-    path('', include('apps.blog.urls')),  # slug_dispatch — последним
+    path('', include('apps.blog.urls')),
+    path('', include('apps.vendors.urls')),  # vendors последним
 
     # Robots
     path('robots.txt', include('apps.pages.robots')),
