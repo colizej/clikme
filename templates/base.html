@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}ClikMe — Вьетнам, Нячанг{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}Всё о жизни и отдыхе во Вьетнаме: статьи, компании, новости.{% endblock %}">
+  <meta name="google-site-verification" content="AtNEwjQK9-U8Vw-BsvBlqskYCWvDMO4_3-fBIOyymZI">
   {% block meta_extra %}{% endblock %}
 
   {# Google Fonts — Inter + Playfair Display #}
@@ -391,6 +392,34 @@
 
   {# ── GDPR COOKIE BANNER ───────────────────────────────────────────────── #}
   {% include "components/cookie_banner.html" %}
+
+  {# ── ANALYTICS (only if cookie consent given) ────────────────────────── #}
+  {% if request.COOKIES.ck_consent %}
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W8L33459QV"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-W8L33459QV');
+  </script>
+
+  <!-- Yandex Metrika -->
+  <script>
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    ym(100423901, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true,
+        webvisor:true
+    });
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/100423901" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+  {% endif %}
 
   <script>
     /* Nav drawer */
