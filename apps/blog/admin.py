@@ -4,17 +4,11 @@ from django.utils.html import format_html
 from .models import Category, Tag, Article, ArticleFAQ, ArticleImage
 
 
-# ── Markdown widget (EasyMDE via CDN) ────────────────────────────────────────
-
-class MarkdownTextarea(forms.Textarea):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('attrs', {})['class'] = 'easymde-field'
-        super().__init__(*args, **kwargs)
-
+# ── Plain textarea (no rich editor) ─────────────────────────────────────────
 
 class ArticleForm(forms.ModelForm):
     content_md = forms.CharField(
-        widget=MarkdownTextarea(attrs={'rows': 30}),
+        widget=forms.Textarea(attrs={'rows': 30, 'class': 'vLargeTextField'}),
         required=False,
         label='Контент (Markdown)',
     )
@@ -119,15 +113,4 @@ class ArticleAdmin(admin.ModelAdmin):
         }),
     )
 
-    class Media:
-        css = {
-            'all': [
-                'https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css',
-                'css/admin-markdown.css',
-            ],
-        }
-        js = [
-            'https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js',
-            'js/admin_md.js',
-        ]
 
