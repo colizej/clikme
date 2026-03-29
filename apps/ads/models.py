@@ -28,7 +28,7 @@ class Partner(models.Model):
         super().save(*args, **kwargs)
         if self.logo and self.logo.name and not self.logo.name.endswith('.webp'):
             process_image_field(self.logo)
-            self.save(update_fields=['logo'])
+            Partner.objects.filter(pk=self.pk).update(logo=self.logo.name)
 
 
 class AdSlot(models.Model):
@@ -180,7 +180,7 @@ class AdUnit(models.Model):
         super().save(*args, **kwargs)
         if self.image and self.image.name and not self.image.name.endswith('.webp'):
             process_image_field(self.image)
-            self.save(update_fields=['image'])
+            AdUnit.objects.filter(pk=self.pk).update(image=self.image.name)
     
     def is_visible(self):
         """Проверяет, активно ли объявление в текущий момент"""

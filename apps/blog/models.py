@@ -29,7 +29,7 @@ class Category(models.Model):
         super().save(*args, **kwargs)
         if self.image and self.image.name and not self.image.name.endswith('.webp'):
             process_image_field(self.image)
-            self.save(update_fields=['image'])
+            Category.objects.filter(pk=self.pk).update(image=self.image.name)
 
 
 class Tag(models.Model):
@@ -108,7 +108,7 @@ class Article(models.Model):
         super().save(*args, **kwargs)
         if self.image and self.image.name and not self.image.name.endswith('.webp'):
             process_image_field(self.image)
-            self.save(update_fields=['image'])
+            Article.objects.filter(pk=self.pk).update(image=self.image.name)
         if self.pk and hasattr(self, '_parsed_faqs'):
             self.faqs.filter(is_auto=True).delete()
             for i, (q, a) in enumerate(self._parsed_faqs):
@@ -371,5 +371,5 @@ class ArticleImage(models.Model):
         super().save(*args, **kwargs)
         if self.image and self.image.name and not self.image.name.endswith('.webp'):
             process_image_field(self.image)
-            self.save(update_fields=['image'])
+            ArticleImage.objects.filter(pk=self.pk).update(image=self.image.name)
 
