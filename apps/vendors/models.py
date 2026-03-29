@@ -45,6 +45,7 @@ class Vendor(models.Model):
         super().save(*args, **kwargs)
         if self.image and self.image.name and not self.image.name.endswith('.webp'):
             process_image_field(self.image)
+            self.save(update_fields=['image'])
 
     def get_absolute_url(self):
         return f'/{self.slug}/'
@@ -77,6 +78,7 @@ class Product(models.Model):
         super().save(*args, **kwargs)
         if self.image and self.image.name and not self.image.name.endswith('.webp'):
             process_image_field(self.image)
+            self.save(update_fields=['image'])
 
     def get_absolute_url(self):
         return f'/{self.slug}/'

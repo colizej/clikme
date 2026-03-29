@@ -23,3 +23,4 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
         if self.avatar and self.avatar.name and not self.avatar.name.endswith('.webp'):
             process_image_field(self.avatar)
+            self.save(update_fields=['avatar'])
