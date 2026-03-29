@@ -18,6 +18,11 @@ class ArticleForm(forms.ModelForm):
         required=False,
         label='Контент (Markdown)',
     )
+    published_at = forms.DateTimeField(
+        required=False,
+        label='Дата публикации',
+        help_text='Можно поставить любую дату, включая прошлую',
+    )
 
     class Meta:
         model = Article
