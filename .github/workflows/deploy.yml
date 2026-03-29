@@ -6,6 +6,7 @@ on:
 
 jobs:
   deploy:
+    if: false  # отключён до готовности к деплою
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
