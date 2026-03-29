@@ -6,6 +6,26 @@
 {% block meta_extra %}
   {% if page.noindex %}<meta name="robots" content="noindex,follow">{% endif %}
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  {% if page.slug == 'o-nas' %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "ClikMe",
+      "url": "https://clikme.ru",
+      "description": "Информационный портал о жизни, отдыхе и путешествиях во Вьетнаме",
+      "areaServed": {
+        "@type": "City",
+        "name": "Нячанг",
+        "addressRegion": "Ханой",
+        "addressCountry": "VN"
+      }
+    }
+  }
+  </script>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
