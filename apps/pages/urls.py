@@ -7,7 +7,7 @@ urlpatterns = [
     path('privacy/', views.PageDetailView.as_view(), {'slug': 'politika-konfidencialnosti'}, name='privacy'),
     path('terms/', views.PageDetailView.as_view(), {'slug': 'terms'}, name='terms'),
     path('pravila/', views.PageDetailView.as_view(), {'slug': 'pravila-ispolzovania'}, name='rules'),
+    path('o-nas/', views.PageDetailView.as_view(), {'slug': 'o-nas'}, name='about'),
     path('contacts/', views.ContactsView.as_view(), name='contacts'),
     path('sitemap.xml', views.SitemapView.as_view(), name='sitemap'),
-    path('<slug>/', views.PageDetailView.as_view(), name='detail'),
 ]
