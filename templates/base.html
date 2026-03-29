@@ -372,7 +372,9 @@
       <div>
         <p class="text-white font-semibold mb-4 text-xs uppercase tracking-widest">{% trans "Информация" %}</p>
         <ul class="space-y-2.5">
-          <li><a href="/privacy/" class="hover:text-white transition-colors">{% trans "Конфиденциальность" %}</a></li>
+          {% for page in footer_pages %}
+          <li><a href="{{ page.get_absolute_url }}" class="hover:text-white transition-colors">{{ page.title }}</a></li>
+          {% endfor %}
         </ul>
       </div>
 

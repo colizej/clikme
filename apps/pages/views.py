@@ -1,4 +1,5 @@
 from django.views.generic import TemplateView, DetailView
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import Page
@@ -11,10 +12,16 @@ class PageDetailView(DetailView):
 
     def get_queryset(self):
         return Page.objects.filter(is_published=True)
-
-
-class PrivacyView(TemplateView):
-    template_name = 'pages/privacy.html'
+    
+    def get_object(self, queryset=None):
+        if 'slug' in self.kwargs:
+            return get_object_or_404(Page, slug=self.kwargs['slug'], is_published=True)
+        return super().get_object(queryset)
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['rendered_content'] = self.object.get_rendered_content()
+        return ctx
 
 
 class ContactsView(TemplateView):
