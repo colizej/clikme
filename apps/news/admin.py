@@ -10,12 +10,6 @@ from .models import NewsSource, NewsItem
 
 
 class NewsItemForm(forms.ModelForm):
-    published_at = SplitDateTimeField(
-        required=False,
-        label='Дата публикации',
-        widget=AdminSplitDateTime(),
-    )
-
     class Meta:
         model = NewsItem
         fields = '__all__'

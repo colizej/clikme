@@ -20,12 +20,6 @@ class ArticleForm(forms.ModelForm):
         required=False,
         label='Контент (Markdown)',
     )
-    published_at = SplitDateTimeField(
-        required=False,
-        label='Дата публикации',
-        widget=AdminSplitDateTime(),
-        help_text='Можно поставить любую дату, включая прошлую и будущую',
-    )
     views_count = forms.IntegerField(
         required=False,
         label='Показы',
