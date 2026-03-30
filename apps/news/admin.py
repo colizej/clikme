@@ -41,11 +41,26 @@ class NewsSourceAdmin(admin.ModelAdmin):
 
 @admin.action(description='✅ Опубликовать выбранные')
 def publish_selected(modeladmin, request, queryset):
-    updated = queryset.filter(status__in=[NewsItem.DRAFT, NewsItem.REJECTED]).update(
-        status=NewsItem.PUBLISHED,
-        published_at=timezone.now(),
-    )
-    modeladmin.message_user(request, f'Опубликовано: {updated}')
+    from apps.news.telegram import send_news_item
+    items = list(queryset.filter(status__in=[NewsItem.DRAFT, NewsItem.REJECTED]))
+    now = timezone.now()
+    ok = tg_ok = 0
+    for item in items:
+        item.status = NewsItem.PUBLISHED
+        if not item.published_at:
+            item.published_at = now
+        item.save(update_fields=['status', 'published_at'])
+        ok += 1
+        # Отправляем в Telegram если ещё не отправлено
+        if not item.telegram_message_id:
+            success, result = send_news_item(item)
+            if success:
+                NewsItem.objects.filter(pk=item.pk).update(telegram_message_id=result)
+                tg_ok += 1
+    msg = f'Опубликовано: {ok}'
+    if tg_ok:
+        msg += f' | Telegram: {tg_ok}'
+    modeladmin.message_user(request, msg)
 
 
 @admin.action(description='🗑 Отклонить выбранные')

@@ -140,6 +140,3 @@ def send_news_item(item) -> tuple[bool, str]:
         err = result.get('description', 'неизвестная ошибка')
         logger.warning('Telegram: ошибка [%s]: %s', item.pk, err)
         return False, err
-        err = result.get('description', 'неизвестная ошибка')
-        logger.warning('Telegram: ошибка [%s]: %s', item.pk, err)
-        return False, err

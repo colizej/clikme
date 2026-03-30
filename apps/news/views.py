@@ -1,5 +1,6 @@
 import re
 from bs4 import BeautifulSoup
+from django.db.models import F
 from django.views.generic import ListView, DetailView
 from .models import NewsItem
 
@@ -179,6 +180,11 @@ class NewsDetailView(DetailView):
 
     def get_queryset(self):
         return NewsItem.objects.filter(status=NewsItem.PUBLISHED)
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        NewsItem.objects.filter(pk=self.object.pk).update(views_count=F('views_count') + 1)
+        return response
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
