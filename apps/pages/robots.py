@@ -22,5 +22,5 @@ def robots_txt(request):
 
 
 urlpatterns = [
-    path("robots.txt", robots_txt),
+    path("", robots_txt),
 ]
