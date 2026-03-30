@@ -1,9 +1,24 @@
+from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin.widgets import AdminSplitDateTime
+from django.forms import SplitDateTimeField
 from django.http import HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from .models import NewsSource, NewsItem
+
+
+class NewsItemForm(forms.ModelForm):
+    published_at = SplitDateTimeField(
+        required=False,
+        label='Дата публикации',
+        widget=AdminSplitDateTime(),
+    )
+
+    class Meta:
+        model = NewsItem
+        fields = '__all__'
 
 
 @admin.register(NewsSource)
@@ -105,6 +120,7 @@ def resend_to_telegram(modeladmin, request, queryset):
 
 @admin.register(NewsItem)
 class NewsItemAdmin(admin.ModelAdmin):
+    form = NewsItemForm
     list_display = ('title_short', 'thumb', 'source', 'tag', 'status_badge',
                     'ai_processed', 'is_edited', 'tg_sent', 'fetched_at', 'published_at')
     list_filter = ('status', 'tag', 'ai_processed', 'is_edited', 'source')
