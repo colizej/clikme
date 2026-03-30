@@ -17,6 +17,7 @@ import re
 import httpx
 from django.core.management.base import BaseCommand
 from apps.news.models import NewsItem
+from apps.news.management.commands.fetch_news import _make_unique_slug
 
 DEEPL_KEY = os.environ.get('DEEPL_API_KEY', '')
 GEMINI_KEY = os.environ.get('GEMINI_API_KEY', '')
@@ -191,8 +192,6 @@ class Command(BaseCommand):
             item.ai_processed = True
             item.ai_model_used = model_used
             # Обновляем slug под новый заголовок
-            from apps.news.management.commands.fetch_news import _make_unique_slug
-            # Только если slug пока кириллический или латинский от оригинала
             new_slug = _make_unique_slug(t_title)
             item.slug = new_slug
             item.save()

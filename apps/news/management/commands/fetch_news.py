@@ -706,7 +706,8 @@ class Command(BaseCommand):
                 m = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', body)
                 if m:
                     image_url = m.group(1)
-            item = NewsItem.objects.create(
+            body_md = _html_to_md(body)
+            news_item = NewsItem.objects.create(
                 source=source,
                 source_url=href,
                 slug=slug,
@@ -715,6 +716,7 @@ class Command(BaseCommand):
                 summary=summary,
                 summary_original=summary,
                 body=body,
+                body_md=body_md,
                 image_url=image_url,
                 status=NewsItem.DRAFT,
             )
@@ -722,7 +724,7 @@ class Command(BaseCommand):
                 result = _download_image(image_url)
                 if result:
                     fname, content = result
-                    item.image.save(fname, content, save=True)
+                    news_item.image.save(fname, content, save=True)
             new += 1
             self.stdout.write(f'  + {title[:80]}')
 
