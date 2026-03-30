@@ -179,13 +179,15 @@ urlpatterns = [
     # OpenCart формат index.php — умный редирект с vendor_id lookup
     path('index.php', index_php_redirect),
 
-    # OpenCart категории вендоров (латиница)
+    # OpenCart категории вендоров (латиница) + все подкатегории
     path('producti-pitania/', RedirectView.as_view(url='/vendors/', permanent=True)),
     path('producti-pitania', RedirectView.as_view(url='/vendors/', permanent=True)),
     path('eda-na-zakaz/', RedirectView.as_view(url='/vendors/', permanent=True)),
     path('eda-na-zakaz', RedirectView.as_view(url='/vendors/', permanent=True)),
     path('produkty/', RedirectView.as_view(url='/vendors/', permanent=True)),
     path('produkty', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('skidki-kyponi/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('skidki-kyponi', RedirectView.as_view(url='/vendors/', permanent=True)),
 
     # OpenCart категории вендоров (кириллица URL-encoded)
     # Услуги → /vendors/

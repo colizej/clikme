@@ -81,11 +81,15 @@ class ArticleDetailView(DetailView):
         try:
             self.object = self.get_object()
         except Http404:
-            # Фолбэк: старые OpenCart URL вида /<vendor>/<product>/ — ищем продукт по slug
+            # Фолбэк 1: старые OpenCart URL вида /<vendor>/<product>/ — ищем продукт по slug
             product = Product.objects.filter(slug=kwargs.get('slug'), is_active=True).first()
             if product:
                 return HttpResponseRedirect(product.get_absolute_url(), status=301)
-            raise
+            # Фолбэк 2: OpenCart подкатегории вида /<cat>/<subcategory>/ — на /vendors/
+            vendor = Vendor.objects.filter(slug=kwargs.get('cat'), is_active=True).first()
+            if vendor:
+                return HttpResponseRedirect(vendor.get_absolute_url(), status=301)
+            return HttpResponseRedirect('/vendors/', status=301)
         # Если в URL передана категория — проверяем соответствие, иначе 301 на canonical
         cat_in_url = kwargs.get('cat')
         article_cat_slug = self.object.category.slug if self.object.category else None
