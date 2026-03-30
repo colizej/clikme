@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block title %}{{ category.meta_title|default:category.name }} — ClikMe{% endblock %}
-{% block meta_description %}{{ category.meta_description|default:category.description|truncatewords:25 }}{% endblock %}
+{% block meta_description %}{{ category.meta_description|default:category.description|truncatechars:160 }}{% endblock %}
 
 {% block extra_head %}
 <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/{{ category.slug }}/">

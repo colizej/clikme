@@ -115,7 +115,7 @@
   {% if article.image %}
   <div class="w-full md:max-w-7xl md:mx-auto aspect-video overflow-hidden md:rounded-b-3xl md:relative">
     <img src="{{ article.image.url }}" alt="{{ article.image_alt|default:article.title }}"
-         class="w-full h-full object-cover object-center" loading="eager">
+         class="w-full h-full object-cover object-center" loading="lazy" fetchpriority="high">
     {# Desktop overlay: breadcrumb + tags + title + views #}
     <div class="hidden md:flex absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent md:rounded-b-3xl flex-col justify-end px-10 pb-10">
       {# Breadcrumb #}
@@ -123,7 +123,7 @@
         <a href="/" class="hover:text-white transition-colors">{% trans "Главная" %}</a>
         {% if article.category %}
         <span>›</span>
-        <a href="/?category={{ article.category.slug }}" class="hover:text-white transition-colors">{{ article.category.name }}</a>
+        <a href="/{{ article.category.slug }}/" class="hover:text-white transition-colors">{{ article.category.name }}</a>
         {% endif %}
         <span>›</span>
         <span class="text-white/40 truncate max-w-[300px]">{{ article.title }}</span>
@@ -139,7 +139,7 @@
         {% endfor %}
       </div>
       {% elif article.category %}
-      <a href="/?category={{ article.category.slug }}"
+      <a href="/{{ article.category.slug }}/"
          class="inline-block self-start mb-3 px-3 py-1 rounded-full text-xs font-semibold bg-white/25 text-white backdrop-blur-sm border border-white/40 hover:bg-white/40 transition-colors">
         {{ article.category.name }}
       </a>
@@ -166,7 +166,7 @@
       <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
       {% if article.category %}
       <span class="text-(--color-border)">›</span>
-      <a href="/?category={{ article.category.slug }}"
+      <a href="/{{ article.category.slug }}/"
          class="hover:text-(--color-accent) transition-colors">{{ article.category.name }}</a>
       {% endif %}
       <span class="text-(--color-border)">›</span>

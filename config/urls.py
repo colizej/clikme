@@ -75,6 +75,7 @@ register_converter(TrailingSlashConverter, 'trailing_slash')
 
 urlpatterns = [
     # Редиректы для миграции с OpenCart
+    path('favicon.ico', RedirectView.as_view(url='/static/img/favicon.png', permanent=True)),
     path('about_us/', RedirectView.as_view(url='/contacts/', permanent=True)),
     path('about_us', RedirectView.as_view(url='/contacts/', permanent=True)),
     path('delivery/', RedirectView.as_view(url='/contacts/', permanent=True)),
