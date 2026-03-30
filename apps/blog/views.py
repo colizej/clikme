@@ -230,22 +230,28 @@ class CategoryDetailView(ListView):
         self.category = Category.objects.filter(slug=self.kwargs['slug'], is_active=True).first()
         if not self.category:
             raise Http404
-        return (
+        qs = (
             Article.objects
             .filter(category=self.category, is_published=True)
             .select_related('category')
             .prefetch_related('tags')
-            .order_by('-published_at')
         )
+        tag_slug = self.request.GET.get('tag', '').strip()
+        if tag_slug:
+            qs = qs.filter(tags__slug=tag_slug)
+        return qs.order_by('-published_at')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['category'] = self.category
+        tag_slug = self.request.GET.get('tag', '').strip()
+        ctx['active_tag'] = Tag.objects.filter(slug=tag_slug).first() if tag_slug else None
         ctx['all_tags'] = (
             Tag.objects
             .annotate(cnt=Count('article'))
-            .filter(cnt__gt=0)
+            .filter(cnt__gt=0, article__category=self.category, article__is_published=True)
             .order_by('-cnt')
+            .distinct()
         )
         return ctx
 
