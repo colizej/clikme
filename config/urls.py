@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from django.views.generic import RedirectView
 from django.shortcuts import redirect
+from django.http import HttpResponse
 
 # OpenCart oc_id → Django vendor slug (для редиректов vendor/findme)
 _OC_VENDOR_MAP = {
@@ -73,7 +74,16 @@ class TrailingSlashConverter:
 
 register_converter(TrailingSlashConverter, 'trailing_slash')
 
+def yandex_verification(request):
+    return HttpResponse(
+        '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>'
+        '<body>Verification: 3a5b99144e59ba91</body></html>',
+        content_type='text/html',
+    )
+
 urlpatterns = [
+    # Яндекс верификация
+    path('yandex_3a5b99144e59ba91.html', yandex_verification),
     # Редиректы для миграции с OpenCart
     path('favicon.ico', RedirectView.as_view(url='/static/img/favicon.png', permanent=True)),
     path('about_us/', RedirectView.as_view(url='/contacts/', permanent=True)),
