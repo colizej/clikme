@@ -147,7 +147,7 @@
       </div>
 
       {# Two cards #}
-      <div class="grid md:grid-cols-2 gap-6">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {% for art in top_articles %}
         <a href="{{ art.get_absolute_url }}" class="group relative flex flex-col rounded-3xl overflow-hidden bg-(--color-dark-soft) border border-white/5 hover:border-(--color-accent)/50 hover:shadow-[0_0_40px_rgba(232,93,38,0.15)] transition-all duration-300">
 

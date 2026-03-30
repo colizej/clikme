@@ -64,7 +64,7 @@ class HomeView(ListView):
             Article.objects
             .filter(is_published=True)
             .select_related('category')
-            .order_by('-views_count')[:2]
+            .order_by('-views_count')[:4]
         )
         return ctx
 
