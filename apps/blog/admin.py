@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
 from django.contrib.admin.widgets import AdminSplitDateTime
+from django.forms import SplitDateTimeField
 from .models import Category, Tag, Article, ArticleFAQ, ArticleImage
 
 
@@ -19,7 +20,7 @@ class ArticleForm(forms.ModelForm):
         required=False,
         label='Контент (Markdown)',
     )
-    published_at = forms.DateTimeField(
+    published_at = SplitDateTimeField(
         required=False,
         label='Дата публикации',
         widget=AdminSplitDateTime(),
