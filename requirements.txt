@@ -10,3 +10,4 @@ httpx
 markdown
 html2text
 google-genai
+django-csp

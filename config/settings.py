@@ -43,6 +43,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -154,6 +155,38 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+    # CSP в режиме Report-Only — логирует нарушения, ничего не блокирует.
+    # После анализа логов заменить на Content-Security-Policy.
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+    CSP_REPORT_ONLY = True
+    CSP_DEFAULT_SRC = ("'self'",)
+    CSP_SCRIPT_SRC = (
+        "'self'",
+        "'unsafe-inline'",    # Django admin + Яндекс.Метрика
+        "https://mc.yandex.ru",
+        "https://cdnjs.cloudflare.com",
+    )
+    CSP_STYLE_SRC = (
+        "'self'",
+        "'unsafe-inline'",    # Tailwind inline styles
+        "https://fonts.googleapis.com",
+        "https://cdnjs.cloudflare.com",
+    )
+    CSP_FONT_SRC = (
+        "'self'",
+        "https://fonts.gstatic.com",
+    )
+    CSP_IMG_SRC = (
+        "'self'",
+        "data:",
+        "https:",             # внешние картинки новостей
+    )
+    CSP_CONNECT_SRC = (
+        "'self'",
+        "https://mc.yandex.ru",
+    )
+    CSP_FRAME_SRC = ("'none'",)
 
 X_FRAME_OPTIONS = 'DENY'
 
