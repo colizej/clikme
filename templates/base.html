@@ -109,8 +109,8 @@
            class="px-3 py-1.5 text-sm font-medium transition-colors {% if path == '/' %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
           {% trans "Главная" %}
         </a>
-        <a href="/#articles"
-           class="px-3 py-1.5 text-sm font-medium transition-colors text-(--color-text) hover:text-(--color-accent)">
+        <a href="/blog-soveti-history/"
+           class="px-3 py-1.5 text-sm font-medium transition-colors {% if '/blog-soveti-history/' in path %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
           {% trans "Статьи" %}
         </a>
         <a href="/news/"
@@ -241,7 +241,7 @@
         </span>
         <span class="drawer-arrow">›</span>
       </a>
-      <a href="/#articles" onclick="closeMobileNav()" class="drawer-link">
+      <a href="/blog-soveti-history/" onclick="closeMobileNav()" class="drawer-link{% if '/blog-soveti-history/' in path %} !bg-(--color-accent-light){% endif %}">
         <span class="drawer-icon">
           <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3l2-2h4l2 2h3a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2z"/>
