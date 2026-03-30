@@ -78,7 +78,14 @@ class ArticleDetailView(DetailView):
         return Article.objects.filter(is_published=True).select_related('category').prefetch_related('tags')
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        try:
+            self.object = self.get_object()
+        except Http404:
+            # Фолбэк: старые OpenCart URL вида /<vendor>/<product>/ — ищем продукт по slug
+            product = Product.objects.filter(slug=kwargs.get('slug'), is_active=True).first()
+            if product:
+                return HttpResponseRedirect(product.get_absolute_url(), status=301)
+            raise
         # Если в URL передана категория — проверяем соответствие, иначе 301 на canonical
         cat_in_url = kwargs.get('cat')
         article_cat_slug = self.object.category.slug if self.object.category else None

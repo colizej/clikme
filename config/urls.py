@@ -4,6 +4,63 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from django.views.generic import RedirectView
+from django.shortcuts import redirect
+
+# OpenCart oc_id → Django vendor slug (для редиректов vendor/findme)
+_OC_VENDOR_MAP = {
+    '3': '/elki-restaurant-russian-cuisine/',
+    '4': '/arenda-uslugi-nhatrang/',
+    '5': '/Bliss-Bloom/',
+    '6': '/alena-helper-nhatrang/',
+    '7': '/muzykalnyy-larek/',
+    '8': '/vendors/',   # тестовый
+    '9': '/it-service/',
+    '10': '/kafe-u-volodi-nyachang/',
+    '11': '/dablin-nhatrang/',
+    '12': '/Smoked-Plate-Exclusive/',
+    '13': '/belko-family-cafe-nha-trang/',
+    '14': '/vendors/',  # тестовый
+    '15': '/pasta-bar-nyachang-pasta-v-syrnoj-golove/',
+    '16': '/esenin-restaurant-nha-trang/',
+    '17': '/muffin-vkusnyaffin/',
+    '18': '/o-pelmeshki-pelmeni-i-vareniki-nachinkami-nachang/',
+    '19': '/restaurant-uzbek-cuisine-chaykhana-nyachang/',
+    '20': '/vendors/',  # тестовый
+    '21': '/eco-voyage-tour-vietnam/',
+    '22': '/prostokvashino-cafe-russkaya-kuhnya-nhahang-nyachang/',
+    '23': '/moryachok-vietnam-russia-cuisine/',
+    '24': '/shashlykoff-nha-trang/',
+    '25': '/ewa-cafe-bistro-nyachang/',
+    '26': '/miss-macarons-nha-trang/',
+    '27': '/soul-kitchen-nha-trang/',
+    '28': '/vostochnyy-uyut-nyachang/',
+    '29': '/sime-healthy-food-nhachang/',
+    '30': '/eym-by-mak-kitchen-restaurant-nha-trang/',
+    '31': '/adjika-nha-trang/',
+    '32': '/izba-nha-trang.ru/',
+    '33': '/palchiki-oblizhesh-nhatrang/',
+    '34': '/restaurant-moscow-nha-trang/',
+    '35': '/dalat-bufet-nhachang/',
+    '36': '/i-like-buffet-nha-trang/',
+    '37': '/grill-garden-2-bbq-bufet/',
+    '38': '/shrimp-garden-hotpot-buffet-nha-trang/',
+    '39': '/mr-moc-seafood-buffet-nhatrang/',
+    '40': '/anrizon-steakhouse-nha-trang/',
+    '41': '/fig-garden-coffee-kids-zone/',
+    '42': '/la-velvet-restaurant-nha-trang/',
+    '43': '/delikatesy-ot-tyoti-gyuli/',
+    '44': '/louisiane-nha-trang/',
+}
+
+
+def index_php_redirect(request):
+    """Умный редирект с index.php: vendor/findme → страница вендора, всё остальное → /vendors/."""
+    route = request.GET.get('route', '')
+    if route == 'vendor/findme':
+        vendor_id = request.GET.get('vendor_id', '')
+        target = _OC_VENDOR_MAP.get(vendor_id, '/vendors/')
+        return redirect(target, permanent=True)
+    return redirect('/vendors/', permanent=True)
 
 class TrailingSlashConverter:
     regex = r'/?'
@@ -119,8 +176,27 @@ urlpatterns = [
     path('food-store/', RedirectView.as_view(url='/vendors/', permanent=True)),
     path('food-store', RedirectView.as_view(url='/vendors/', permanent=True)),
 
-    # OpenCart формат index.php
-    path('index.php', RedirectView.as_view(url='/vendors/', permanent=True)),
+    # OpenCart формат index.php — умный редирект с vendor_id lookup
+    path('index.php', index_php_redirect),
+
+    # OpenCart категории вендоров (латиница)
+    path('producti-pitania/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('producti-pitania', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('eda-na-zakaz/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('eda-na-zakaz', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('produkty/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('produkty', RedirectView.as_view(url='/vendors/', permanent=True)),
+
+    # OpenCart категории вендоров (кириллица URL-encoded)
+    # Услуги → /vendors/
+    path('%D0%A3%D1%81%D0%BB%D1%83%D0%B3%D0%B8/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D0%A3%D1%81%D0%BB%D1%83%D0%B3%D0%B8', RedirectView.as_view(url='/vendors/', permanent=True)),
+    # аренда → /arenda-uslugi-nhatrang/
+    path('%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0/', RedirectView.as_view(url='/arenda-uslugi-nhatrang/', permanent=True)),
+    path('%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0', RedirectView.as_view(url='/arenda-uslugi-nhatrang/', permanent=True)),
+    # салон-красоты → /Bliss-Bloom/
+    path('%D1%81%D0%B0%D0%BB%D0%BE%D0%BD-%D0%BA%D1%80%D0%B0%D1%81%D0%BE%D1%82%D1%8B/', RedirectView.as_view(url='/Bliss-Bloom/', permanent=True)),
+    path('%D1%81%D0%B0%D0%BB%D0%BE%D0%BD-%D0%BA%D1%80%D0%B0%D1%81%D0%BE%D1%82%D1%8B', RedirectView.as_view(url='/Bliss-Bloom/', permanent=True)),
     
     path(f'{settings.ADMIN_URL}/', admin.site.urls),
 
