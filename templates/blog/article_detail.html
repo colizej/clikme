@@ -303,6 +303,36 @@
     </section>
     {% endif %}
 
+    {# ── Выбор редакции (C) ── #}
+    {% if featured_articles %}
+    <section class="mt-14 -mx-4 px-4 py-10 bg-(--color-bg-warm) rounded-2xl">
+      <div class="flex items-center gap-2 mb-6">
+        <svg class="w-4 h-4 text-(--color-accent) shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <h2 class="font-serif text-xl font-bold text-(--color-text)">Выбор редакции</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {% for feat in featured_articles %}
+        <a href="{{ feat.get_absolute_url }}" class="group flex flex-col rounded-2xl overflow-hidden border border-(--color-accent)/20 hover:border-(--color-accent) hover:shadow-md transition-all bg-white">
+          {% if feat.image %}
+          <div class="aspect-[16/9] overflow-hidden">
+            <img src="{{ feat.image.url }}" alt="{{ feat.image_alt|default:feat.title }}"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                 loading="lazy">
+          </div>
+          {% endif %}
+          <div class="p-4 flex flex-col gap-1.5 flex-1">
+            {% if feat.category %}
+            <span class="text-xs font-medium text-(--color-accent)">{{ feat.category.name }}</span>
+            {% endif %}
+            <span class="text-sm font-semibold text-(--color-text) group-hover:text-(--color-accent) transition-colors leading-snug line-clamp-3">{{ feat.title }}</span>
+            <span class="text-xs text-(--color-text-muted) mt-auto pt-2">{{ feat.views_count }} просмотров</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
     <div class="mt-10">
       <a href="/" class="ck-btn-outline text-sm py-2">← {% trans "Все статьи" %}</a>
     </div>

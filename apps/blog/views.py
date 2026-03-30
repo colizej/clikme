@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db.models import Count, F, Q
 from django.http import Http404, JsonResponse, HttpResponseRedirect
 from django.views.generic import ListView, DetailView
@@ -66,6 +67,12 @@ class HomeView(ListView):
             .select_related('category')
             .order_by('-views_count')[:4]
         )
+        ctx['featured_articles'] = (
+            Article.objects
+            .filter(is_published=True, is_featured=True)
+            .select_related('category')
+            .order_by('-published_at')[:3]
+        )
         return ctx
 
 
@@ -127,6 +134,13 @@ class ArticleDetailView(DetailView):
         else:
             ctx['related_articles'] = []
         ctx['manual_faqs'] = article.faqs.filter(is_auto=False)
+        ctx['featured_articles'] = (
+            Article.objects
+            .filter(is_published=True, is_featured=True)
+            .exclude(pk=article.pk)
+            .select_related('category')
+            .order_by('-published_at')[:3]
+        )
         return ctx
 
 
@@ -231,32 +245,52 @@ class CategoryDetailView(ListView):
 
 
 def slug_dispatch(request, slug):
-    """Диспатчер: Category | Article | Vendor | Product | Page по slug"""
-    category = Category.objects.filter(slug=slug, is_active=True).first()
-    if category:
+    """Диспатчер: Category | Article | Vendor | Product | Page по slug.
+    Тип slug кешируется на 5 минут чтобы избежать 5 SQL на каждый запрос.
+    """
+    _CACHE_TTL = 300  # 5 минут
+
+    cache_key = f'slug_type:{slug}'
+    obj_type = cache.get(cache_key)
+
+    if obj_type is None:
+        if Category.objects.filter(slug=slug, is_active=True).exists():
+            obj_type = 'category'
+        elif Article.objects.filter(slug=slug, is_published=True).exists():
+            obj_type = 'article'
+        elif Vendor.objects.filter(slug=slug, is_active=True).exists():
+            obj_type = 'vendor'
+        elif Product.objects.filter(slug=slug, is_active=True).exists():
+            obj_type = 'product'
+        elif Page.objects.filter(slug=slug, is_published=True).exists():
+            obj_type = 'page'
+        else:
+            obj_type = '404'
+        cache.set(cache_key, obj_type, _CACHE_TTL)
+
+    if obj_type == 'category':
         return CategoryDetailView.as_view()(request, slug=slug)
 
-    article = Article.objects.filter(slug=slug, is_published=True).first()
-    if article:
+    if obj_type == 'article':
         # Если у статьи есть категория — редирект на каноничный URL
-        if article.category:
+        article = Article.objects.filter(slug=slug, is_published=True).only(
+            'slug', 'category__slug'
+        ).select_related('category').first()
+        if article and article.category:
             canonical_url = article.get_absolute_url()
             if request.path != canonical_url:
                 return HttpResponseRedirect(canonical_url, status=301)
         return ArticleDetailView.as_view()(request, slug=slug)
 
-    vendor = Vendor.objects.filter(slug=slug, is_active=True).first()
-    if vendor:
+    if obj_type == 'vendor':
         from apps.vendors.views import VendorDetailView
         return VendorDetailView.as_view()(request, slug=slug)
 
-    product = Product.objects.filter(slug=slug, is_active=True).first()
-    if product:
+    if obj_type == 'product':
         from apps.vendors.views import ProductDetailView
         return ProductDetailView.as_view()(request, slug=slug)
 
-    page = Page.objects.filter(slug=slug, is_published=True).first()
-    if page:
+    if obj_type == 'page':
         from apps.pages.views import PageDetailView
         return PageDetailView.as_view()(request, slug=slug)
 

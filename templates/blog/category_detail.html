@@ -91,6 +91,12 @@
         {% else %}
         <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-orange-50 to-amber-100">🌴</div>
         {% endif %}
+        {% if article.is_featured %}
+        <span class="absolute top-3 right-3 flex items-center gap-1 bg-(--color-accent) text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow">
+          <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Ред.
+        </span>
+        {% endif %}
         {% with card_tags=article.tags.all %}
         {% if card_tags %}
         <div class="absolute top-3 left-3 flex flex-wrap gap-1">
