@@ -190,6 +190,17 @@ if not DEBUG:
 
 X_FRAME_OPTIONS = 'DENY'
 
+# ─── Sentry ───────────────────────────────────────────────────────────────────
+SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
+if SENTRY_DSN:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment='production' if not DEBUG else 'development',
+        traces_sample_rate=0.2,   # 20% транзакций для performance monitoring
+        send_default_pii=False,
+    )
+
 # ─── Logging ──────────────────────────────────────────────────────────────────
 LOGGING = {
     'version': 1,
