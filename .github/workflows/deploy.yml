@@ -6,7 +6,6 @@ on:
 
 jobs:
   deploy:
-    if: false  # отключён до готовности к деплою
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
@@ -23,5 +22,5 @@ jobs:
             pip install -r requirements.txt -q
             python manage.py migrate --run-syncdb
             python manage.py collectstatic --no-input --clear
-            sudo systemctl restart clikme
+            sudo /usr/local/bin/restart-clikme.sh
             echo "Deployed: $(git log --oneline -1)"
