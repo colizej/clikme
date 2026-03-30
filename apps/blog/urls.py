@@ -6,7 +6,6 @@ app_name = 'blog'
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
-    path('blog-soveti-history/', RedirectView.as_view(url='/#tags', permanent=True), name='blog_category_redirect'),
     path('search/', views.SearchView.as_view(), name='search'),
     path('search/api/', views.search_api, name='search_api'),
     # /cat/slug/ — статья с категорией (поддерживает кириллицу через <str:>)
