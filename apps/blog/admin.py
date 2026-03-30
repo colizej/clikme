@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
+from django.contrib.admin.widgets import AdminSplitDateTime
 from .models import Category, Tag, Article, ArticleFAQ, ArticleImage
 
 
@@ -21,7 +22,13 @@ class ArticleForm(forms.ModelForm):
     published_at = forms.DateTimeField(
         required=False,
         label='Дата публикации',
-        help_text='Можно поставить любую дату, включая прошлую',
+        widget=AdminSplitDateTime(),
+        help_text='Можно поставить любую дату, включая прошлую и будущую',
+    )
+    views_count = forms.IntegerField(
+        required=False,
+        label='Показы',
+        min_value=0,
     )
 
     class Meta:
@@ -84,7 +91,7 @@ class ArticleAdmin(admin.ModelAdmin):
     raw_id_fields = ('author',)
     filter_horizontal = ('tags',)
     date_hierarchy = 'published_at'
-    readonly_fields = ('views_count', 'content')
+    readonly_fields = ('content',)
 
     def save_related(self, request, form, formsets, change):
         """Перерендеривает content после сохранения инлайн-изображений."""
