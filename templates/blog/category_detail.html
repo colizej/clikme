@@ -20,6 +20,8 @@
 <meta property="og:description" content="{{ category.meta_description|default:category.description|truncatewords:25 }}">
 <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/{{ category.slug }}/">
 <meta property="og:locale" content="ru_RU">
+  <meta property="og:locale:alternate" content="ru_BY">
+  <meta property="og:locale:alternate" content="ru_KZ">
 <meta property="og:site_name" content="ClikMe">
 {% if category.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ category.image.url }}">{% endif %}
 

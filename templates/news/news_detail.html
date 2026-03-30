@@ -11,6 +11,8 @@
   <meta property="og:description" content="{{ news_item.summary|truncatewords:30 }}">
   <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/news/{{ news_item.slug }}/">
   <meta property="og:locale" content="ru_RU">
+  <meta property="og:locale:alternate" content="ru_BY">
+  <meta property="og:locale:alternate" content="ru_KZ">
   <meta property="og:site_name" content="ClikMe">
   {% if news_item.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ news_item.image.url }}">
   {% elif news_item.image_url %}<meta property="og:image" content="{{ news_item.image_url }}">{% endif %}

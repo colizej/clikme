@@ -12,6 +12,8 @@
   <meta property="og:description" content="{{ article.meta_description|default:article.short_description }}">
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta property="og:locale" content="ru_RU">
+  <meta property="og:locale:alternate" content="ru_BY">
+  <meta property="og:locale:alternate" content="ru_KZ">
   <meta property="og:site_name" content="ClikMe">
   {% if article.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.image.url }}">{% endif %}
   <meta property="article:published_time" content="{{ article.published_at|date:'c' }}">

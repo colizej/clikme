@@ -11,6 +11,8 @@
   <meta property="og:description" content="{{ product.meta_description|default:product.description|truncatewords:25 }}">
   <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/{{ product.slug }}/">
   <meta property="og:locale" content="ru_RU">
+  <meta property="og:locale:alternate" content="ru_BY">
+  <meta property="og:locale:alternate" content="ru_KZ">
   <meta property="og:site_name" content="ClikMe">
   {% if product.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}">{% endif %}
 
