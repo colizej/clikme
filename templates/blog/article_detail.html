@@ -28,7 +28,7 @@
   <meta name="twitter:description" content="{{ article.meta_description|default:article.short_description }}">
   {% if article.image %}<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.image.url }}">{% endif %}
 
-  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ article.get_absolute_url }}">
 
   {# ── Article JSON-LD ── #}
   <script type="application/ld+json">

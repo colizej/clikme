@@ -5,6 +5,9 @@
 
 {% block extra_head %}
 <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/">
+{% if request.GET.q or request.GET.tag or request.GET.category or page_obj.number > 1 %}
+<meta name="robots" content="noindex,follow">
+{% endif %}
 
 {% if page_obj.number == 1 and not request.GET.q and not request.GET.tag and not request.GET.category %}
 <script type="application/ld+json">

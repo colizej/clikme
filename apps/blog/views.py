@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.http import Http404, JsonResponse, HttpResponseRedirect
 from django.views.generic import ListView, DetailView
 
@@ -95,6 +95,8 @@ class ArticleDetailView(DetailView):
         article_cat_slug = self.object.category.slug if self.object.category else None
         if cat_in_url is not None and cat_in_url != article_cat_slug:
             return HttpResponseRedirect(self.object.get_absolute_url(), status=301)
+        # Инкремент счётчика просмотров (без гонки через F-expression)
+        Article.objects.filter(pk=self.object.pk).update(views_count=F('views_count') + 1)
         return self.render_to_response(self.get_context_data())
 
     def get_context_data(self, **kwargs):

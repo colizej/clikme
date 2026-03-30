@@ -9,8 +9,8 @@
   <meta name="google-site-verification" content="AtNEwjQK9-U8Vw-BsvBlqskYCWvDMO4_3-fBIOyymZI">
 
   {# Русскоязычная аудитория: RU, BY, KZ, VN и все рус. пользователи мира #}
-  <link rel="alternate" hreflang="ru" href="{{ request.scheme }}://{{ request.get_host }}{{ request.get_full_path }}">
-  <link rel="alternate" hreflang="x-default" href="{{ request.scheme }}://{{ request.get_host }}{{ request.get_full_path }}">
+  <link rel="alternate" hreflang="ru" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <link rel="alternate" hreflang="x-default" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 
   {% block meta_extra %}{% endblock %}
 
