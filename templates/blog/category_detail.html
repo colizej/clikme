@@ -47,8 +47,8 @@
     <span class="text-(--color-text)">{{ category.name }}</span>
   </nav>
 
-  {# Header #}
-  <div class="mb-10">
+  {# Header + SEO текст сверху #}
+  <div class="mb-8">
     {% if category.image %}
     <div class="aspect-[3/1] rounded-2xl overflow-hidden mb-6">
       <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover">
@@ -62,6 +62,21 @@
       {% blocktrans count count=page_obj.paginator.count %}{{ count }} статья{% plural %}{{ count }} статей{% endblocktrans %}
     </p>
   </div>
+
+  {# ── Теги (свайп) ── #}
+  {% if all_tags %}
+  <div class="overflow-x-auto mb-8" style="scrollbar-width:none;-ms-overflow-style:none;">
+    <style>.tag-bar-cat::-webkit-scrollbar{display:none}</style>
+    <div class="tag-bar-cat flex gap-2 min-w-max px-1 pb-1">
+      {% for tag in all_tags %}
+      <a href="/?tag={{ tag.slug }}"
+         class="ck-pill transition-colors whitespace-nowrap hover:bg-(--color-accent-medium)">
+        {{ tag.name }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   {# Article grid #}
   {% if object_list %}
@@ -123,6 +138,18 @@
     {% endif %}
   </nav>
   {% endif %}
+
+  {# SEO текст снизу #}
+  <div class="mt-16 pt-10 border-t border-(--color-border)">
+    <div class="max-w-3xl">
+      <h2 class="font-serif text-2xl font-bold mb-4 text-(--color-text)">О разделе «{{ category.name }}»</h2>
+      <div class="text-(--color-text-muted) text-sm leading-relaxed space-y-3">
+        <p>На этой странице собраны все статьи раздела <strong>{{ category.name }}</strong> — практические советы, путеводители и личный опыт о жизни и путешествиях во Вьетнаме. Здесь вы найдёте информацию о Нячанге, отдыхе, визах, питании, транспорте и многом другом.</p>
+        <p>Материалы написаны русскоязычными авторами, живущими во Вьетнаме. Мы пишем о том, что реально полезно — без рекламных текстов и воды.</p>
+        <p><a href="/" class="text-(--color-accent) hover:underline">На главной странице</a> вы найдёте последние публикации, а в разделе <a href="/vendors/" class="text-(--color-accent) hover:underline">«Компании»</a> — проверенные заведения Нячанга.</p>
+      </div>
+    </div>
+  </div>
 
   {% else %}
   <div class="text-center py-24 text-(--color-text-muted)">

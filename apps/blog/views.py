@@ -219,6 +219,12 @@ class CategoryDetailView(ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['category'] = self.category
+        ctx['all_tags'] = (
+            Tag.objects
+            .annotate(cnt=Count('article'))
+            .filter(cnt__gt=0)
+            .order_by('-cnt')
+        )
         return ctx
 
 
