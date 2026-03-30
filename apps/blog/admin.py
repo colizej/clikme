@@ -84,6 +84,16 @@ class ArticleAdmin(admin.ModelAdmin):
     form = ArticleForm
     inlines = [ArticleImageInline]
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'published_at':
+            return SplitDateTimeField(
+                required=False,
+                label='Дата публикации',
+                widget=AdminSplitDateTime(),
+                help_text='Можно поставить любую дату, включая прошлую и будущую',
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
     list_display = ('title', 'category', 'is_published', 'is_featured', 'published_at', 'views_count')
     list_filter = ('is_published', 'is_featured', 'noindex', 'category')
     list_editable = ('is_published', 'is_featured')

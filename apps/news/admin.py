@@ -126,6 +126,15 @@ def resend_to_telegram(modeladmin, request, queryset):
 @admin.register(NewsItem)
 class NewsItemAdmin(admin.ModelAdmin):
     form = NewsItemForm
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'published_at':
+            return SplitDateTimeField(
+                required=False,
+                label='Дата публикации',
+                widget=AdminSplitDateTime(),
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
     list_display = ('title_short', 'thumb', 'source', 'tag', 'status_badge',
                     'ai_processed', 'is_edited', 'tg_sent', 'fetched_at', 'published_at')
     list_filter = ('status', 'tag', 'ai_processed', 'is_edited', 'source')
