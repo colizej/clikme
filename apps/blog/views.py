@@ -73,6 +73,12 @@ class HomeView(ListView):
             .select_related('category')
             .order_by('-published_at')[:3]
         )
+        ctx['latest_news'] = (
+            NewsItem.objects
+            .filter(status=NewsItem.PUBLISHED)
+            .only('title', 'slug', 'tag', 'published_at', 'image', 'image_url')
+            .order_by('-published_at')[:6]
+        )
         return ctx
 
 

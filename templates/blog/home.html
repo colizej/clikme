@@ -134,6 +134,55 @@
   {% endif %}
 
   {# ════════════════════════════════════════════════════════════════════ #}
+  {# LATEST NEWS — горизонтальная лента                                  #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if not request.GET.q and not request.GET.category and not request.GET.tag and page_obj.number == 1 and latest_news %}
+  <section class="max-w-7xl mx-auto px-4 pt-12">
+    <div class="flex items-center gap-4 mb-5">
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-(--color-accent) opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-(--color-accent)"></span>
+        </span>
+        <p class="text-(--color-accent) text-xs font-bold uppercase tracking-[0.15em]">Последние новости</p>
+      </div>
+      <div class="h-px flex-1 bg-(--color-border)"></div>
+      <a href="/news/" class="text-xs text-(--color-text-muted) hover:text-(--color-accent) font-medium transition-colors shrink-0">Все новости →</a>
+    </div>
+    <div class="overflow-x-auto" style="scrollbar-width:none;-ms-overflow-style:none;">
+      <div class="flex gap-3 min-w-max pb-1">
+        {% for item in latest_news %}
+        <a href="{{ item.get_absolute_url }}" class="group flex flex-col w-56 shrink-0 rounded-2xl border border-(--color-border) bg-white hover:border-(--color-accent)/40 hover:shadow-md transition-all overflow-hidden">
+          {% if item.image %}
+          <div class="h-28 overflow-hidden bg-(--color-bg-warm)">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}"
+                 loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          {% elif item.image_url %}
+          <div class="h-28 overflow-hidden bg-(--color-bg-warm)">
+            <img src="{{ item.image_url }}" alt="{{ item.title }}"
+                 loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          {% else %}
+          <div class="h-28 bg-gradient-to-br from-orange-50 to-amber-100 flex items-center justify-center text-3xl">📰</div>
+          {% endif %}
+          <div class="p-3 flex flex-col flex-1">
+            {% if item.tag %}
+            <span class="text-[10px] font-bold uppercase tracking-wider text-(--color-accent) mb-1">{{ item.tag }}</span>
+            {% endif %}
+            <p class="text-xs font-semibold leading-snug line-clamp-3 group-hover:text-(--color-accent) transition-colors">{{ item.title }}</p>
+            {% if item.published_at %}
+            <p class="text-[10px] text-(--color-text-muted) mt-auto pt-2">{{ item.published_at|date:"d.m.Y" }}</p>
+            {% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ════════════════════════════════════════════════════════════════════ #}
   {# FEATURED — Выбор редакции (A)                                      #}
   {# ════════════════════════════════════════════════════════════════════ #}
   {% if not request.GET.q and not request.GET.category and not request.GET.tag and page_obj.number == 1 and featured_articles %}
@@ -251,16 +300,10 @@
   {% endif %}
 
   {# ════════════════════════════════════════════════════════════════════ #}
-  {# ARTICLE GRID                                                        #}
+  {# ARTICLE GRID — только при поиске / фильтре по тегу                 #}
   {# ════════════════════════════════════════════════════════════════════ #}
+  {% if request.GET.q or request.GET.tag %}
   <section id="articles" class="max-w-7xl mx-auto px-4 py-10 scroll-mt-18">
-
-    {% if not request.GET.q and not request.GET.category and not request.GET.tag and page_obj.number == 1 %}
-    <div class="flex items-center gap-3 mb-6">
-      <h2 class="font-serif text-2xl font-bold">{% trans "Все статьи" %}</h2>
-      <div class="h-px flex-1 bg-(--color-border)"></div>
-    </div>
-    {% endif %}
 
     {# ── Tag filter bar ── #}
     {% if all_tags and not request.GET.q %}
@@ -280,9 +323,8 @@
 
     {% if object_list %}
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {% for article in object_list|slice:":6" %}
+      {% for article in object_list %}
       <a href="{{ article.get_absolute_url }}" class="ck-article-card group flex flex-col">
-        {# Image #}
         <div class="relative aspect-[16/10] overflow-hidden bg-(--color-bg-warm)">
           {% if article.image %}
           <img src="{{ article.image.url }}" alt="{{ article.title }}"
@@ -291,14 +333,6 @@
           {% else %}
           <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-orange-50 to-amber-100">🌴</div>
           {% endif %}
-          {# Featured badge (B) #}
-          {% if article.is_featured %}
-          <span class="absolute top-3 right-3 flex items-center gap-1 bg-(--color-accent) text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow">
-            <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            Ред.
-          </span>
-          {% endif %}
-          {# Tags overlay #}
           {% with card_tags=article.tags.all %}
           {% if card_tags %}
           <div class="absolute top-3 left-3 flex flex-wrap gap-1">
@@ -311,11 +345,8 @@
           {% endif %}
           {% endwith %}
         </div>
-        {# Text #}
         <div class="p-5 flex flex-col flex-1">
-          <h2 class="font-bold text-sm leading-snug line-clamp-3 mb-3 group-hover:text-(--color-accent) transition-colors">
-            {{ article.title }}
-          </h2>
+          <h2 class="font-bold text-sm leading-snug line-clamp-3 mb-3 group-hover:text-(--color-accent) transition-colors">{{ article.title }}</h2>
           {% if article.short_description %}
           <p class="text-xs text-(--color-text-muted) leading-relaxed line-clamp-2 mb-auto">{{ article.short_description|truncatewords:18 }}</p>
           {% endif %}
@@ -328,15 +359,7 @@
       {% endfor %}
     </div>
 
-    {# ── Кнопка "Все статьи" — только на главной без фильтров ── #}
-    {% if not request.GET.q and not request.GET.tag %}
-    <div class="mt-10 text-center">
-      <a href="/blog-soveti-history/" class="ck-btn-accent inline-flex items-center gap-2">
-        {% trans "Все статьи" %} →
-      </a>
-    </div>
-    {% else %}
-    {# Пагинация для поиска/фильтра по тегу #}
+    {# Пагинация #}
     {% if page_obj.has_other_pages %}
     <nav class="mt-14 flex justify-center items-center gap-2" aria-label="{% trans 'Страницы' %}">
       {% if page_obj.has_previous %}
@@ -357,7 +380,6 @@
       {% endif %}
     </nav>
     {% endif %}
-    {% endif %}
 
     {% else %}
     <div class="text-center py-24 text-(--color-text-muted)">
@@ -368,6 +390,18 @@
     </div>
     {% endif %}
   </section>
+  {% endif %}
+
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# Кнопка "Все статьи" — только на главной без фильтров               #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if not request.GET.q and not request.GET.tag and not request.GET.category and page_obj.number == 1 %}
+  <div class="max-w-7xl mx-auto px-4 py-10 text-center">
+    <a href="/blog-soveti-history/" class="ck-btn-accent inline-flex items-center gap-2">
+      {% trans "Все статьи" %} →
+    </a>
+  </div>
+  {% endif %}
 
   {# ════════════════════════════════════════════════════════════════════ #}
   {# DISCOVER SECTION — только на главной                               #}
