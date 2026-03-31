@@ -37,7 +37,7 @@ class NewsConfig(AppConfig):
         scheduler = BackgroundScheduler(timezone='UTC')
         scheduler.add_job(
             _publish_scheduled_news,
-            trigger=IntervalTrigger(minutes=1),
+            trigger=IntervalTrigger(minutes=30),
             id='publish_scheduled_news',
             replace_existing=True,
             max_instances=1,
