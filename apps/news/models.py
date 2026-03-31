@@ -98,7 +98,7 @@ class NewsItem(models.Model):
     class Meta:
         verbose_name = 'Новость'
         verbose_name_plural = 'Новости'
-        ordering = ['-fetched_at']
+        ordering = ['-published_at']
 
     def __str__(self):
         return self.title
