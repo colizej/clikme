@@ -115,6 +115,20 @@ urlpatterns = [
     path('politika-konfidencialnosti/', RedirectView.as_view(url='/privacy/', permanent=True)),
     path('pravila-ispolzovania/', RedirectView.as_view(url='/pravila/', permanent=True)),
 
+    # Редиректы со старых 404 страниц (из отчёта Яндекс.Вебмастера)
+    path('excursions-asia/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('excursions-asia', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0-%D0%B6%D0%B8%D0%BB%D1%8C%D1%8F/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0-%D0%B6%D0%B8%D0%BB%D1%8C%D1%8F', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D1%81%D0%B0%D0%BB%D0%BE%D0%BD-%D0%BA%D1%80%D0%B0%D1%81%D0%BE%D1%82%D1%8B/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D1%81%D0%B0%D0%BB%D0%BE%D0%BD-%D0%BA%D1%80%D0%B0%D1%81%D0%BE%D1%82%D1%8B', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D0%A3%D1%81%D0%BB%D1%83%D0%B3%D0%B8/', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('%D0%A3%D1%81%D0%BB%D1%83%D0%B3%D0%B8', RedirectView.as_view(url='/vendors/', permanent=True)),
+    path('vinpearl-nyachang-2-days-marriot/', RedirectView.as_view(url='/blog-soveti-history/', permanent=True)),
+    path('vinpearl-nyachang-2-days-marriot', RedirectView.as_view(url='/blog-soveti-history/', permanent=True)),
+
     # Вендор id=7: кириллика -> латиница
     path('%D0%BC%D1%83%D0%B7%D1%8B%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D0%BB%D0%B0%D1%80%D0%B5%D0%BA/', RedirectView.as_view(url='/muzykalnyy-larek/', permanent=True)),
     path('%D0%BC%D1%83%D0%B7%D1%8B%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D0%BB%D0%B0%D1%80%D0%B5%D0%BA', RedirectView.as_view(url='/muzykalnyy-larek/', permanent=True)),
