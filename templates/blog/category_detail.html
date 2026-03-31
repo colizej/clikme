@@ -63,6 +63,16 @@
     </p>
   </div>
 
+  {# ── Активный фильтр ── #}
+  {% if active_tag %}
+  <div class="flex items-baseline gap-3 mb-4">
+    <h2 class="font-serif text-2xl font-bold">
+      Тег: <span class="text-(--color-accent)">{{ active_tag.name }}</span>
+    </h2>
+    <a href="/{{ category.slug }}/" class="ck-pill hover:bg-(--color-accent-medium) transition-colors">✕ Сбросить</a>
+  </div>
+  {% endif %}
+
   {# ── Теги (свайп) ── #}
   {% if all_tags %}
   <div class="overflow-x-auto mb-8" style="scrollbar-width:none;-ms-overflow-style:none;">
