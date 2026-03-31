@@ -1,6 +1,8 @@
 import re
+from datetime import timedelta
 from bs4 import BeautifulSoup
-from django.db.models import F
+from django.db.models import F, Count
+from django.utils import timezone
 from django.views.generic import ListView, DetailView
 from .models import NewsItem
 
@@ -173,14 +175,13 @@ class NewsListView(ListView):
         qs = NewsItem.objects.filter(status=NewsItem.PUBLISHED)
         tag = self.request.GET.get('tag', '').strip()
         if tag == 'new':
-            qs = qs.filter(published_at__gte=timezone.now() - __import__('datetime').timedelta(hours=48))
+            qs = qs.filter(published_at__gte=timezone.now() - timedelta(hours=48))
         elif tag:
             qs = qs.filter(tag=tag)
         return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        from django.db.models import Count
         ctx['all_tags'] = (
             NewsItem.objects
             .filter(status=NewsItem.PUBLISHED)
@@ -191,7 +192,7 @@ class NewsListView(ListView):
         )
         new_cnt = NewsItem.objects.filter(
             status=NewsItem.PUBLISHED,
-            published_at__gte=timezone.now() - __import__('datetime').timedelta(hours=48)
+            published_at__gte=timezone.now() - timedelta(hours=48)
         ).count()
         ctx['new_cnt'] = new_cnt
         ctx['total_cnt'] = NewsItem.objects.filter(status=NewsItem.PUBLISHED).count()
