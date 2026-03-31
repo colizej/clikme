@@ -172,19 +172,24 @@ class NewsListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = NewsItem.objects.filter(status=NewsItem.PUBLISHED)
+        now = timezone.now()
+        qs = NewsItem.objects.filter(
+            status=NewsItem.PUBLISHED,
+            published_at__lte=now,
+        )
         tag = self.request.GET.get('tag', '').strip()
         if tag == 'new':
-            qs = qs.filter(published_at__gte=timezone.now() - timedelta(hours=48))
+            qs = qs.filter(published_at__gte=now - timedelta(hours=48))
         elif tag:
             qs = qs.filter(tag=tag)
         return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        now = timezone.now()
         ctx['all_tags'] = (
             NewsItem.objects
-            .filter(status=NewsItem.PUBLISHED)
+            .filter(status=NewsItem.PUBLISHED, published_at__lte=now)
             .exclude(tag='')
             .values('tag')
             .annotate(cnt=Count('id'))
@@ -192,10 +197,13 @@ class NewsListView(ListView):
         )
         new_cnt = NewsItem.objects.filter(
             status=NewsItem.PUBLISHED,
-            published_at__gte=timezone.now() - timedelta(hours=48)
+            published_at__gte=now - timedelta(hours=48),
+            published_at__lte=now,
         ).count()
         ctx['new_cnt'] = new_cnt
-        ctx['total_cnt'] = NewsItem.objects.filter(status=NewsItem.PUBLISHED).count()
+        ctx['total_cnt'] = NewsItem.objects.filter(
+            status=NewsItem.PUBLISHED, published_at__lte=now
+        ).count()
         ctx['active_tag'] = self.request.GET.get('tag', '').strip()
         return ctx
 
@@ -206,7 +214,10 @@ class NewsDetailView(DetailView):
     context_object_name = 'news_item'
 
     def get_queryset(self):
-        return NewsItem.objects.filter(status=NewsItem.PUBLISHED)
+        return NewsItem.objects.filter(
+            status=NewsItem.PUBLISHED,
+            published_at__lte=timezone.now(),
+        )
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
