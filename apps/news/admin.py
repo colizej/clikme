@@ -174,27 +174,27 @@ class NewsItemAdmin(admin.ModelAdmin):
         return custom + urls
 
     def _fetch_view(self, request):
-        from django.core.management import call_command
-        import io
-        out = io.StringIO()
-        try:
-            call_command('fetch_news', stdout=out)
-            msg = out.getvalue().strip() or 'Готово'
-            self.message_user(request, f'✅ {msg}', messages.SUCCESS)
-        except Exception as exc:
-            self.message_user(request, f'❌ Ошибка: {exc}', messages.ERROR)
+        import subprocess, sys
+        from django.conf import settings
+        subprocess.Popen(
+            [sys.executable, 'manage.py', 'fetch_news'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=settings.BASE_DIR,
+        )
+        self.message_user(request, '⏳ Парсинг запущен в фоне — новости появятся через минуту', messages.SUCCESS)
         return HttpResponseRedirect(reverse('admin:news_newsitem_changelist'))
 
     def _translate_view(self, request):
-        from django.core.management import call_command
-        import io
-        out = io.StringIO()
-        try:
-            call_command('translate_news', stdout=out)
-            result = out.getvalue().strip()
-            self.message_user(request, f'🌐 {result}', messages.SUCCESS)
-        except Exception as exc:
-            self.message_user(request, f'❌ Ошибка перевода: {exc}', messages.ERROR)
+        import subprocess, sys
+        from django.conf import settings
+        subprocess.Popen(
+            [sys.executable, 'manage.py', 'translate_news'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=settings.BASE_DIR,
+        )
+        self.message_user(request, '⏳ Перевод запущен в фоне — результат появится через минуту', messages.SUCCESS)
         return HttpResponseRedirect(reverse('admin:news_newsitem_changelist'))
 
     @admin.display(description='Заголовок')
