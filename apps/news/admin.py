@@ -136,7 +136,7 @@ class NewsItemAdmin(admin.ModelAdmin):
     readonly_fields = ('ai_processed', 'ai_model_used', 'telegram_message_id',
                        'source_url', 'fetched_at', 'title_original', 'summary_original')
     date_hierarchy = 'fetched_at'
-    actions = [publish_selected, reject_selected, to_draft, translate_selected, resend_to_telegram]
+    actions = [reject_selected, to_draft, translate_selected, resend_to_telegram]
     change_list_template = 'admin/news/newsitem/change_list.html'
 
     fieldsets = (
