@@ -22,10 +22,25 @@ class AdSlotAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+@admin.action(description='📋 Дублировать объявление')
+def duplicate_adunit(modeladmin, request, queryset):
+    from django.contrib import messages
+    count = 0
+    for obj in queryset:
+        obj.pk = None
+        obj.name = f'{obj.name} (копия)'
+        obj.impressions_count = 0
+        obj.clicks_count = 0
+        obj.is_active = False
+        obj.save()
+        count += 1
+    messages.success(request, f'Создано копий: {count}. Проверьте и активируйте.')
+
+
 @admin.register(AdUnit)
 class AdUnitAdmin(admin.ModelAdmin):
     list_display = [
-        'name', 'partner', 'ad_type', 'slot', 
+        'name', 'partner', 'ad_type', 'slot',
         'target_display', 'priority', 'is_active', 'impressions_count'
     ]
     list_filter = ['ad_type', 'slot', 'partner', 'is_active', 'is_permanent']
@@ -33,6 +48,7 @@ class AdUnitAdmin(admin.ModelAdmin):
     readonly_fields = ['impressions_count', 'clicks_count', 'created_at', 'updated_at']
     autocomplete_fields = ['slot', 'target_article', 'target_news', 'target_categories']
     ordering = ['-priority', '-created_at']
+    actions = [duplicate_adunit]
     
     fieldsets = (
         ('Основное', {
