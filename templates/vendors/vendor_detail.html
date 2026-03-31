@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static blog_tags %}
+{% load i18n static blog_tags ads_tags %}
 
 {% block title %}{{ vendor.display_name }} — ClikMe{% endblock %}
 {% block meta_description %}{{ vendor.meta_description|default:vendor.description|truncatewords:25 }}{% endblock %}
@@ -138,6 +138,9 @@
             title="{{ vendor.display_name }} на карте"></iframe>
   </div>
   {% endif %}
+
+  {# ── Ad slot: end of vendor page ── #}
+  {% ad_slot "vendor-end" vendor "product" %}
 
 </div>
 
