@@ -33,7 +33,7 @@
         <a href="{% url 'ads:click' ad.id %}{% if article %}?article={{ article.slug }}{% endif %}" 
            style="display: inline-block; padding: 0.5rem 1rem; background: var(--color-accent); color: white; border-radius: 9999px; font-weight: 600; text-decoration: none;"
            target="_blank" rel="noopener sponsored">
-            {% if ad.intro_text %}{{ ad.intro_text }} {% endif %}{{ ad.text }}
+            {{ ad.text }}
         </a>
     </div>
     {% endif %}
