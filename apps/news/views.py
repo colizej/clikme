@@ -170,7 +170,26 @@ class NewsListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return NewsItem.objects.filter(status=NewsItem.PUBLISHED)
+        qs = NewsItem.objects.filter(status=NewsItem.PUBLISHED)
+        tag = self.request.GET.get('tag', '').strip()
+        if tag:
+            qs = qs.filter(tag=tag)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # Теги: только те что есть у опубликованных новостей
+        from django.db.models import Count
+        ctx['all_tags'] = (
+            NewsItem.objects
+            .filter(status=NewsItem.PUBLISHED)
+            .exclude(tag='')
+            .values('tag')
+            .annotate(cnt=Count('id'))
+            .order_by('-cnt')
+        )
+        ctx['active_tag'] = self.request.GET.get('tag', '').strip()
+        return ctx
 
 
 class NewsDetailView(DetailView):
