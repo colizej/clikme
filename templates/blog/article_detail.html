@@ -277,6 +277,20 @@
     {# ── Ad slot: end of article ── #}
     {% ad_slot "article-end" article "article" %}
 
+    {# ── Yandex RTB banner ── #}
+    <div class="my-8">
+      <!-- Yandex.RTB R-A-19033073-1 -->
+      <div id="yandex_rtb_R-A-19033073-1"></div>
+      <script>
+      window.yaContextCb.push(() => {
+          Ya.Context.AdvManager.render({
+              "blockId": "R-A-19033073-1",
+              "renderTo": "yandex_rtb_R-A-19033073-1"
+          })
+      })
+      </script>
+    </div>
+
     {# ── Related articles ── #}
     {% if related_articles %}
     <section class="mt-14">
