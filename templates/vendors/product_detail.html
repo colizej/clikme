@@ -53,13 +53,12 @@
   {# ── Ad slot: top of product ── #}
   {% ad_slot "product-top" product "product" %}
 
-  <nav class="text-xs text-(--color-muted) mb-6 flex items-center gap-1">
-    <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
-    <span>/</span>
-    <a href="{{ product.vendor.get_absolute_url }}"
-       class="hover:text-(--color-accent) transition-colors">{{ product.vendor.display_name }}</a>
-    <span>/</span>
-    <span class="truncate">{{ product.name }}</span>
+  <nav class="ck-breadcrumb">
+    <a href="/">{% trans "Главная" %}</a>
+    <span class="crumb-sep">›</span>
+    <a href="{{ product.vendor.get_absolute_url }}">{{ product.vendor.display_name }}</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">{{ product.name }}</span>
   </nav>
 
   <div class="flex flex-col md:flex-row gap-8">

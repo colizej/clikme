@@ -77,6 +77,21 @@
            leading-tight w-full group-hover:text-(--color-accent) transition-colors;
   }
 
+  /* === Хлебные крошки ================================================= */
+  .ck-breadcrumb {
+    @apply flex flex-wrap items-center gap-x-1.5 gap-y-1
+           text-xs text-(--color-text-muted) mb-4 min-w-0;
+  }
+  .ck-breadcrumb a {
+    @apply hover:text-(--color-accent) transition-colors shrink-0;
+  }
+  .ck-breadcrumb .crumb-sep {
+    @apply text-(--color-border) shrink-0;
+  }
+  .ck-breadcrumb .crumb-current {
+    @apply text-(--color-text) truncate min-w-0;
+  }
+
   /* === Секции ========================================================= */
   .ck-section      { @apply py-14 md:py-20; }
   .ck-section-warm { @apply py-14 md:py-20 bg-(--color-bg-section); }

@@ -42,10 +42,10 @@
 {# ── Hero ── #}
 <section class="bg-(--color-bg-warm) py-10 px-4 border-b border-(--color-border)">
   <div class="max-w-7xl mx-auto">
-    <nav class="text-xs text-(--color-text-muted) mb-4 flex items-center gap-1.5">
-      <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
-      <span>›</span>
-      <span class="text-(--color-text)">{{ category.name }}</span>
+    <nav class="ck-breadcrumb">
+      <a href="/">{% trans "Главная" %}</a>
+      <span class="crumb-sep">›</span>
+      <span class="crumb-current">{{ category.name }}</span>
     </nav>
     {% if category.image %}
     <div class="aspect-[3/1] rounded-2xl overflow-hidden mb-5">

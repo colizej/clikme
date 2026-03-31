@@ -20,10 +20,10 @@
 {# ── Hero ── #}
 <section class="bg-(--color-teal-light) py-10 px-4 border-b border-(--color-teal)/30">
   <div class="max-w-7xl mx-auto">
-    <nav class="text-xs text-(--color-text-muted) mb-4 flex items-center gap-1.5">
-      <a href="/" class="hover:text-(--color-accent) transition-colors">Главная</a>
-      <span>›</span>
-      <span class="text-(--color-text)">Новости</span>
+    <nav class="ck-breadcrumb">
+      <a href="/">{% trans "Главная" %}</a>
+      <span class="crumb-sep">›</span>
+      <span class="crumb-current">{% trans "Новости" %}</span>
     </nav>
     <div class="inline-flex items-center gap-1.5 ck-pill-teal mb-3">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>

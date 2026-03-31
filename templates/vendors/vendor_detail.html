@@ -48,12 +48,12 @@
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 py-10">
 
-  <nav class="text-xs text-(--color-text-muted) mb-6 flex items-center gap-1.5">
-    <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
-    <span class="text-(--color-border)">›</span>
-    <a href="/vendors/" class="hover:text-(--color-accent) transition-colors">{% trans "Компании" %}</a>
-    <span class="text-(--color-border)">›</span>
-    <span>{{ vendor.display_name }}</span>
+  <nav class="ck-breadcrumb">
+    <a href="/">{% trans "Главная" %}</a>
+    <span class="crumb-sep">›</span>
+    <a href="/vendors/">{% trans "Компании" %}</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">{{ vendor.display_name }}</span>
   </nav>
 
   {# Header card #}

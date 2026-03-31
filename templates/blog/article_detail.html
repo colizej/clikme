@@ -162,15 +162,14 @@
   <article class="max-w-3xl mx-auto px-4 py-10">
 
     {# Breadcrumb — mobile only #}
-    <nav aria-label="breadcrumb" class="md:hidden text-xs text-(--color-text-muted) mb-6 flex flex-wrap items-center gap-1.5">
-      <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+    <nav aria-label="breadcrumb" class="ck-breadcrumb md:hidden mb-6">
+      <a href="/">{% trans "Главная" %}</a>
       {% if article.category %}
-      <span class="text-(--color-border)">›</span>
-      <a href="/{{ article.category.slug }}/"
-         class="hover:text-(--color-accent) transition-colors">{{ article.category.name }}</a>
+      <span class="crumb-sep">›</span>
+      <a href="/{{ article.category.slug }}/">{{ article.category.name }}</a>
       {% endif %}
-      <span class="text-(--color-border)">›</span>
-      <span class="truncate max-w-[200px]">{{ article.title }}</span>
+      <span class="crumb-sep">›</span>
+      <span class="crumb-current">{{ article.title|truncatewords:6 }}</span>
     </nav>
 
     {# Tags above title (mobile only) #}
