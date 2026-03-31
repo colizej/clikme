@@ -248,8 +248,9 @@ class CategoryDetailView(ListView):
         ctx['active_tag'] = Tag.objects.filter(slug=tag_slug).first() if tag_slug else None
         ctx['all_tags'] = (
             Tag.objects
-            .annotate(cnt=Count('article'))
-            .filter(cnt__gt=0, article__category=self.category, article__is_published=True)
+            .filter(article__category=self.category, article__is_published=True)
+            .annotate(cnt=Count('article', filter=Q(article__category=self.category, article__is_published=True)))
+            .filter(cnt__gt=0)
             .order_by('-cnt')
             .distinct()
         )
