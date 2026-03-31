@@ -70,7 +70,7 @@ def translate_selected(modeladmin, request, queryset):
             call_command('translate_news', id=item.pk, force=True, stdout=out)
             if 'Переведено: 1' in out.getvalue():
                 ok += 1
-        except Exception:
+        except BaseException:
             pass
     modeladmin.message_user(request, f'🌐 Переведено: {ok}/{queryset.count()}')
 
