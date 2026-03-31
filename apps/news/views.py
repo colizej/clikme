@@ -172,13 +172,14 @@ class NewsListView(ListView):
     def get_queryset(self):
         qs = NewsItem.objects.filter(status=NewsItem.PUBLISHED)
         tag = self.request.GET.get('tag', '').strip()
-        if tag:
+        if tag == 'new':
+            qs = qs.filter(published_at__gte=timezone.now() - __import__('datetime').timedelta(hours=48))
+        elif tag:
             qs = qs.filter(tag=tag)
         return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        # Теги: только те что есть у опубликованных новостей
         from django.db.models import Count
         ctx['all_tags'] = (
             NewsItem.objects
@@ -188,6 +189,11 @@ class NewsListView(ListView):
             .annotate(cnt=Count('id'))
             .order_by('-cnt')
         )
+        new_cnt = NewsItem.objects.filter(
+            status=NewsItem.PUBLISHED,
+            published_at__gte=timezone.now() - __import__('datetime').timedelta(hours=48)
+        ).count()
+        ctx['new_cnt'] = new_cnt
         ctx['active_tag'] = self.request.GET.get('tag', '').strip()
         return ctx
 
