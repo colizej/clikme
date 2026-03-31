@@ -222,4 +222,16 @@ class NewsDetailView(DetailView):
         # extract related-article headings from the body and truncate summary before them.
         if not clean_body and obj.summary and obj.body:
             ctx['clean_summary'] = _clean_summary_tail(obj.summary, obj.body)
+        ctx['prev_news'] = (
+            NewsItem.objects
+            .filter(status=NewsItem.PUBLISHED, published_at__lt=obj.published_at)
+            .order_by('-published_at')
+            .first()
+        )
+        ctx['next_news'] = (
+            NewsItem.objects
+            .filter(status=NewsItem.PUBLISHED, published_at__gt=obj.published_at)
+            .order_by('published_at')
+            .first()
+        )
         return ctx
