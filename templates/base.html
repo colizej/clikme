@@ -13,6 +13,11 @@
   <link rel="alternate" hreflang="ru" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
   <link rel="alternate" hreflang="x-default" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
 
+  {# Default OG image (overridden per-page in meta_extra) #}
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-default.jpg' %}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
   {% block meta_extra %}{% endblock %}
 
   {# Yandex RTB loader #}
