@@ -18,11 +18,19 @@
 {% block content %}
 
 {# ── Hero ── #}
-<section class="bg-(--color-bg-warm) py-12 px-4 border-b border-(--color-border)">
+<section class="bg-(--color-bg-warm) py-10 px-4 border-b border-(--color-border)">
   <div class="max-w-7xl mx-auto">
-    <div class="inline-block ck-pill mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1 -mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>{% trans "Лента новостей" %}</div>
-    <h1 class="font-serif text-4xl md:text-5xl font-black text-(--color-text)">{% trans "Новости Вьетнама" %}</h1>
-    <p class="text-(--color-text-muted) mt-2">{% trans "Свежие события из жизни Вьетнама, Нячанга и региона. Туризм, культура, бизнес, недвижимость." %}</p>
+    <nav class="text-xs text-(--color-text-muted) mb-4 flex items-center gap-1.5">
+      <a href="/" class="hover:text-(--color-accent) transition-colors">Главная</a>
+      <span>›</span>
+      <span class="text-(--color-text)">Новости</span>
+    </nav>
+    <div class="inline-flex items-center gap-1.5 ck-pill mb-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
+      Лента новостей
+    </div>
+    <h1 class="font-serif text-4xl md:text-5xl font-black text-(--color-text) mb-2">Новости Вьетнама</h1>
+    <p class="text-(--color-text-muted) text-base">Свежие события из жизни Вьетнама, Нячанга и региона. Туризм, культура, бизнес, недвижимость.</p>
   </div>
 </section>
 

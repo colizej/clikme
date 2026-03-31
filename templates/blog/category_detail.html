@@ -38,30 +38,36 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-10">
 
-  {# Breadcrumb #}
-  <nav class="text-xs text-(--color-text-muted) mb-6 flex items-center gap-1.5">
-    <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
-    <span>›</span>
-    <span class="text-(--color-text)">{{ category.name }}</span>
-  </nav>
-
-  {# Header + SEO текст сверху #}
-  <div class="mb-8">
+{# ── Hero ── #}
+<section class="bg-(--color-bg-warm) py-10 px-4 border-b border-(--color-border)">
+  <div class="max-w-7xl mx-auto">
+    <nav class="text-xs text-(--color-text-muted) mb-4 flex items-center gap-1.5">
+      <a href="/" class="hover:text-(--color-accent) transition-colors">{% trans "Главная" %}</a>
+      <span>›</span>
+      <span class="text-(--color-text)">{{ category.name }}</span>
+    </nav>
     {% if category.image %}
-    <div class="aspect-[3/1] rounded-2xl overflow-hidden mb-6">
+    <div class="aspect-[3/1] rounded-2xl overflow-hidden mb-5">
       <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover">
     </div>
+    {% else %}
+    <div class="inline-flex items-center gap-1.5 ck-pill mb-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      Статьи
+    </div>
     {% endif %}
-    <h1 class="font-serif text-4xl md:text-5xl font-black text-(--color-text) mb-3">{{ category.name }}</h1>
+    <h1 class="font-serif text-4xl md:text-5xl font-black text-(--color-text) mb-2">{{ category.name }}</h1>
     {% if category.description %}
-    <p class="text-(--color-text-muted) text-base max-w-2xl leading-relaxed">{{ category.description }}</p>
+    <p class="text-(--color-text-muted) text-base max-w-2xl">{{ category.description }}</p>
     {% endif %}
     <p class="text-xs text-(--color-text-muted) mt-2">
       {% blocktrans count count=page_obj.paginator.count %}{{ count }} статья{% plural %}{{ count }} статей{% endblocktrans %}
     </p>
   </div>
+</section>
+
+<div class="max-w-7xl mx-auto px-4 py-10">
 
   {# ── Теги (свайп) ── #}
   {% if all_tags %}
