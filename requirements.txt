@@ -12,4 +12,5 @@ html2text
 google-genai
 django-csp
 sentry-sdk[django]
-apscheduler
+apscheduler==3.11.2
+tzlocal==5.3.1
