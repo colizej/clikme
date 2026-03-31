@@ -194,6 +194,7 @@ class NewsListView(ListView):
             published_at__gte=timezone.now() - __import__('datetime').timedelta(hours=48)
         ).count()
         ctx['new_cnt'] = new_cnt
+        ctx['total_cnt'] = NewsItem.objects.filter(status=NewsItem.PUBLISHED).count()
         ctx['active_tag'] = self.request.GET.get('tag', '').strip()
         return ctx
 
