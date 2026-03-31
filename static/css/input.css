@@ -44,7 +44,8 @@
 
   /* === Герой ========================================================== */
   .ck-hero {
-    @apply relative overflow-hidden bg-(--color-bg-warm) py-20 md:py-28 px-6;
+    @apply relative overflow-hidden py-20 md:py-28 px-6;
+    background: linear-gradient(135deg, #FFF3EA 0%, #FFF8F4 65%, #EAF7F3 100%);
   }
 
   /* === Карточки ======================================================= */

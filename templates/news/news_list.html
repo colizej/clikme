@@ -25,7 +25,7 @@
       <span>›</span>
       <span class="text-(--color-text)">Новости</span>
     </nav>
-    <div class="inline-flex items-center gap-1.5 ck-pill mb-3">
+    <div class="inline-flex items-center gap-1.5 ck-pill-teal mb-3">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
       Лента новостей
     </div>
@@ -42,18 +42,18 @@
     <style>.news-tag-bar::-webkit-scrollbar{display:none}</style>
     <div class="news-tag-bar flex gap-2 min-w-max px-1 pb-1">
       <a href="/news/"
-         class="ck-pill transition-colors whitespace-nowrap {% if not active_tag %}bg-(--color-accent) text-white{% else %}hover:bg-(--color-accent-medium){% endif %}">
+         class="ck-pill transition-colors whitespace-nowrap {% if not active_tag %}bg-(--color-teal) text-white{% else %}hover:bg-(--color-teal-light){% endif %}">
         Все <span class="opacity-60 text-[10px]">{{ total_cnt }}</span>
       </a>
       {% if new_cnt %}
       <a href="/news/?tag=new"
-         class="ck-pill transition-colors whitespace-nowrap {% if active_tag == 'new' %}bg-green-600 text-white{% else %}hover:bg-(--color-accent-medium){% endif %}">
+         class="ck-pill transition-colors whitespace-nowrap {% if active_tag == 'new' %}bg-(--color-teal) text-white{% else %}hover:bg-(--color-teal-light){% endif %}">
         Новое <span class="opacity-60 text-[10px]">{{ new_cnt }}</span>
       </a>
       {% endif %}
       {% for t in all_tags %}
       <a href="/news/?tag={{ t.tag }}"
-         class="ck-pill transition-colors whitespace-nowrap {% if active_tag == t.tag %}bg-(--color-accent) text-white{% else %}hover:bg-(--color-accent-medium){% endif %}">
+         class="ck-pill transition-colors whitespace-nowrap {% if active_tag == t.tag %}bg-(--color-teal) text-white{% else %}hover:bg-(--color-teal-light){% endif %}">
         {{ t.tag|capfirst }} <span class="opacity-60 text-[10px]">{{ t.cnt }}</span>
       </a>
       {% endfor %}
