@@ -18,6 +18,12 @@
   --color-accent-light:  #FFF0E6;  /* очень светлый оранжевый */
   --color-accent-medium: #FFDCC6;
 
+  /* ── Бирюзовый (второй цвет логотипа) ───────────────────────────── */
+  --color-teal:        #6DC5A8;
+  --color-teal-hover:  #5AB397;
+  --color-teal-light:  #EAF7F3;
+  --color-teal-dark:   #3D8C73;
+
   /* ── Тёмный (только футер) ───────────────────────────────────────── */
   --color-dark:       #1C1917;
   --color-dark-soft:  #292524;
@@ -74,6 +80,12 @@
   .ck-section      { @apply py-14 md:py-20; }
   .ck-section-warm { @apply py-14 md:py-20 bg-(--color-bg-section); }
   .ck-section-dark { @apply py-14 md:py-20 bg-(--color-dark) text-white; }
+  .ck-section-teal { @apply py-14 md:py-20 bg-(--color-teal-light); }
+
+  .ck-pill-teal {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
+           bg-(--color-teal-light) text-(--color-teal-dark);
+  }
 
   /* === Кнопки ========================================================= */
   .ck-btn-accent {

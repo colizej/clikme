@@ -89,6 +89,9 @@
 </head>
 <body class="font-sans text-(--color-text) bg-(--color-bg) antialiased">
 
+  {# ── TOP BAR ─────────────────────────────────────────────────────── #}
+  <div style="height:4px; background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-teal) 100%);"></div>
+
   {# ── NAV ───────────────────────────────────────────────────────────── #}
   <header class="ck-nav">
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center gap-6">
@@ -119,7 +122,7 @@
           {% trans "Статьи" %}
         </a>
         <a href="/news/"
-           class="px-3 py-1.5 text-sm font-medium transition-colors {% if '/news/' in path %}text-(--color-accent) border-b-2 border-(--color-accent){% else %}text-(--color-text) hover:text-(--color-accent){% endif %}">
+           class="px-3 py-1.5 text-sm font-medium transition-colors {% if '/news/' in path %}text-(--color-teal-dark) border-b-2 border-(--color-teal){% else %}text-(--color-text) hover:text-(--color-teal-dark){% endif %}">
           {% trans "Новости" %}
         </a>
         <a href="/vendors/"
@@ -204,8 +207,8 @@
   {# ── MOBILE DRAWER ───────────────────────────────────────────────── #}
   <aside id="nav-mobile" role="dialog" aria-modal="true" aria-label="{% trans 'Навигация' %}">
 
-    {# Drawer header: accent gradient #}
-    <div class="px-5 py-4" style="background: var(--color-dark)">
+    {# Drawer header: teal #}
+    <div class="px-5 py-4" style="background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-teal-dark) 100%)">
       <div class="flex items-center justify-between">
         <a href="/" onclick="closeMobileNav()">
           <img src="{% static 'img/logo.png' %}" alt="ClikMe" class="h-8 w-auto"
@@ -259,15 +262,15 @@
         </span>
         <span class="drawer-arrow">›</span>
       </a>
-      <a href="/news/" onclick="closeMobileNav()" class="drawer-link{% if '/news/' in path %} !bg-(--color-accent-light){% endif %}">
+      <a href="/news/" onclick="closeMobileNav()" class="drawer-link{% if '/news/' in path %} !bg-(--color-teal-light){% endif %}">
         <span class="drawer-icon">
-          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--color-accent)" stroke-width="1.8">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--color-teal)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 22H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2z"/>
             <path stroke-linecap="round" stroke-linejoin="round" d="M17 22v-6H7v6M7 2v4h8"/>
           </svg>
         </span>
         <span class="drawer-label">
-          <strong class="{% if '/news/' in path %}text-(--color-accent){% endif %}">{% trans "Новости" %}</strong>
+          <strong class="{% if '/news/' in path %}text-(--color-teal-dark){% endif %}">{% trans "Новости" %}</strong>
           <small>{% trans "Последние события Вьетнама" %}</small>
         </span>
         <span class="drawer-arrow">›</span>
