@@ -451,19 +451,23 @@ class Command(BaseCommand):
 
             slug = _make_unique_slug(title)
             body_md = _html_to_md(body)
-            item = NewsItem.objects.create(
-                source=source,
-                source_url=url,
-                slug=slug,
-                title=title,
-                title_original=title,
-                summary=summary,
-                summary_original=summary,
-                body=body,
-                body_md=body_md,
-                image_url=image_url,
-                status=NewsItem.DRAFT,
-            )
+            try:
+                item = NewsItem.objects.create(
+                    source=source,
+                    source_url=url,
+                    slug=slug,
+                    title=title,
+                    title_original=title,
+                    summary=summary,
+                    summary_original=summary,
+                    body=body,
+                    body_md=body_md,
+                    image_url=image_url,
+                    status=NewsItem.DRAFT,
+                )
+            except Exception:
+                skip += 1
+                continue
             if image_url:
                 result = _download_image(image_url)
                 if result:
