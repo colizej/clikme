@@ -15,8 +15,8 @@ class NewsConfig(AppConfig):
         if os.environ.get('RUN_MAIN') == 'true':
             # runserver — запускаем только в одном процессе
             _start_scheduler()
-        elif _is_gunicorn():
-            # gunicorn — только один воркер через file lock
+        else:
+            # gunicorn и любой другой сервер — только один воркер через file lock
             _start_scheduler_locked()
 
 
@@ -43,7 +43,7 @@ def _start_scheduler():
     scheduler = BackgroundScheduler(timezone='UTC')
     scheduler.add_job(
         _publish_scheduled_news,
-        trigger=IntervalTrigger(minutes=30),
+        trigger=IntervalTrigger(minutes=5),
         id='publish_scheduled_news',
         replace_existing=True,
         max_instances=1,
