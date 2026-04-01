@@ -29,7 +29,7 @@ class HomeView(ListView):
     def get_queryset(self):
         qs = (
             Article.objects
-            .filter(is_published=True)
+            .filter(is_published=True, published_at__lte=timezone.now())
             .select_related('category', 'author')
             .prefetch_related('tags')
         )
@@ -89,7 +89,9 @@ class ArticleDetailView(DetailView):
     context_object_name = 'article'
 
     def get_queryset(self):
-        return Article.objects.filter(is_published=True).select_related('category').prefetch_related('tags')
+        return Article.objects.filter(
+            is_published=True, published_at__lte=timezone.now()
+        ).select_related('category').prefetch_related('tags')
 
     def get(self, request, *args, **kwargs):
         try:
@@ -236,7 +238,7 @@ class CategoryDetailView(ListView):
             raise Http404
         qs = (
             Article.objects
-            .filter(category=self.category, is_published=True)
+            .filter(category=self.category, is_published=True, published_at__lte=timezone.now())
             .select_related('category')
             .prefetch_related('tags')
         )
