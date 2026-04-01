@@ -227,6 +227,13 @@ urlpatterns = [
     
     path(f'{settings.ADMIN_URL}/', admin.site.urls),
 
+    # Bot WebApp + API
+    path('bot/', __import__('apps.core.bot_view', fromlist=['bot_webapp']).bot_webapp),
+    path('api/bot/vendors/', __import__('apps.core.api_views', fromlist=['api_vendors']).api_vendors),
+    path('api/bot/articles/', __import__('apps.core.api_views', fromlist=['api_articles']).api_articles),
+    path('api/bot/news/', __import__('apps.core.api_views', fromlist=['api_news']).api_news),
+    path('api/bot/search/', __import__('apps.core.api_views', fromlist=['api_search']).api_search),
+
     # Auth
     path('accounts/', include('django.contrib.auth.urls')),
 
