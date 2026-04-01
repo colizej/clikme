@@ -1,6 +1,10 @@
 # === Архивы и справочные шаблоны (не пушить) ===
 opencart/
-go/
+bot_eat_blog/venv/
+bot_eat_blog/.env
+bot_eat_blog/website/static/data/
+bot_eat_blog/__pycache__/
+bot_eat_blog/.git/
 
 # === Tailwind CLI (бинарник, каждый скачивает сам) ===
 tailwindcss
