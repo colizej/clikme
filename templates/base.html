@@ -381,6 +381,21 @@
         {% trans "Нажимая «Подписаться», вы соглашаетесь с" %}
         <a href="/privacy/" class="underline hover:text-(--color-accent)">{% trans "политикой конфиденциальности" %}</a>
       </p>
+      <div class="mt-8 pt-6 border-t border-(--color-border)">
+        <p class="text-sm text-(--color-text-muted) mb-3">{% trans "Или подпишитесь в Telegram — там быстрее" %}</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="https://t.me/asiatodaynhantrang" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#2AABEE] text-white text-sm font-medium hover:bg-[#1d96d3] transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.88 14.07l-2.967-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.943.516z"/></svg>
+            AsiaToday | Нячанг
+          </a>
+          <a href="https://t.me/NhaTrang_where_eat_bot" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#2AABEE] text-[#2AABEE] text-sm font-medium hover:bg-[#2AABEE] hover:text-white transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.88 14.07l-2.967-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.943.516z"/></svg>
+            Бот «Где покушать»
+          </a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -414,10 +429,27 @@
 
       <div>
         <p class="text-white font-semibold mb-4 text-xs uppercase tracking-widest"><svg xmlns="http://www.w3.org/2000/svg" class="inline w-3.5 h-3.5 mr-1 -mt-0.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>Нячанг</p>
-        <p class="leading-relaxed text-xs">
+        <p class="leading-relaxed text-xs mb-4">
           Нячанг (Нha Trang), Вьетнам<br>
           <span class="text-(--color-accent)">UTC+7</span>
         </p>
+        <p class="text-white font-semibold mb-3 text-xs uppercase tracking-widest">Мы в Telegram</p>
+        <ul class="space-y-2.5">
+          <li>
+            <a href="https://t.me/asiatodaynhantrang" target="_blank" rel="noopener"
+               class="flex items-center gap-2 hover:text-white transition-colors text-xs">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.88 14.07l-2.967-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.943.516z"/></svg>
+              AsiaToday | Нячанг
+            </a>
+          </li>
+          <li>
+            <a href="https://t.me/NhaTrang_where_eat_bot" target="_blank" rel="noopener"
+               class="flex items-center gap-2 hover:text-white transition-colors text-xs">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.88 14.07l-2.967-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.943.516z"/></svg>
+              Бот «Где покушать»
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
 
