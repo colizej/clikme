@@ -217,7 +217,7 @@ class NewsDetailView(DetailView):
         return NewsItem.objects.filter(
             status=NewsItem.PUBLISHED,
             published_at__lte=timezone.now(),
-        )
+        ).select_related('source')
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
@@ -233,15 +233,16 @@ class NewsDetailView(DetailView):
         # extract related-article headings from the body and truncate summary before them.
         if not clean_body and obj.summary and obj.body:
             ctx['clean_summary'] = _clean_summary_tail(obj.summary, obj.body)
+        now = timezone.now()
         ctx['prev_news'] = (
             NewsItem.objects
-            .filter(status=NewsItem.PUBLISHED, published_at__lt=obj.published_at)
+            .filter(status=NewsItem.PUBLISHED, published_at__lt=obj.published_at, published_at__lte=now)
             .order_by('-published_at')
             .first()
         )
         ctx['next_news'] = (
             NewsItem.objects
-            .filter(status=NewsItem.PUBLISHED, published_at__gt=obj.published_at)
+            .filter(status=NewsItem.PUBLISHED, published_at__gt=obj.published_at, published_at__lte=now)
             .order_by('published_at')
             .first()
         )
