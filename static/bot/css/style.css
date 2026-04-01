@@ -1,0 +1,94 @@
+
+.tab-container {
+    display: flex;
+    justify-content: center;
+}
+
+.tab-button {
+    padding: 7px 23px;
+    margin: 0 10px;
+    border: none;
+    background-color: transparent;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    background-color: #6CC4A7; 
+    color: #fff; 
+    border-radius: 25px;
+}
+
+.tab-button:not(.active) {
+    color: #6c757d; 
+}
+
+.tab-content {
+    background-color: #f5f5f5;
+    margin-top: 20px;
+    padding: 20px;
+    border-top: 1px solid #ddd;
+    border-radius: 25px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.tab-content.hidden {
+    transform: translateY(20px);
+    opacity: 0;
+    display: none;
+}
+
+.tab-content.visible {
+    transform: translateY(0);
+    opacity: 1;
+    display: block;
+}
+
+ /* Стили для контейнера tags */
+ .tag-container {
+    display: flex;
+    flex-wrap: nowrap; 
+    overflow-x: auto; /* Горизонтальная прокрутка */
+    scroll-snap-type: x mandatory; /* Анимация при свайпе */
+    -webkit-overflow-scrolling: touch; /* Плавная прокрутка на мобильных устройствах */
+    gap: 3px; /* Расстояние между тегами */
+    padding: 10px;
+    scrollbar-width: none; /* Убираем полосу прокрутки */
+    font-size: .85em;
+}
+
+/* Скрываем полосу прокрутки */
+.tag-container::-webkit-scrollbar {
+    display: none;
+}
+
+
+.tag-btn {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    padding: 5px 10px;
+    margin-right: 5px;
+    cursor: pointer;
+    white-space: nowrap; 
+    flex-shrink: 0;
+    color:#4e8d78;
+}
+
+.tag-btn.active {
+    background-color: #fe992a;
+    color: white;
+    border-color: ;
+}
+
+
+
+.restaurant-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
