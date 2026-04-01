@@ -28,14 +28,36 @@ function initSwipe(selector) {
 // ── Поиск ─────────────────────────────────────────────────────────────────────
 let allVendors  = [];
 let allArticles = [];
+let searchTimer = null;
 
 function initSearch() {
     const input = document.getElementById('search-input');
     if (!input) return;
     input.addEventListener('input', () => {
-        const q = input.value.trim().toLowerCase();
-        renderVendors(q ? allVendors.filter(v => v.name.toLowerCase().includes(q) || v.description.toLowerCase().includes(q)) : allVendors);
-        renderArticles(q ? allArticles.filter(a => a.title.toLowerCase().includes(q)) : allArticles);
+        const q = input.value.trim();
+        clearTimeout(searchTimer);
+        if (!q) {
+            renderVendors(allVendors);
+            renderArticles(allArticles);
+            return;
+        }
+        if (q.length < 2) return;
+        searchTimer = setTimeout(() => {
+            fetch(`https://clikme.ru/api/bot/search/?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(results => {
+                    if (!Array.isArray(results)) return;
+                    const vendors  = results.filter(r => r.type === 'vendor');
+                    const articles = results.filter(r => r.type === 'article' || r.type === 'news');
+                    renderVendors(vendors.map(r => ({ name: r.title, url: r.url, description: '', logo_url: '', zone: '' })));
+                    renderArticles(articles.map(r => ({ title: r.title, url: r.url, image_url: '', tag: '' })));
+                })
+                .catch(() => {
+                    const ql = q.toLowerCase();
+                    renderVendors(allVendors.filter(v => v.name.toLowerCase().includes(ql) || v.description.toLowerCase().includes(ql)));
+                    renderArticles(allArticles.filter(a => a.title.toLowerCase().includes(ql)));
+                });
+        }, 400);
     });
 }
 
