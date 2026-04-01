@@ -117,13 +117,15 @@ class ArticleDetailView(DetailView):
         article = self.object
         ctx['prev_article'] = (
             Article.objects
-            .filter(is_published=True, published_at__lt=article.published_at)
+            .filter(is_published=True, published_at__lt=article.published_at, category__isnull=False)
+            .select_related('category')
             .order_by('-published_at')
             .first()
         )
         ctx['next_article'] = (
             Article.objects
-            .filter(is_published=True, published_at__gt=article.published_at)
+            .filter(is_published=True, published_at__gt=article.published_at, category__isnull=False)
+            .select_related('category')
             .order_by('published_at')
             .first()
         )
