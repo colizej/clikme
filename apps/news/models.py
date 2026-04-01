@@ -141,7 +141,7 @@ class NewsItem(models.Model):
 # ── Signals ───────────────────────────────────────────────────────────────────
 
 import os
-from django.db.models.signals import post_save, post_delete, pre_save
+from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -171,23 +171,5 @@ def _delete_image_on_delete(sender, instance, **kwargs):
             pass
 
 
-@receiver(post_save, sender=NewsItem)
-def auto_send_to_telegram(sender, instance, created, **kwargs):
-    """
-    При сохранении новости со статусом PUBLISHED + published_at <= now
-    и telegram_message_id пустым — автоматически отправляет в канал.
-    """
-    if instance.status != NewsItem.PUBLISHED:
-        return
-    if instance.telegram_message_id:
-        return  # уже отправлено
-    if instance.published_at and instance.published_at > timezone.now():
-        return  # отложенная публикация — не отправлять пока
-    try:
-        from apps.news.telegram import send_news_item
-        ok, result = send_news_item(instance)
-        if ok:
-            # update_fields чтобы не вызвать рекурсию
-            NewsItem.objects.filter(pk=instance.pk).update(telegram_message_id=result)
-    except Exception:
-        pass  # не ломаем сохранение при ошибке Telegram
+# Отправка в Telegram выполняется планировщиком (apps/news/apps.py)
+# каждые 30 минут — сигнал убран чтобы избежать дублирования

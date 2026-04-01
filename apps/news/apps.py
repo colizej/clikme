@@ -1,4 +1,10 @@
+import fcntl
+import os
+import tempfile
+
 from django.apps import AppConfig
+
+_lock_file = None  # держим ссылку чтобы GC не закрыл файл и не снял замок
 
 
 class NewsConfig(AppConfig):
@@ -6,48 +12,43 @@ class NewsConfig(AppConfig):
     name = 'apps.news'
 
     def ready(self):
-        import os
-        # Не запускать при manage.py командах
         if os.environ.get('RUN_MAIN') == 'true':
             # runserver — запускаем только в одном процессе
-            self._start_scheduler()
-        elif os.environ.get('SERVER_SOFTWARE') or _is_gunicorn():
-            # gunicorn — используем файловую блокировку, только один воркер
-            self._start_scheduler_locked()
-
-    def _start_scheduler_locked(self):
-        """Запускает планировщик только в одном воркере gunicorn через file lock."""
-        import fcntl
-        import tempfile
-        import os
-
-        lock_path = os.path.join(tempfile.gettempdir(), 'clikme_scheduler.lock')
-        try:
-            lock_file = open(lock_path, 'w')
-            fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            # Успешно захватили — запускаем
-            self._start_scheduler()
-        except (IOError, OSError):
-            pass  # Другой воркер уже запустил планировщик
-
-    def _start_scheduler(self):
-        from apscheduler.schedulers.background import BackgroundScheduler
-        from apscheduler.triggers.interval import IntervalTrigger
-
-        scheduler = BackgroundScheduler(timezone='UTC')
-        scheduler.add_job(
-            _publish_scheduled_news,
-            trigger=IntervalTrigger(minutes=30),
-            id='publish_scheduled_news',
-            replace_existing=True,
-            max_instances=1,
-        )
-        scheduler.start()
+            _start_scheduler()
+        elif _is_gunicorn():
+            # gunicorn — только один воркер через file lock
+            _start_scheduler_locked()
 
 
 def _is_gunicorn():
     import sys
     return 'gunicorn' in sys.modules
+
+
+def _start_scheduler_locked():
+    global _lock_file
+    lock_path = os.path.join(tempfile.gettempdir(), 'clikme_scheduler.lock')
+    try:
+        _lock_file = open(lock_path, 'w')
+        fcntl.flock(_lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _start_scheduler()
+    except (IOError, OSError):
+        pass  # другой воркер уже держит замок
+
+
+def _start_scheduler():
+    from apscheduler.schedulers.background import BackgroundScheduler
+    from apscheduler.triggers.interval import IntervalTrigger
+
+    scheduler = BackgroundScheduler(timezone='UTC')
+    scheduler.add_job(
+        _publish_scheduled_news,
+        trigger=IntervalTrigger(minutes=30),
+        id='publish_scheduled_news',
+        replace_existing=True,
+        max_instances=1,
+    )
+    scheduler.start()
 
 
 def _publish_scheduled_news():
