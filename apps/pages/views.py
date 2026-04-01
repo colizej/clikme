@@ -38,7 +38,7 @@ class ContactsView(TemplateView):
                 subject=f'[ClikMe] Сообщение от {name}',
                 message=f'От: {name} <{email}>\n\n{message}',
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.DEFAULT_FROM_EMAIL],
+                recipient_list=[settings.ADMIN_EMAIL],
                 fail_silently=True,
             )
         return self.render_to_response(self.get_context_data(success=True))
