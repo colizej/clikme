@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from django.db.models import Count, F, Q
 from django.http import Http404, JsonResponse, HttpResponseRedirect
+from django.utils import timezone
 from django.views.generic import ListView, DetailView
 
 from .models import Article, Category, Tag
@@ -115,16 +116,17 @@ class ArticleDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         article = self.object
+        now = timezone.now()
         ctx['prev_article'] = (
             Article.objects
-            .filter(is_published=True, published_at__lt=article.published_at, category__isnull=False)
+            .filter(is_published=True, published_at__lt=article.published_at, published_at__lte=now, category__isnull=False)
             .select_related('category')
             .order_by('-published_at')
             .first()
         )
         ctx['next_article'] = (
             Article.objects
-            .filter(is_published=True, published_at__gt=article.published_at, category__isnull=False)
+            .filter(is_published=True, published_at__gt=article.published_at, published_at__lte=now, category__isnull=False)
             .select_related('category')
             .order_by('published_at')
             .first()
