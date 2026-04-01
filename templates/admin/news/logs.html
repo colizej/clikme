@@ -1,0 +1,107 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<style>
+.log-box {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 12px;
+    border-radius: 6px;
+    height: 280px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.log-box .ok  { color: #4ec9b0; }
+.log-box .err { color: #f44747; }
+.log-box .info { color: #9cdcfe; }
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.log-status { font-size: 11px; color: #999; }
+.log-status.running { color: #4ec9b0; }
+</style>
+
+<h1>📋 Логи фоновых задач</h1>
+<p style="color:#666">Страница обновляется автоматически каждые 3 секунды.</p>
+
+<div id="logs-container"></div>
+
+<script>
+let lastMtimes = {};
+
+function colorize(line) {
+    if (line.includes('✓') || line.includes('Готово') || line.includes('успешно') || line.includes('новых:'))
+        return `<span class="ok">${line}</span>`;
+    if (line.includes('✗') || line.includes('Ошибка') || line.includes('ERROR') || line.includes('критическая'))
+        return `<span class="err">${line}</span>`;
+    if (line.includes('📡') || line.includes('Найдено') || line.includes('Запущен') || line.includes('INFO'))
+        return `<span class="info">${line}</span>`;
+    return line;
+}
+
+function escapeHtml(text) {
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderLogs(data) {
+    const container = document.getElementById('logs-container');
+
+    Object.entries(data).forEach(([key, info]) => {
+        let box = document.getElementById('log-' + key);
+        let pre = document.getElementById('pre-' + key);
+        let status = document.getElementById('status-' + key);
+
+        if (!box) {
+            container.insertAdjacentHTML('beforeend', `
+                <div style="margin-bottom:24px">
+                    <div class="log-header">
+                        <h2 style="margin:0;font-size:16px">${info.label}</h2>
+                        <span class="log-status" id="status-${key}">нет данных</span>
+                    </div>
+                    <div class="log-box" id="log-${key}"><pre id="pre-${key}" style="margin:0"></pre></div>
+                </div>
+            `);
+            box  = document.getElementById('log-' + key);
+            pre  = document.getElementById('pre-' + key);
+            status = document.getElementById('status-' + key);
+        }
+
+        // Обновляем только если файл изменился
+        if (lastMtimes[key] !== info.mtime) {
+            lastMtimes[key] = info.mtime;
+            if (info.lines.length) {
+                pre.innerHTML = info.lines.map(l => colorize(escapeHtml(l))).join('\n');
+                box.scrollTop = box.scrollHeight;
+                const last = info.lines[info.lines.length - 1];
+                if (last.includes('Готово') || last.includes('✓') || last.includes('нет данных') || last.includes('Нет новостей')) {
+                    status.textContent = '✓ завершено';
+                    status.className = 'log-status';
+                } else {
+                    status.textContent = '⏳ выполняется…';
+                    status.className = 'log-status running';
+                }
+            } else {
+                pre.textContent = 'Лог пуст — задача ещё не запускалась';
+                status.textContent = '';
+            }
+        }
+    });
+}
+
+function fetchLogs() {
+    fetch('data/')
+        .then(r => r.json())
+        .then(renderLogs)
+        .catch(() => {});
+}
+
+fetchLogs();
+setInterval(fetchLogs, 3000);
+</script>
+{% endblock %}

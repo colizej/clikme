@@ -53,23 +53,46 @@ def _start_scheduler():
 
 def _publish_scheduled_news():
     """Отправляет в Telegram новости, время публикации которых наступило."""
+    import datetime
+    from pathlib import Path
+    from django.conf import settings
+
+    log_dir = Path(settings.BASE_DIR) / 'logs'
+    log_dir.mkdir(exist_ok=True)
+    log_path = log_dir / 'publish_scheduled.log'
+
+    def log(msg):
+        ts = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        line = f'[{ts}] {msg}\n'
+        with open(log_path, 'a', encoding='utf-8') as f:
+            f.write(line)
+
     try:
         from django.utils import timezone
         from apps.news.models import NewsItem
 
         now = timezone.now()
-        pending = NewsItem.objects.filter(
+        pending = list(NewsItem.objects.filter(
             status=NewsItem.PUBLISHED,
             published_at__lte=now,
             telegram_message_id='',
-        )
+        ))
+
+        if not pending:
+            log('Нет новостей для публикации')
+            return
+
+        log(f'Найдено для публикации: {len(pending)}')
         for item in pending:
             try:
                 from apps.news.telegram import send_news_item
                 ok, result = send_news_item(item)
                 if ok:
                     NewsItem.objects.filter(pk=item.pk).update(telegram_message_id=result)
-            except Exception:
-                pass
-    except Exception:
-        pass
+                    log(f'✓ Опубликовано: {item.title[:60]}')
+                else:
+                    log(f'✗ Ошибка: {item.title[:60]} — {result}')
+            except Exception as e:
+                log(f'✗ Исключение: {item.title[:60]} — {e}')
+    except Exception as e:
+        log(f'Критическая ошибка: {e}')

@@ -172,32 +172,64 @@ class NewsItemAdmin(admin.ModelAdmin):
         custom = [
             path('fetch/', self.admin_site.admin_view(self._fetch_view), name='news_newsitem_fetch'),
             path('translate/', self.admin_site.admin_view(self._translate_view), name='news_newsitem_translate'),
+            path('logs/', self.admin_site.admin_view(self._logs_view), name='news_newsitem_logs'),
+            path('logs/data/', self.admin_site.admin_view(self._logs_data), name='news_newsitem_logs_data'),
         ]
         return custom + urls
 
-    def _fetch_view(self, request):
+    def _log_path(self, name):
+        from django.conf import settings
+        log_dir = settings.BASE_DIR / 'logs'
+        log_dir.mkdir(exist_ok=True)
+        return log_dir / f'{name}.log'
+
+    def _run_bg(self, cmd_args, log_name):
         import subprocess, sys
         from django.conf import settings
+        log_file = open(self._log_path(log_name), 'w', encoding='utf-8')
         subprocess.Popen(
-            [sys.executable, 'manage.py', 'fetch_news'],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            [sys.executable, 'manage.py'] + cmd_args,
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
             cwd=settings.BASE_DIR,
         )
-        self.message_user(request, '⏳ Парсинг запущен в фоне — новости появятся через минуту', messages.SUCCESS)
-        return HttpResponseRedirect(reverse('admin:news_newsitem_changelist'))
+
+    def _fetch_view(self, request):
+        self._run_bg(['fetch_news'], 'fetch_news')
+        self.message_user(request, '⏳ Парсинг запущен — смотрите лог', messages.SUCCESS)
+        return HttpResponseRedirect(reverse('admin:news_newsitem_logs'))
 
     def _translate_view(self, request):
-        import subprocess, sys
-        from django.conf import settings
-        subprocess.Popen(
-            [sys.executable, 'manage.py', 'translate_news'],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            cwd=settings.BASE_DIR,
-        )
-        self.message_user(request, '⏳ Перевод запущен в фоне — результат появится через минуту', messages.SUCCESS)
-        return HttpResponseRedirect(reverse('admin:news_newsitem_changelist'))
+        self._run_bg(['translate_news'], 'translate_news')
+        self.message_user(request, '⏳ Перевод запущен — смотрите лог', messages.SUCCESS)
+        return HttpResponseRedirect(reverse('admin:news_newsitem_logs'))
+
+    def _logs_view(self, request):
+        from django.shortcuts import render
+        return render(request, 'admin/news/logs.html', {
+            'title': 'Логи фоновых задач',
+            'opts': self.model._meta,
+        })
+
+    def _logs_data(self, request):
+        from django.http import JsonResponse
+        result = {}
+        for name, label in [
+            ('fetch_news', 'Парсинг новостей'),
+            ('translate_news', 'Перевод'),
+            ('publish_scheduled', 'Публикация в Telegram'),
+        ]:
+            log_file = self._log_path(name)
+            if log_file.exists():
+                lines = log_file.read_text(encoding='utf-8', errors='replace').splitlines()
+                result[name] = {
+                    'label': label,
+                    'lines': lines[-100:],  # последние 100 строк
+                    'mtime': log_file.stat().st_mtime,
+                }
+            else:
+                result[name] = {'label': label, 'lines': [], 'mtime': 0}
+        return JsonResponse(result)
 
     @admin.display(description='Заголовок')
     def title_short(self, obj):
