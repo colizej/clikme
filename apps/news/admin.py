@@ -61,18 +61,19 @@ def to_draft(modeladmin, request, queryset):
 
 @admin.action(description='🌐 Перевести выбранные')
 def translate_selected(modeladmin, request, queryset):
-    from django.core.management import call_command
-    import io
-    ok = 0
-    for item in queryset:
-        out = io.StringIO()
-        try:
-            call_command('translate_news', id=item.pk, force=True, stdout=out)
-            if 'Переведено: 1' in out.getvalue():
-                ok += 1
-        except BaseException:
-            pass
-    modeladmin.message_user(request, f'🌐 Переведено: {ok}/{queryset.count()}')
+    import subprocess
+    import sys
+    from django.conf import settings
+
+    ids = list(queryset.values_list('pk', flat=True))
+    for pk in ids:
+        subprocess.Popen(
+            [sys.executable, 'manage.py', 'translate_news', f'--id={pk}', '--force'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=settings.BASE_DIR,
+        )
+    modeladmin.message_user(request, f'⏳ Перевод запущен в фоне для {len(ids)} новостей — обновите страницу через минуту')
 
 
 @admin.action(description='📤 Отправить в Telegram')
