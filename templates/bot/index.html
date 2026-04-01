@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ClikMe — Нячанг</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/bot/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Шапка -->
+<div class="container d-flex justify-content-between align-items-center mb-2">
+    <a href="https://clikme.ru">
+        <img src="https://clikme.ru/static/img/logo.png" height="50" class="my-3" alt="ClikMe">
+    </a>
+    <a data-bs-toggle="offcanvas" href="#offcanvasMenu" role="button">
+        <i class="bi bi-three-dots-vertical fs-1" style="color:#fe992a"></i>
+    </a>
+</div>
+
+<!-- Боковое меню -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu">
+    <div class="offcanvas-header">
+        <h2 class="offcanvas-title h5"><span style="color:#fe992a">Клик</span><span style="color:#6CC4A7">Ми</span></h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-5">
+        <div class="mb-4">
+            <div class="d-flex align-items-center" style="color:#6CC4A7">
+                <i class="bi bi-airplane-engines me-2 fs-5"></i>
+                <a href="https://www.trip.com/t/ct8wdoJRLP2" target="_blank" class="text-decoration-none"><h2 class="h6">Авиабилеты по лучшей цене</h2></a>
+            </div>
+            <p class="small ms-4">💬 Ловите дешёвые перелёты!</p>
+        </div>
+        <div class="mb-4">
+            <div class="d-flex align-items-center" style="color:#fe992a">
+                <i class="bi bi-building me-2 fs-5"></i>
+                <a href="https://www.trip.com/t/hnCiIKsDIP2" target="_blank" class="text-decoration-none"><h2 class="h6">Отели на любой вкус</h2></a>
+            </div>
+            <p class="small ms-4">💬 Найдите своё идеальное место!</p>
+        </div>
+        <div class="mb-4">
+            <div class="d-flex align-items-center" style="color:#6CC4A7">
+                <i class="bi bi-geo-alt me-2 fs-5"></i>
+                <a href="https://www.trip.com/t/WBBbIgG9HP2" target="_blank" class="text-decoration-none"><h2 class="h6">Достопримечательности</h2></a>
+            </div>
+            <p class="small ms-4">💬 Открывайте жемчужины Вьетнама!</p>
+        </div>
+        <div class="mb-4">
+            <div class="d-flex align-items-center" style="color:#fe992a">
+                <i class="bi bi-newspaper me-2 fs-5"></i>
+                <a href="https://clikme.ru/news/" target="_blank" class="text-decoration-none"><h2 class="h6">Новости Вьетнама</h2></a>
+            </div>
+            <p class="small ms-4">💬 Свежие новости каждый день!</p>
+        </div>
+        <div class="">
+            <div class="d-flex align-items-center" style="color:#6CC4A7">
+                <i class="bi bi-coin me-2 fs-5"></i>
+                <a href="https://clikme.ru/vendors/" target="_blank" class="text-decoration-none"><h2 class="h6">Все компании Нячанга</h2></a>
+            </div>
+            <p class="small ms-4">💬 Проверенные места и сервисы!</p>
+        </div>
+    </div>
+</div>
+
+<!-- Поиск -->
+<div class="container mb-3">
+    <div class="input-group">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" id="search-input" class="form-control border-start-0"
+               placeholder="Поиск компаний и статей…" autocomplete="off">
+    </div>
+</div>
+
+<!-- Табы -->
+<div class="tab-container">
+    <button id="tab1" class="tab-button active" onclick="switchTab('tab1')">🏪 Компании</button>
+    <button id="tab2" class="tab-button" onclick="switchTab('tab2')">📝 Статьи</button>
+</div>
+
+<!-- Вкладка 1: Компании -->
+<div id="content1" class="tab-content visible">
+    <div id="tag-list-restaurant" class="tag-container d-flex mb-4 pt-0 px-2">
+        <button data-tag="all" class="tag-btn active">Все</button>
+        <button data-tag="central_zone" class="tag-btn">Центр</button>
+        <button data-tag="northern_zone" class="tag-btn">Север</button>
+    </div>
+    <div class="row px-2 restaurant-list"></div>
+</div>
+
+<!-- Вкладка 2: Статьи -->
+<div id="content2" class="tab-content hidden">
+    <div id="tag-list-blog" class="tag-container mb-4 pt-0 px-2"></div>
+    <div class="row row-cols-2 g-3 px-2" id="masonryContainer"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/bot/js/scripts.js"></script>
+</body>
+</html>
