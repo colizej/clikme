@@ -66,17 +66,26 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name',)
 
+    class Media:
+        js = ('admin/js/transliterate_slug.js',)
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
 
+    class Media:
+        js = ('admin/js/transliterate_slug.js',)
+
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     form = ArticleForm
     inlines = [ArticleImageInline]
+
+    class Media:
+        js = ('admin/js/transliterate_slug.js',)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'published_at':
