@@ -209,12 +209,31 @@ class Article(models.Model):
         html = re.sub(r'<p>\s*</p>', '', html)        # Обернуть таблицы для горизонтальной прокрутки на мобильных
         html = re.sub(r'<table', '<div class="ck-table-wrap"><table', html)
         html = re.sub(r'</table>', '</table></div>', html)
-        # Обернуть iframe в адаптивный контейнер (trip.com и др. партнёрки)
+        # Обернуть блок <!-- РЕКЛАМНЫЙ БЛОК start--> ... <!-- РЕКЛАМНЫЙ БЛОК end --> в стильный контейнер
         html = re.sub(
-            r'<iframe([^>]*)></iframe>',
+            r'<!--\s*РЕКЛАМНЫЙ БЛОК start\s*-->(.*?)<!--\s*РЕКЛАМНЫЙ БЛОК end\s*-->',
+            lambda m: (
+                '<div class="ck-ad-block">'
+                '<div class="ck-ad-block__label">Партнёрская подборка</div>'
+                + m.group(1).strip() +
+                '</div>'
+            ),
+            html,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        # Обернуть одиночные iframe в адаптивный контейнер (вне блоков)
+        html = re.sub(
+            r'(?<!class="ck-ad-block">)<iframe([^>]*)></iframe>',
             r'<div class="ck-iframe-wrap"><iframe\1></iframe></div>',
             html,
             flags=re.IGNORECASE,
+        )
+        # Обернуть iframe внутри ck-ad-block
+        html = re.sub(
+            r'(class="ck-ad-block"[^>]*>.*?)<iframe([^>]*)></iframe>',
+            r'\1<div class="ck-iframe-wrap"><iframe\2></iframe></div>',
+            html,
+            flags=re.IGNORECASE | re.DOTALL,
         )
         self.content = html
 

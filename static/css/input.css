@@ -553,3 +553,27 @@ details.ck-faq-item[open] .ck-faq-q {
     transform: scale(0.316);
   }
 }
+
+/* Партнёрский рекламный блок */
+.ck-ad-block {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem 1.5rem;
+  margin: 2rem 0;
+  position: relative;
+}
+
+.ck-ad-block__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0369a1;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.ck-ad-block .ck-iframe-wrap {
+  margin: 0 auto;
+}
