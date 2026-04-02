@@ -18,6 +18,8 @@
     {% csrf_token %}
     {# Honeypot #}
     <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+    {# Timestamp антиспам #}
+    <input type="hidden" name="form_ts" value="{{ form_timestamp }}">
 
     <div>
       <label for="name" class="block text-sm font-medium mb-1">{% trans "Имя" %}</label>
