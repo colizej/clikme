@@ -209,15 +209,18 @@ class Article(models.Model):
         html = re.sub(r'<p>\s*</p>', '', html)        # Обернуть таблицы для горизонтальной прокрутки на мобильных
         html = re.sub(r'<table', '<div class="ck-table-wrap"><table', html)
         html = re.sub(r'</table>', '</table></div>', html)
-        # Обернуть блок <!-- РЕКЛАМНЫЙ БЛОК start--> ... <!-- РЕКЛАМНЫЙ БЛОК end --> в стильный контейнер
-        html = re.sub(
-            r'<!--\s*РЕКЛАМНЫЙ БЛОК start\s*-->(.*?)<!--\s*РЕКЛАМНЫЙ БЛОК end\s*-->',
-            lambda m: (
+        # Обернуть блок <!-- РЕКЛАМНЫЙ БЛОК start: Текст --> ... <!-- РЕКЛАМНЫЙ БЛОК end --> в стильный контейнер
+        def _ad_block_replace(m):
+            label = (m.group(1) or '').strip() or 'Партнёрская подборка'
+            return (
                 '<div class="ck-ad-block">'
-                '<div class="ck-ad-block__label">Партнёрская подборка</div>'
-                + m.group(1).strip() +
+                f'<div class="ck-ad-block__label">{label}</div>'
+                + m.group(2).strip() +
                 '</div>'
-            ),
+            )
+        html = re.sub(
+            r'<!--\s*РЕКЛАМНЫЙ БЛОК start(?:\s*:\s*([^-]*?))?\s*-->(.*?)<!--\s*РЕКЛАМНЫЙ БЛОК end\s*-->',
+            _ad_block_replace,
             html,
             flags=re.IGNORECASE | re.DOTALL,
         )
