@@ -209,6 +209,13 @@ class Article(models.Model):
         html = re.sub(r'<p>\s*</p>', '', html)        # Обернуть таблицы для горизонтальной прокрутки на мобильных
         html = re.sub(r'<table', '<div class="ck-table-wrap"><table', html)
         html = re.sub(r'</table>', '</table></div>', html)
+        # Обернуть iframe в адаптивный контейнер (trip.com и др. партнёрки)
+        html = re.sub(
+            r'<iframe([^>]*)></iframe>',
+            r'<div class="ck-iframe-wrap"><iframe\1></iframe></div>',
+            html,
+            flags=re.IGNORECASE,
+        )
         self.content = html
 
     def _parse_faq_blocks(self, source):
