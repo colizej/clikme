@@ -22,6 +22,7 @@ class ArticleForm(forms.ModelForm):
     )
     views_count = forms.IntegerField(
         required=False,
+        initial=0,
         label='Показы',
         min_value=0,
     )
@@ -29,6 +30,9 @@ class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
         fields = '__all__'
+
+    def clean_views_count(self):
+        return self.cleaned_data.get('views_count') or 0
 
 
 # ── Inlines ───────────────────────────────────────────────────────────────────
