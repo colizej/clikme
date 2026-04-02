@@ -112,9 +112,22 @@ class ArticleAdmin(admin.ModelAdmin):
     readonly_fields = ('content',)
 
     def save_related(self, request, form, formsets, change):
-        """Перерендеривает content после сохранения инлайн-изображений."""
+        """Перерендеривает content после сохранения инлайн-изображений.
+        Image #1 всегда становится обложкой статьи."""
         super().save_related(request, form, formsets, change)
         obj = form.instance
+
+        # Синхронизировать обложку из ArticleImage #1
+        cover_img = obj.extra_images.filter(number=1).first()
+        if cover_img and cover_img.image:
+            update_fields = {'image': cover_img.image.name}
+            if not obj.image_alt and cover_img.alt:
+                update_fields['image_alt'] = cover_img.alt
+            Article.objects.filter(pk=obj.pk).update(**update_fields)
+            obj.image = cover_img.image
+            if 'image_alt' in update_fields:
+                obj.image_alt = cover_img.alt
+
         obj.render_content()
         Article.objects.filter(pk=obj.pk).update(content=obj.content)
 
