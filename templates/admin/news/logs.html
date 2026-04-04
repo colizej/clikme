@@ -1,4 +1,5 @@
 {% extends "admin/base_site.html" %}
+{% load i18n %}
 {% block content %}
 <style>
 .log-box {
@@ -27,8 +28,24 @@
 .log-status.running { color: #4ec9b0; }
 </style>
 
-<h1>📋 Логи фоновых задач</h1>
-<p style="color:#666">Страница обновляется автоматически каждые 3 секунды.</p>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+  <h1 style="margin:0">📋 Логи фоновых задач</h1>
+  <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+    <a href="{% url 'admin:news_newsitem_fetch' %}"
+       style="background:#E85D26;color:#fff;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.4">
+      🔄 Спарсить
+    </a>
+    <a href="{% url 'admin:news_newsitem_translate' %}"
+       style="background:#4f46e5;color:#fff;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.4">
+      🌐 Перевести
+    </a>
+    <a href="{% url 'admin:news_newsitem_changelist' %}"
+       style="background:#f3f4f6;color:#374151;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.4;border:1px solid #d1d5db">
+      ← Назад к новостям
+    </a>
+  </div>
+</div>
+<p style="color:#666;margin-bottom:16px">Страница обновляется автоматически каждые 3 секунды.</p>
 
 <div id="logs-container"></div>
 
