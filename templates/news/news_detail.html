@@ -5,6 +5,7 @@
 {% block meta_description %}{{ news_item.summary|truncatewords:30 }}{% endblock %}
 {% block meta_extra %}
   <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/news/{{ news_item.slug }}/">
+  {% if news_item.published_at and news_item.published_at < now_minus_12m %}<meta name="robots" content="noindex,follow">{% endif %}
 
   <meta property="og:type" content="article">
   <meta property="og:title" content="{{ news_item.title }}">

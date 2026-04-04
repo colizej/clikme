@@ -246,4 +246,5 @@ class NewsDetailView(DetailView):
             .order_by('published_at')
             .first()
         )
+        ctx['now_minus_12m'] = now - timedelta(days=365)
         return ctx
