@@ -24,18 +24,44 @@
     align-items: center;
     margin-bottom: 6px;
 }
-.log-status { font-size: 11px; color: #999; }
+.log-status { font-size: 11px; color: #999; display: flex; align-items: center; gap: 6px; }
 .log-status.running { color: #4ec9b0; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle;
+}
+
+#global-status {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: #ecfdf5;
+    border: 1px solid #6ee7b7;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #065f46;
+    margin-bottom: 16px;
+}
+#global-status.running { display: flex; }
+#global-status .spinner { border-color: #065f46; border-top-color: transparent; width: 16px; height: 16px; border-width: 2.5px; }
 </style>
 
 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
   <h1 style="margin:0">📋 Логи фоновых задач</h1>
   <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
-    <a href="{% url 'admin:news_newsitem_fetch' %}"
+    <a href="{% url 'admin:news_newsitem_fetch' %}" id="btn-fetch"
        style="background:#E85D26;color:#fff;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.4">
       🔄 Спарсить
     </a>
-    <a href="{% url 'admin:news_newsitem_translate' %}"
+    <a href="{% url 'admin:news_newsitem_translate' %}" id="btn-translate"
        style="background:#4f46e5;color:#fff;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.4">
       🌐 Перевести
     </a>
@@ -45,12 +71,19 @@
     </a>
   </div>
 </div>
+
+<div id="global-status">
+  <span class="spinner"></span>
+  <span id="global-status-text">Выполняется…</span>
+</div>
+
 <p style="color:#666;margin-bottom:16px">Страница обновляется автоматически каждые 3 секунды.</p>
 
 <div id="logs-container"></div>
 
 <script>
 let lastMtimes = {};
+let anyRunning = false;
 
 function colorize(line) {
     if (line.includes('✓') || line.includes('Готово') || line.includes('успешно') || line.includes('новых:'))
@@ -66,8 +99,20 @@ function escapeHtml(text) {
     return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function updateGlobalStatus(runningLabels) {
+    const el = document.getElementById('global-status');
+    const txt = document.getElementById('global-status-text');
+    if (runningLabels.length) {
+        el.classList.add('running');
+        txt.textContent = 'Выполняется: ' + runningLabels.join(', ') + '…';
+    } else {
+        el.classList.remove('running');
+    }
+}
+
 function renderLogs(data) {
     const container = document.getElementById('logs-container');
+    const runningLabels = [];
 
     Object.entries(data).forEach(([key, info]) => {
         let box = document.getElementById('log-' + key);
@@ -84,31 +129,36 @@ function renderLogs(data) {
                     <div class="log-box" id="log-${key}"><pre id="pre-${key}" style="margin:0"></pre></div>
                 </div>
             `);
-            box  = document.getElementById('log-' + key);
-            pre  = document.getElementById('pre-' + key);
+            box    = document.getElementById('log-' + key);
+            pre    = document.getElementById('pre-' + key);
             status = document.getElementById('status-' + key);
         }
 
-        // Обновляем только если файл изменился
         if (lastMtimes[key] !== info.mtime) {
             lastMtimes[key] = info.mtime;
             if (info.lines.length) {
                 pre.innerHTML = info.lines.map(l => colorize(escapeHtml(l))).join('\n');
                 box.scrollTop = box.scrollHeight;
-                const last = info.lines[info.lines.length - 1];
-                if (last.includes('Готово') || last.includes('✓') || last.includes('нет данных') || last.includes('Нет новостей')) {
-                    status.textContent = '✓ завершено';
-                    status.className = 'log-status';
-                } else {
-                    status.textContent = '⏳ выполняется…';
-                    status.className = 'log-status running';
-                }
             } else {
                 pre.textContent = 'Лог пуст — задача ещё не запускалась';
-                status.textContent = '';
             }
         }
+
+        // Статус определяем по PID (running из API), а не по тексту лога
+        if (info.running) {
+            status.innerHTML = '<span class="spinner"></span> выполняется…';
+            status.className = 'log-status running';
+            runningLabels.push(info.label);
+        } else if (info.lines && info.lines.length) {
+            status.innerHTML = '✓ завершено';
+            status.className = 'log-status';
+        } else {
+            status.innerHTML = '';
+            status.className = 'log-status';
+        }
     });
+
+    updateGlobalStatus(runningLabels);
 }
 
 function fetchLogs() {
@@ -117,6 +167,16 @@ function fetchLogs() {
         .then(renderLogs)
         .catch(() => {});
 }
+
+// При клике на кнопки — сразу показать глобальный спиннер
+document.getElementById('btn-fetch').addEventListener('click', function() {
+    document.getElementById('global-status').classList.add('running');
+    document.getElementById('global-status-text').textContent = 'Запускается парсинг…';
+});
+document.getElementById('btn-translate').addEventListener('click', function() {
+    document.getElementById('global-status').classList.add('running');
+    document.getElementById('global-status-text').textContent = 'Запускается перевод…';
+});
 
 fetchLogs();
 setInterval(fetchLogs, 3000);

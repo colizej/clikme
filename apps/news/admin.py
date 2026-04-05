@@ -183,16 +183,34 @@ class NewsItemAdmin(admin.ModelAdmin):
         log_dir.mkdir(exist_ok=True)
         return log_dir / f'{name}.log'
 
+    def _pid_path(self, name):
+        from django.conf import settings
+        return settings.BASE_DIR / 'logs' / f'{name}.pid'
+
+    def _is_running(self, name):
+        import os
+        pid_file = self._pid_path(name)
+        if not pid_file.exists():
+            return False
+        try:
+            pid = int(pid_file.read_text().strip())
+            os.kill(pid, 0)  # проверяем жив ли процесс
+            return True
+        except (OSError, ValueError):
+            pid_file.unlink(missing_ok=True)
+            return False
+
     def _run_bg(self, cmd_args, log_name):
         import subprocess, sys
         from django.conf import settings
         log_file = open(self._log_path(log_name), 'w', encoding='utf-8')
-        subprocess.Popen(
+        proc = subprocess.Popen(
             [sys.executable, 'manage.py'] + cmd_args,
             stdout=log_file,
             stderr=subprocess.STDOUT,
             cwd=settings.BASE_DIR,
         )
+        self._pid_path(log_name).write_text(str(proc.pid))
 
     def _fetch_view(self, request):
         self._run_bg(['fetch_news'], 'fetch_news')
@@ -220,15 +238,22 @@ class NewsItemAdmin(admin.ModelAdmin):
             ('publish_scheduled', 'Публикация в Telegram'),
         ]:
             log_file = self._log_path(name)
+            is_running = self._is_running(name)
             if log_file.exists():
                 lines = log_file.read_text(encoding='utf-8', errors='replace').splitlines()
                 result[name] = {
                     'label': label,
-                    'lines': lines[-100:],  # последние 100 строк
+                    'lines': lines[-100:],
                     'mtime': log_file.stat().st_mtime,
+                    'running': is_running,
                 }
             else:
-                result[name] = {'label': label, 'lines': [], 'mtime': 0}
+                result[name] = {
+                    'label': label,
+                    'lines': [],
+                    'mtime': 0,
+                    'running': is_running,
+                }
         return JsonResponse(result)
 
     @admin.display(description='Заголовок')
