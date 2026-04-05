@@ -26,6 +26,8 @@
 }
 .log-status { font-size: 11px; color: #999; display: flex; align-items: center; gap: 6px; }
 .log-status.running { color: #4ec9b0; }
+.stop-btn { color: #f44747; font-size: 11px; text-decoration: none; margin-left: 6px; }
+.stop-btn:hover { text-decoration: underline; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner {
@@ -150,7 +152,7 @@ function renderLogs(data) {
 
         // Статус определяем по PID (running из API), а не по тексту лога
         if (info.running) {
-            status.innerHTML = '<span class="spinner"></span> выполняется…';
+            status.innerHTML = `<span class="spinner"></span> выполняется… <a href="/admin/news/newsitem/stop/${key}/" class="stop-btn" onclick="return confirm('Остановить задачу?')">🛑 Стоп</a>`;
             status.className = 'log-status running';
             runningLabels.push(info.label);
         } else if (info.lines && info.lines.length) {

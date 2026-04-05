@@ -173,6 +173,7 @@ class NewsItemAdmin(admin.ModelAdmin):
             path('fetch/', self.admin_site.admin_view(self._fetch_view), name='news_newsitem_fetch'),
             path('translate/', self.admin_site.admin_view(self._translate_view), name='news_newsitem_translate'),
             path('backfill-images/', self.admin_site.admin_view(self._backfill_images_view), name='news_newsitem_backfill_images'),
+            path('stop/<str:name>/', self.admin_site.admin_view(self._stop_view), name='news_newsitem_stop'),
             path('logs/', self.admin_site.admin_view(self._logs_view), name='news_newsitem_logs'),
             path('logs/data/', self.admin_site.admin_view(self._logs_data), name='news_newsitem_logs_data'),
         ]
@@ -221,6 +222,26 @@ class NewsItemAdmin(admin.ModelAdmin):
     def _translate_view(self, request):
         self._run_bg(['translate_news'], 'translate_news')
         self.message_user(request, '⏳ Перевод запущен — смотрите лог', messages.SUCCESS)
+        return HttpResponseRedirect(reverse('admin:news_newsitem_logs'))
+
+    def _stop_view(self, request, name):
+        import os, signal
+        ALLOWED = {'fetch_news', 'translate_news', 'backfill_images', 'publish_scheduled'}
+        if name not in ALLOWED:
+            self.message_user(request, '❌ Неизвестная задача', messages.ERROR)
+            return HttpResponseRedirect(reverse('admin:news_newsitem_logs'))
+        pid_file = self._pid_path(name)
+        if not pid_file.exists():
+            self.message_user(request, 'Задача не запущена', messages.WARNING)
+            return HttpResponseRedirect(reverse('admin:news_newsitem_logs'))
+        try:
+            pid = int(pid_file.read_text().strip())
+            os.kill(pid, signal.SIGTERM)
+            pid_file.unlink(missing_ok=True)
+            self.message_user(request, f'🛑 Задача «{name}» остановлена (PID {pid})', messages.SUCCESS)
+        except (OSError, ValueError):
+            pid_file.unlink(missing_ok=True)
+            self.message_user(request, 'Процесс уже завершён', messages.WARNING)
         return HttpResponseRedirect(reverse('admin:news_newsitem_logs'))
 
     def _backfill_images_view(self, request):
