@@ -83,20 +83,32 @@ def _fetch_og_image(article_url: str) -> str:
         'Accept': 'text/html,application/xhtml+xml,*/*;q=0.9',
         'Accept-Language': 'ru-RU,ru;q=0.9,en;q=0.8',
     }
-    try:
-        r = httpx.get(article_url, timeout=12, follow_redirects=True, verify=False,
-                      headers=headers)
-        if r.status_code != 200:
-            return ''
-        soup = BeautifulSoup(r.content, 'html.parser')
-        for attr in ('og:image', 'twitter:image', 'og:image:secure_url'):
-            tag = soup.find('meta', property=attr) or soup.find('meta', attrs={'name': attr})
-            if tag:
-                img = tag.get('content', '').strip()
-                if img.startswith(('http://', 'https://')):
-                    return img.replace('&amp;', '&')
-    except Exception:
-        pass
+    # Некоторые сайты работают только по http — пробуем оба варианта
+    urls_to_try = [article_url]
+    if article_url.startswith('https://'):
+        urls_to_try.append('http://' + article_url[8:])
+    for url in urls_to_try:
+        try:
+            r = httpx.get(url, timeout=12, follow_redirects=True, verify=False,
+                          headers=headers)
+            if r.status_code != 200:
+                continue
+            soup = BeautifulSoup(r.content, 'html.parser')
+            base = url.rsplit('/', 1)[0]
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            base_origin = f'{parsed.scheme}://{parsed.netloc}'
+            for attr in ('og:image', 'twitter:image', 'og:image:secure_url'):
+                tag = soup.find('meta', property=attr) or soup.find('meta', attrs={'name': attr})
+                if tag:
+                    img = tag.get('content', '').strip().replace('\\', '/')
+                    img = img.replace('&amp;', '&')
+                    if img.startswith(('http://', 'https://')):
+                        return img
+                    if img.startswith('/'):
+                        return base_origin + img
+        except Exception:
+            continue
     return ''
 
 
@@ -569,11 +581,26 @@ class Command(BaseCommand):
         # Shkulev Media: e1.ru защищён DDoS-Guard → используем 74.ru (тот же CMS, те же ID статей)
         if 'e1.ru' in url:
             url = re.sub(r'(?:www\.)?e1\.ru', '74.ru', url)
-        try:
-            resp = httpx.get(url, headers=self._HEADERS, timeout=20, follow_redirects=True)
-            resp.raise_for_status()
-        except Exception:
+        # Некоторые сайты работают только по http — пробуем оба варианта
+        urls_to_try = [url]
+        if url.startswith('https://'):
+            urls_to_try.append('http://' + url[8:])
+        resp = None
+        for try_url in urls_to_try:
+            try:
+                resp = httpx.get(try_url, headers=self._HEADERS, timeout=20, follow_redirects=True)
+                if resp.status_code == 200:
+                    url = try_url
+                    break
+            except Exception:
+                continue
+        if not resp or resp.status_code != 200:
             return ''
+
+        # Определяем base_origin для склейки относительных URL картинок
+        from urllib.parse import urlparse as _urlparse
+        _p = _urlparse(url)
+        base_origin = f'{_p.scheme}://{_p.netloc}'
 
         soup = BeautifulSoup(resp.content, 'html.parser')
 
@@ -606,7 +633,11 @@ class Command(BaseCommand):
         # Нормализуем <img>: оставляем src, добавляем lazy
         for img in article_el.find_all('img'):
             src = img.get('src') or img.get('data-src') or img.get('data-lazy-src') or ''
-            # Пропускаем data: URI (SVG-иконки, плейсхолдеры) и относительные пути
+            src = src.replace('\\', '/')  # Windows-пути на некоторых вьетнамских сайтах
+            # Склеиваем относительные пути с base_origin
+            if src and src.startswith('/'):
+                src = base_origin + src
+            # Пропускаем data: URI (SVG-иконки, плейсхолдеры) и нераспознанные пути
             if not src or src.startswith('data:') or not src.startswith('http'):
                 img.decompose()
                 continue
