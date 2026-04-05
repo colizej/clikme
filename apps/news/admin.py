@@ -172,6 +172,7 @@ class NewsItemAdmin(admin.ModelAdmin):
         custom = [
             path('fetch/', self.admin_site.admin_view(self._fetch_view), name='news_newsitem_fetch'),
             path('translate/', self.admin_site.admin_view(self._translate_view), name='news_newsitem_translate'),
+            path('backfill-images/', self.admin_site.admin_view(self._backfill_images_view), name='news_newsitem_backfill_images'),
             path('logs/', self.admin_site.admin_view(self._logs_view), name='news_newsitem_logs'),
             path('logs/data/', self.admin_site.admin_view(self._logs_data), name='news_newsitem_logs_data'),
         ]
@@ -222,6 +223,11 @@ class NewsItemAdmin(admin.ModelAdmin):
         self.message_user(request, '⏳ Перевод запущен — смотрите лог', messages.SUCCESS)
         return HttpResponseRedirect(reverse('admin:news_newsitem_logs'))
 
+    def _backfill_images_view(self, request):
+        self._run_bg(['fetch_news', '--backfill-images'], 'backfill_images')
+        self.message_user(request, '⏳ Докачка картинок запущена — смотрите лог', messages.SUCCESS)
+        return HttpResponseRedirect(reverse('admin:news_newsitem_logs'))
+
     def _logs_view(self, request):
         from django.shortcuts import render
         return render(request, 'admin/news/logs.html', {
@@ -235,6 +241,7 @@ class NewsItemAdmin(admin.ModelAdmin):
         for name, label in [
             ('fetch_news', 'Парсинг новостей'),
             ('translate_news', 'Перевод'),
+            ('backfill_images', 'Докачка картинок'),
             ('publish_scheduled', 'Публикация в Telegram'),
         ]:
             log_file = self._log_path(name)

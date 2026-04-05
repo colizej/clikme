@@ -65,6 +65,10 @@
        style="background:#4f46e5;color:#fff;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.4">
       🌐 Перевести
     </a>
+    <a href="{% url 'admin:news_newsitem_backfill_images' %}" id="btn-backfill"
+       style="background:#0891b2;color:#fff;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.4">
+      🖼 Докачать картинки
+    </a>
     <a href="{% url 'admin:news_newsitem_changelist' %}"
        style="background:#f3f4f6;color:#374151;font-weight:700;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.4;border:1px solid #d1d5db">
       ← Назад к новостям
@@ -176,6 +180,10 @@ document.getElementById('btn-fetch').addEventListener('click', function() {
 document.getElementById('btn-translate').addEventListener('click', function() {
     document.getElementById('global-status').classList.add('running');
     document.getElementById('global-status-text').textContent = 'Запускается перевод…';
+});
+document.getElementById('btn-backfill').addEventListener('click', function() {
+    document.getElementById('global-status').classList.add('running');
+    document.getElementById('global-status-text').textContent = 'Запускается докачка картинок…';
 });
 
 fetchLogs();
