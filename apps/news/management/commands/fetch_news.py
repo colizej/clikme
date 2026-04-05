@@ -22,6 +22,7 @@ Management command: fetch_news
 import os
 import re
 import uuid
+from datetime import timedelta
 import feedparser
 import html2text
 import httpx
