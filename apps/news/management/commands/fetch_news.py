@@ -22,7 +22,7 @@ Management command: fetch_news
 import os
 import re
 import uuid
-from datetime import timedelta
+from datetime import timedelta, timezone as dt_timezone
 import feedparser
 import html2text
 import httpx
@@ -391,7 +391,7 @@ class Command(BaseCommand):
             # Фильтр по дате: только новости за последние 7 дней
             pub = entry.get('published_parsed') or entry.get('updated_parsed')
             if pub:
-                pub_dt = timezone.datetime(*pub[:6], tzinfo=timezone.utc)
+                pub_dt = timezone.datetime(*pub[:6], tzinfo=dt_timezone.utc)
                 if pub_dt < cutoff:
                     filtered += 1
                     continue
