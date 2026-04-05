@@ -351,6 +351,8 @@ class Command(BaseCommand):
 
     def _fetch_rss(self, source: NewsSource, keywords: list[str], dry_run: bool):
         new = skip = filtered = 0
+        cutoff = timezone.now() - timedelta(days=7)
+
         try:
             # httpx handles SSL certificates correctly (uses certifi)
             resp = httpx.get(source.url, headers=self._HEADERS, timeout=15, follow_redirects=True)
@@ -372,6 +374,14 @@ class Command(BaseCommand):
             url = entry.get('link', '').strip()
             if not url:
                 continue
+
+            # Фильтр по дате: только новости за последние 7 дней
+            pub = entry.get('published_parsed') or entry.get('updated_parsed')
+            if pub:
+                pub_dt = timezone.datetime(*pub[:6], tzinfo=timezone.utc)
+                if pub_dt < cutoff:
+                    filtered += 1
+                    continue
 
             # Дедупликация
             if NewsItem.objects.filter(source_url=url).exists():
