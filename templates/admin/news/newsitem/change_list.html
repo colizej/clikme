@@ -3,6 +3,13 @@
 
 {% block object-tools-items %}
   <li>
+    <a href="{% url 'admin:news_newsitem_logs' %}"
+       class="button"
+       style="background:#374151;color:#fff;font-weight:700;padding:8px 18px;border-radius:6px;text-decoration:none;display:inline-block;line-height:1.4;">
+      📋 Логи задач
+    </a>
+  </li>
+  <li>
     <a href="{% url 'admin:news_newsitem_translate' %}"
        class="button"
        style="background:#4f46e5;color:#fff;font-weight:700;padding:8px 18px;border-radius:6px;text-decoration:none;display:inline-block;line-height:1.4;">
