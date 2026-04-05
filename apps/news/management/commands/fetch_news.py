@@ -506,6 +506,8 @@ class Command(BaseCommand):
         '.fck_detail',                # VNExpress (e.vnexpress.net, vnexpress.net)
         'div.article__body',          # VietnamPlus / TTXVN
         '#ContentArticle',            # CenIT CMS (nhatrang.khanhhoa.gov.vn и др.)
+        '.content-article',           # BaoQuangNinh и аналогичные вьетнамские газеты
+        '.article-content',           # doanhnghiepvn.vn и аналогичные
         '[itemprop="articleBody"]',
         '.article-body', '.article__body', '.article-content',
         '.post-body', '.post-content', '.entry-content',
