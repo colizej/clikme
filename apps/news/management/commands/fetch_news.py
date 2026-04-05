@@ -505,6 +505,7 @@ class Command(BaseCommand):
         '[data-article-content]',     # Shkulev Media (74.ru / e1.ru)
         '.fck_detail',                # VNExpress (e.vnexpress.net, vnexpress.net)
         'div.article__body',          # VietnamPlus / TTXVN
+        '#ContentArticle',            # CenIT CMS (nhatrang.khanhhoa.gov.vn и др.)
         '[itemprop="articleBody"]',
         '.article-body', '.article__body', '.article-content',
         '.post-body', '.post-content', '.entry-content',
