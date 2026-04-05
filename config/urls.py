@@ -72,7 +72,10 @@ class TrailingSlashConverter:
     def to_url(self, value):
         return value
 
-register_converter(TrailingSlashConverter, 'trailing_slash')
+try:
+    register_converter(TrailingSlashConverter, 'trailing_slash')
+except ValueError:
+    pass
 
 def yandex_verification(request):
     return HttpResponse(
